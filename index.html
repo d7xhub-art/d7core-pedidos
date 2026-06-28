@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="D7 Pedidos">
+<meta name="theme-color" content="#0f1117">
+<title>D7 Core Pedidos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0d14;--sidebar:#0f1420;--card:#141c2b;--card2:#192234;
+  --border:#1e2d45;--border2:#253350;
+  --text:#e8edf5;--sub:#6b7fa0;--sub2:#3d4f6e;
+  --p:#3b82f6;--p2:#1d4ed8;--a:#f97316;--a2:#c2410c;
+  --green:#22c55e;--green2:#15803d;
+  --purple:#a855f7;--red:#ef4444;--yellow:#f59e0b;
+  --radius:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+/* ══ SIDEBAR ══ */
+#sidebar{width:230px;min-width:230px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;overflow-x:hidden;transition:width .25s,left .25s;scrollbar-width:none}
+#sidebar::-webkit-scrollbar{display:none}
+.sb-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#1d4ed8,var(--a));border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;letter-spacing:.5px;box-shadow:0 4px 12px rgba(249,115,22,.3)}
+.sb-logo-t{font-size:14px;font-weight:900;color:#fff;line-height:1.2;letter-spacing:.2px}
+.sb-logo-s{font-size:10.5px;color:var(--sub);margin-top:2px;letter-spacing:.3px}
+.sb-section{padding:16px 16px 5px;font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:1px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--sub);transition:all .15s;position:relative;user-select:none}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sb-item.on{background:linear-gradient(135deg,rgba(29,78,216,.6),rgba(37,99,235,.4));color:#fff;font-weight:700;border:1px solid rgba(59,130,246,.25)}
+.sb-item .ico{font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;min-width:22px;text-align:center;transition:all .3s}
+.sb-badge.has{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;box-shadow:0 2px 6px rgba(59,130,246,.4)}
+.sb-badge.zero{background:var(--card2);color:var(--sub2)}
+.sb-divider{height:1px;background:var(--border);margin:6px 16px}
+
+/* ══ STATUS BAR ══ */
+#statusbar{background:var(--bg);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--sub);gap:12px;flex-shrink:0}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
+
+/* ══ MAIN ══ */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ══ TOPBAR ══ */
+#topbar{background:var(--sidebar);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px}
+.tb-left{display:flex;align-items:center;gap:10px;min-width:0}
+.tb-title{font-size:16px;font-weight:800;color:var(--text);white-space:nowrap}
+.tb-center{display:flex;flex-direction:column;align-items:center;gap:1px}
+.tb-brand{display:flex;align-items:center;gap:5px}
+.tb-d7{font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--p),#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px}
+.tb-gem{font-size:16px}
+.tb-core{font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--a),#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px}
+.tb-line{height:2px;width:80px;background:linear-gradient(90deg,var(--p),var(--a));border-radius:2px}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.tb-btn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;letter-spacing:.2px}
+.tb-btn:active{transform:scale(.95)}
+.btn-add{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 2px 10px rgba(34,197,94,.25)}
+.btn-bk{background:var(--card);color:var(--sub);border:1px solid var(--border)!important}
+.btn-imp{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)!important}
+.ham{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px}
+.ham span{width:20px;height:2px;background:var(--sub);border-radius:2px;transition:all .2s;display:block}
+
+/* ══ CONTENT ══ */
+#content{flex:1;overflow-y:auto;padding:24px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#content::-webkit-scrollbar{width:5px}
+#content::-webkit-scrollbar-track{background:transparent}
+#content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ══ PAGE LAYOUT ══ */
+.pg-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px}
+.pg-title{font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.3px}
+.pg-sub{font-size:12px;color:var(--sub);margin-top:3px;font-weight:500}
+
+/* ══ STATS ══ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:border-color .15s}
+.stat:hover{border-color:var(--border2)}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat.blue::before{background:linear-gradient(90deg,var(--p),#60a5fa)}
+.stat.orange::before{background:linear-gradient(90deg,var(--a),#fb923c)}
+.stat.green::before{background:linear-gradient(90deg,var(--green),#4ade80)}
+.stat.purple::before{background:linear-gradient(90deg,var(--purple),#c084fc)}
+.stat-ico{font-size:22px;margin-bottom:10px;opacity:.8}
+.stat-label{font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-val{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.5px}
+.stat-sub{font-size:12px;color:var(--sub);margin-top:5px}
+
+/* ══ CARD ══ */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.tbl-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.tbl-head-t{font-size:14px;font-weight:800;letter-spacing:-.1px}
+.tbl-head-s{font-size:12px;color:var(--sub)}
+
+/* ══ TABLE ══ */
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(255,255,255,.015)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:13px 16px;border-bottom:1px solid rgba(30,45,69,.6);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.018)}
+.tr-click{cursor:pointer}
+
+/* ══ FILTER ROW ══ */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-bar{background:var(--card);border:1.5px solid var(--border);border-radius:9px;padding:10px 14px 10px 40px;font-size:13px;color:var(--text);width:100%;outline:none;transition:border .15s}
+.search-bar::placeholder{color:var(--sub2)}
+.search-bar:focus{border-color:var(--p)}
+.search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub2);pointer-events:none}
+.filter-sel{background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;outline:none;transition:border .15s}
+.filter-sel:focus{border-color:var(--p)}
+.filter-sel option{background:#141c2b;color:var(--text)}
+
+/* ══ BADGE / TAG ══ */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
+.bd-open{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.bd-sent{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.bd-cancel{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.tag{display:inline-block;background:rgba(59,130,246,.12);color:#60a5fa;padding:2px 8px;border-radius:5px;font-size:11.5px;font-weight:700;border:1px solid rgba(59,130,246,.15)}
+.tag-a{background:rgba(249,115,22,.12);color:#fb923c;border:1px solid rgba(249,115,22,.15)}
+
+/* ══ MODAL ══ */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)}
+.modal.open{display:flex}
+.mbox{background:var(--card);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:600px;max-height:93vh;overflow-y:auto;padding:26px;box-shadow:0 25px 80px rgba(0,0,0,.6);scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.mbox::-webkit-scrollbar{width:4px}
+.mbox::-webkit-scrollbar-thumb{background:var(--border)}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.mtitle{font-size:17px;font-weight:900;letter-spacing:-.2px}
+.mclose{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:20px;color:var(--sub);width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+.mclose:hover{background:rgba(255,255,255,.1);color:var(--text)}
+
+/* ══ FORM ══ */
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fld label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.fld input,.fld select,.fld textarea{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:rgba(255,255,255,.025);outline:none;color:var(--text);width:100%;transition:border .15s;font-family:inherit}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--p);background:rgba(59,130,246,.04)}
+.fld select option{background:#141c2b;color:var(--text)}
+.fld textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 90px;gap:10px}
+.row-cep{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.cnpj-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:flex-end}
+.sec{font-size:11px;font-weight:900;color:var(--p);text-transform:uppercase;letter-spacing:.8px;padding:14px 0 10px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sec:first-child{padding-top:0}
+
+/* ══ BUTTONS ══ */
+.btn{border:none;cursor:pointer;border-radius:8px;font-weight:700;font-size:13px;padding:10px 16px;transition:all .15s;font-family:inherit;letter-spacing:.1px}
+.btn:active{transform:scale(.96)}
+.btn-p{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;box-shadow:0 2px 12px rgba(59,130,246,.3)}
+.btn-a{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;box-shadow:0 2px 12px rgba(249,115,22,.3)}
+.btn-g{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 2px 10px rgba(34,197,94,.25)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--sub);border:1.5px solid var(--border)!important}
+.btn-danger{background:rgba(239,68,68,.1);color:#f87171;border:1.5px solid rgba(239,68,68,.25)!important}
+.btn-full{width:100%;display:block;text-align:center}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:7px}
+.btn-cnpj{background:rgba(59,130,246,.1);color:#60a5fa;border:1.5px solid rgba(59,130,246,.25)!important;padding:10px 14px;font-size:13px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit}
+.btn-cnpj:disabled{opacity:.4;cursor:not-allowed}
+.btn-cnpj:hover:not(:disabled){background:rgba(59,130,246,.18)}
+.icon-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:7px;padding:6px 11px;cursor:pointer;font-size:12px;color:var(--sub);transition:all .15s;font-family:inherit;font-weight:600;white-space:nowrap}
+.icon-btn:hover{background:rgba(255,255,255,.08);color:var(--text);border-color:var(--border2)}
+.icon-btn-red{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:#f87171}
+.icon-btn-red:hover{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.3)}
+.icon-btn-g{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#4ade80}
+.icon-btn-g:hover{background:rgba(34,197,94,.15)}
+
+/* ══ ALERT BOX ══ */
+.abox{border-radius:8px;padding:10px 14px;font-size:12.5px;display:none;gap:8px;align-items:flex-start;margin-bottom:14px;line-height:1.5}
+.abox.ok{background:rgba(34,197,94,.08);color:#4ade80;border:1px solid rgba(34,197,94,.2);display:flex}
+.abox.err{background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.2);display:flex}
+.abox.warn{background:rgba(245,158,11,.08);color:#fcd34d;border:1px solid rgba(245,158,11,.2);display:flex}
+
+/* ══ PEDIDO ══ */
+.pd-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.num-inp{width:80px;padding:8px;border:1.5px solid var(--border);border-radius:7px;text-align:center;font-size:13px;font-weight:700;background:rgba(255,255,255,.025);color:var(--text);font-family:inherit;outline:none;transition:border .15s}
+.num-inp:focus{border-color:var(--p)}
+.dark-input{background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);width:100%;outline:none;transition:border .15s;font-family:inherit}
+.dark-input:focus{border-color:var(--p)}
+.dark-input::placeholder{color:var(--sub2)}
+.prod-result{max-height:240px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;margin-top:10px;background:var(--card2);scrollbar-width:thin}
+.prod-row{padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .1s}
+.prod-row:last-child{border-bottom:none}
+.prod-row:hover{background:rgba(255,255,255,.04)}
+.add-ico{width:26px;height:26px;background:linear-gradient(135deg,var(--a),var(--a2));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:700;flex-shrink:0;box-shadow:0 2px 8px rgba(249,115,22,.3)}
+.tot-bar{background:linear-gradient(135deg,rgba(29,78,216,.6),rgba(37,99,235,.4));border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+
+/* ══ EMPTY ══ */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--sub);gap:12px;text-align:center}
+.empty-ico{font-size:44px;opacity:.4}
+.empty-t{font-size:15px;font-weight:700}
+.empty-s{font-size:13px;opacity:.7}
+
+/* ══ SPIN ══ */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(59,130,246,.3);border-top-color:var(--p);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:820px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:680px){
+  #sidebar{position:fixed;left:-240px;z-index:300;transition:left .25s;box-shadow:4px 0 30px rgba(0,0,0,.5)}
+  #sidebar.open{left:0}
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:299}
+  #overlay.open{display:block}
+  .ham{display:flex!important}
+  .tb-center{display:none!important}
+  #content{padding:16px}
+  .stats{grid-template-columns:1fr 1fr}
+  .row2,.row3,.row-cep{grid-template-columns:1fr}
+  .cnpj-row{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .tb-right .tb-btn:not(.btn-add){display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">D7</div>
+    <div>
+      <div class="sb-logo-t">D7 HUB</div>
+      <div class="sb-logo-s">Representação Comercial</div>
+    </div>
+  </div>
+
+  <div style="flex:1;padding-bottom:12px">
+    <div class="sb-section">Principal</div>
+    <div class="sb-item" id="si-dashboard" onclick="goto('dashboard')"><span class="ico">📊</span>Dashboard</div>
+    <div class="sb-item" id="si-clientes" onclick="goto('clientes')"><span class="ico">👥</span>Clientes<span class="sb-badge zero" id="badge-cli">0</span></div>
+    <div class="sb-item" id="si-pedidos" onclick="goto('pedidos')"><span class="ico">📋</span>Pedidos<span class="sb-badge zero" id="badge-ped">0</span></div>
+
+    <div class="sb-section">Catálogo</div>
+    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">📦</span>Produtos<span class="sb-badge zero" id="badge-prod">0</span></div>
+
+    <div class="sb-section">Empresas</div>
+    <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
+
+    <div class="sb-section">Vendas</div>
+    <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
+    <div class="sb-item" id="si-followup" onclick="goto('followup')"><span class="ico">🔔</span>Follow-up<span class="sb-badge zero" id="badge-fu">0</span></div>
+
+    <div class="sb-section">Gestão</div>
+    <div class="sb-item" id="si-relatorios" onclick="goto('relatorios')"><span class="ico">📈</span>Relatórios</div>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">Dados</div>
+    <div class="sb-item" id="si-backup" onclick="goto('backup')"><span class="ico">💾</span>Backup & Restore</div>
+  </div>
+
+  <div style="padding:12px 16px;border-top:1px solid var(--border)">
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0<br><span style="color:#253350">© 2025 • Todos os direitos</span></div>
+  </div>
+</div>
+
+<!-- ════ MAIN ════ -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-left">
+      <button class="ham" id="hambtn" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="tb-title" id="tb-title">Dashboard</div>
+    </div>
+    <div class="tb-center">
+      <div class="tb-brand">
+        <span class="tb-d7">D7</span><span class="tb-gem">💎</span><span class="tb-core">CORE</span>
+      </div>
+      <div class="tb-line"></div>
+    </div>
+    <div class="tb-right">
+      <button class="tb-btn btn-imp" onclick="triggerImport()">📥 Importar</button>
+      <button class="tb-btn btn-bk" onclick="exportarBackup()">💾 Backup</button>
+      <button class="tb-btn btn-add" onclick="goto('novo-pedido')">+ Novo Pedido</button>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importarBackup(event)">
+  <div id="content"></div>
+  <!-- STATUS BAR -->
+  <div id="statusbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sb-dot" id="statusDot"></div>
+      <span id="statusMsg">Dados salvos localmente</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;color:var(--sub2)">
+      <span id="stCli">0 clientes</span>
+      <span id="stProd">0 produtos</span>
+      <span id="stPed">0 pedidos</span>
+      <span id="lastSave"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL ════ -->
+<div class="modal" id="modal">
+  <div class="mbox">
+    <div class="mhead"><div class="mtitle" id="mtitle"></div><button class="mclose" onclick="closeModal()">×</button></div>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<!-- ════ MODAL PEDIDO ════ -->
+<div class="modal" id="mpedido">
+  <div class="mbox" style="max-width:660px">
+    <div class="mhead"><div class="mtitle">Detalhes do Pedido</div><button class="mclose" onclick="closeMPed()">×</button></div>
+    <div id="mpbody"></div>
+  </div>
+</div>
+
+<script>
+// ══ DB ══
+const DB={
+  get:k=>JSON.parse(localStorage.getItem('d7_'+k)||'[]'),
+  set:(k,v)=>{localStorage.setItem('d7_'+k,JSON.stringify(v));updateStatus()}
+};
+function updateStatus(){
+  const clis=DB.get('clientes'),peds=DB.get('pedidos'),prods=DB.get('produtos');
+  document.getElementById('stCli').textContent=clis.length+' clientes';
+  document.getElementById('stProd').textContent=prods.length+' produtos';
+  document.getElementById('stPed').textContent=peds.length+' pedidos';
+  const now=new Date();
+  document.getElementById('lastSave').textContent='Salvo às '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+}
+
+// ══ UTILS ══
+const fmt=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
+const fmtDate=d=>{try{return new Date(d).toLocaleDateString('pt-BR')}catch(e){return d}};
+function uuid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function maskCNPJ(v){return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2').slice(0,18)}
+function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'):d.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3')}
+function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
+
+let tab='dashboard',editId=null,pSearch='';
+let np={cliId:'',repId:'',itens:[],obs:''};
+
+// ══ MODAL ══
+function openModal(title,html){document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open');editId=null}
+function closeMPed(){document.getElementById('mpedido').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+document.getElementById('mpedido').addEventListener('click',e=>{if(e.target===document.getElementById('mpedido'))closeMPed()});
+
+// ══ SIDEBAR ══
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+
+// ══ BADGES ══
+function updateBadges(){
+  const upd=(id,v,urgent)=>{const el=document.getElementById(id);if(!el)return;el.textContent=v;el.className='sb-badge '+(v>0?'has':'zero');if(urgent&&v>0)el.style.background='linear-gradient(135deg,#ef4444,#b91c1c)'};
+  upd('badge-cli',DB.get('clientes').length);
+  upd('badge-ped',DB.get('pedidos').length);
+  upd('badge-prod',DB.get('produtos').length);
+  upd('badge-rep',DB.get('representadas').length);
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const fuPend=DB.get('followups').filter(f=>f.status==='pendente');
+  const fuVenc=fuPend.filter(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);return d<=hoje}).length;
+  upd('badge-fu',fuVenc||fuPend.length,fuVenc>0);
+}
+
+// ══ NAVIGATE ══
+const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',relatorios:'Relatórios',backup:'Backup & Restore'};
+function goto(t){
+  tab=t;
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById('si-'+t);if(el)el.classList.add('on');
+  document.getElementById('tb-title').textContent=titles[t]||t;
+  closeSidebar();render();updateBadges();
+}
+
+// ══ RENDER ══
+function render(){
+  const c=document.getElementById('content');
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,relatorios:pgRelatorios,backup:pgBackup};
+  c.innerHTML=(pages[tab]||pgDash)();
+}
+
+/* ══════════════════════ DASHBOARD ══════════════════════ */
+function pgDash(){
+  const clis=DB.get('clientes'),prods=DB.get('produtos'),peds=DB.get('pedidos'),reps=DB.get('representadas');
+  const total=peds.reduce((s,p)=>s+p.total,0);
+  const abertos=peds.filter(p=>p.status==='aberto');
+  const enviados=peds.filter(p=>p.status==='enviado');
+  const totAb=abertos.reduce((s,p)=>s+p.total,0);
+  const totEn=enviados.reduce((s,p)=>s+p.total,0);
+  const recentes=[...peds].reverse().slice(0,8);
+  return `
+  <div class="stats">
+    <div class="stat blue"><div class="stat-ico">💰</div><div class="stat-label">Volume Total</div><div class="stat-val">${fmt(total)}</div><div class="stat-sub">${peds.length} pedido(s) emitido(s)</div></div>
+    <div class="stat orange"><div class="stat-ico">📋</div><div class="stat-label">Em Aberto</div><div class="stat-val">${fmt(totAb)}</div><div class="stat-sub">${abertos.length} aguardando</div></div>
+    <div class="stat green"><div class="stat-ico">✔</div><div class="stat-label">Enviados</div><div class="stat-val">${fmt(totEn)}</div><div class="stat-sub">${enviados.length} confirmado(s)</div></div>
+    <div class="stat purple"><div class="stat-ico">👥</div><div class="stat-label">Cadastros</div><div class="stat-val">${clis.length}</div><div class="stat-sub">${prods.length} produtos · ${reps.length} empresas</div></div>
+  </div>
+  ${(()=>{
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const fus=DB.get('followups').filter(f=>f.status==='pendente').sort((a,b)=>new Date(a.data)-new Date(b.data)).slice(0,5);
+    if(!fus.length)return '';
+    const venc=fus.filter(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);return d<hoje}).length;
+    return `<div class="tbl-wrap" style="margin-bottom:16px;${venc>0?'border-color:rgba(239,68,68,.3)':''}">
+      <div class="tbl-head" style="${venc>0?'background:rgba(239,68,68,.05)':''}">
+        <div class="tbl-head-t">🔔 Follow-ups Pendentes${venc>0?` <span style="color:var(--red);font-size:12px">(${venc} vencido${venc>1?'s':''})</span>`:''}</div>
+        <button class="btn btn-ghost btn-sm" onclick="goto('followup')">Ver todos →</button>
+      </div>
+      <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Assunto</th><th>Data</th><th>Ação</th></tr></thead><tbody>
+      ${fus.map(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);const venc=d<hoje,hj=d.getTime()===hoje.getTime();return`<tr>
+        <td style="font-weight:600">${f.cliNome||'—'}</td>
+        <td><span class="tag ${f.tipo==='ligação'?'':'tag-a'}" style="font-size:11px">${f.tipo}</span></td>
+        <td style="color:var(--sub);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.assunto||'—'}</td>
+        <td><span style="font-size:12px;font-weight:700;color:${venc?'var(--red)':hj?'var(--yellow)':'var(--sub)'}">${venc?'⚠️ ':hj?'📅 ':''}${fmtDate(f.data)}</span></td>
+        <td><div style="display:flex;gap:5px">
+          <button class="icon-btn icon-btn-g btn-sm" onclick="concluirFU('${f.id}')">✔</button>
+          <button class="icon-btn btn-sm" onclick="verFU('${f.id}')">👁️</button>
+        </div></td>
+      </tr>`}).join('')}
+      </tbody></table>
+    </div>`;
+  })()}
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="tbl-head-t">📋 Pedidos Recentes</div>
+      <button class="btn btn-ghost btn-sm" onclick="goto('pedidos')">Ver todos →</button>
+    </div>
+    ${recentes.length===0
+      ?`<div class="empty"><div class="empty-ico">📋</div><div class="empty-t">Nenhum pedido ainda</div><div class="empty-s">Clique em "+ Novo Pedido" para começar</div></div>`
+      :`<table><thead><tr><th>#</th><th>Cliente</th><th>Representada</th><th>Data</th><th>Total</th><th>Status</th></tr></thead><tbody>
+      ${recentes.map(p=>`<tr class="tr-click" onclick="verPedido('${p.id}')">
+        <td><span style="font-weight:800;color:var(--p)">#${p.num}</span></td>
+        <td><div style="font-weight:600">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub)">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
+        <td style="color:var(--sub);font-size:12.5px">${p.repNome||'—'}</td>
+        <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${fmtDate(p.data)}</td>
+        <td style="font-weight:800;color:var(--a)">${fmt(p.total)}</td>
+        <td><span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}">${p.status==='aberto'?'Aberto':p.status==='enviado'?'Enviado':'Cancelado'}</span></td>
+      </tr>`).join('')}</tbody></table>`}
+  </div>`;
+}
+
+/* ══════════════════════ CLIENTES ══════════════════════ */
+function pgClientes(){
+  const all=DB.get('clientes');
+  const q=(document.getElementById('scli')||{}).value||'';
+  const list=all.filter(c=>(c.razao+c.fantasia+c.cnpj+c.cidade).toLowerCase().includes(q.toLowerCase()));
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Clientes</div><div class="pg-sub">${list.length} de ${all.length} cadastrado(s)</div></div>
+    <button class="btn btn-g" onclick="openFormCli()">+ Novo Cliente</button>
+  </div>
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="scli" type="search" placeholder="Buscar por nome, CNPJ ou cidade..." oninput="render()" value="${q}"></div>
+  </div>
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">Nenhum cliente encontrado</div>${q?'':'<div class="empty-s">Cadastre o primeiro cliente</div>'}</div>`
+    :`<div class="tbl-wrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Cidade/UF</th><th>Telefone</th><th>Cond. Pag.</th><th>Ações</th></tr></thead><tbody>
+    ${list.map(c=>`<tr>
+      <td><div style="font-weight:700">${c.razao||'—'}</div>${c.fantasia&&c.fantasia!==c.razao?`<div style="font-size:11.5px;color:var(--a)">${c.fantasia}</div>`:''}</td>
+      <td style="font-size:12px;color:var(--sub);white-space:nowrap">${c.cnpj||'—'}</td>
+      <td style="font-size:12.5px;color:var(--sub)">${c.cidade||'—'}${c.uf?'/'+c.uf:''}</td>
+      <td style="font-size:12.5px;color:var(--sub)">${c.fone||'—'}</td>
+      <td><span class="tag">${c.condPag||'—'}</span></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="icon-btn btn-sm" onclick="openFormCli('${c.id}')">✏️ Editar</button>
+        <button class="icon-btn icon-btn-red btn-sm" onclick="delCli('${c.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}`;
+}
+
+function fmCli(c={}){return `
+<div>
+  <div id="cIbox" class="abox"></div>
+  <div class="sec">🏢 Identificação</div>
+  <div class="cnpj-row fld">
+    <div class="fld" style="margin:0"><label>CNPJ</label><input id="cCnpj" value="${c.cnpj||''}" placeholder="00.000.000/0001-00" oninput="this.value=maskCNPJ(this.value)" maxlength="18"></div>
+    <button id="cBtnCnpj" class="btn-cnpj" onclick="buscarCNPJ('c')">🔍 Consultar Receita</button>
+  </div>
+  <div class="row2">
+    <div class="fld"><label>Razão Social *</label><input id="cRazao" value="${c.razao||''}" placeholder="Razão Social da empresa"></div>
+    <div class="fld"><label>Nome Fantasia</label><input id="cFantasia" value="${c.fantasia||''}" placeholder="Nome Fantasia"></div>
+  </div>
+  <div class="sec">📞 Contato</div>
+  <div class="row2">
+    <div class="fld"><label>Telefone / WhatsApp</label><input id="cFone" value="${c.fone||''}" placeholder="(11) 99999-9999" type="tel" oninput="this.value=maskFone(this.value)"></div>
+    <div class="fld"><label>E-mail</label><input id="cEmail" value="${c.email||''}" placeholder="email@empresa.com.br" type="email"></div>
+  </div>
+  <div class="fld"><label>Nome do Responsável / Comprador</label><input id="cContato" value="${c.contato||''}" placeholder="Contato principal"></div>
+  <div class="sec">📍 Endereço</div>
+  <div class="row2">
+    <div class="fld"><label>CEP</label><input id="cCEP" value="${c.cep||''}" placeholder="00000-000" oninput="this.value=maskCEP(this.value)" onblur="buscarCEP('c')" maxlength="9"></div>
+    <div class="fld"><label>Número</label><input id="cNum" value="${c.num||''}" placeholder="Nº"></div>
+  </div>
+  <div class="fld"><label>Logradouro</label><input id="cRua" value="${c.rua||''}" placeholder="Rua / Avenida / Alameda"></div>
+  <div class="row-cep">
+    <div class="fld"><label>Bairro</label><input id="cBairro" value="${c.bairro||''}" placeholder="Bairro"></div>
+    <div class="fld"><label>Cidade</label><input id="cCidade" value="${c.cidade||''}" placeholder="Cidade"></div>
+    <div class="fld"><label>UF</label><input id="cUF" value="${c.uf||''}" placeholder="SP" maxlength="2" style="text-transform:uppercase"></div>
+  </div>
+  <div class="sec">💼 Comercial</div>
+  <div class="row2">
+    <div class="fld"><label>Condição de Pagamento</label>
+      <select id="cCond">${['À Vista','7 dias','14 dias','21 dias','28 dias','30 dias','30/60','30/60/90','45 dias','60 dias','Boleto 30d','Cheque 30d'].map(o=>`<option ${(c.condPag||'À Vista')===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div class="fld"><label>Limite de Crédito R$</label><input id="cLimite" type="number" min="0" step="100" value="${c.limite||''}" placeholder="0,00"></div>
+  </div>
+  <div class="fld"><label>Observações / Restrições</label><textarea id="cObs">${c.obs||''}</textarea></div>
+  <div style="display:flex;gap:10px;margin-top:4px">
+    <button class="btn btn-p btn-full" onclick="saveCli()">💾 Salvar Cliente</button>
+  </div>
+</div>`}
+
+function openFormCli(id){editId=id||null;const c=id?DB.get('clientes').find(x=>x.id==id):{};openModal(id?'Editar Cliente':'Novo Cliente',fmCli(c||{}))}
+function saveCli(){
+  const razao=document.getElementById('cRazao').value.trim();
+  if(!razao)return alert('Razão Social é obrigatória.');
+  const list=DB.get('clientes');
+  const o={id:editId||uuid(),cnpj:document.getElementById('cCnpj').value.trim(),razao,fantasia:document.getElementById('cFantasia').value.trim(),fone:document.getElementById('cFone').value.trim(),email:document.getElementById('cEmail').value.trim(),contato:document.getElementById('cContato').value.trim(),cep:document.getElementById('cCEP').value.trim(),rua:document.getElementById('cRua').value.trim(),num:document.getElementById('cNum').value.trim(),bairro:document.getElementById('cBairro').value.trim(),cidade:document.getElementById('cCidade').value.trim(),uf:document.getElementById('cUF').value.trim().toUpperCase(),condPag:document.getElementById('cCond').value,limite:parseFloat(document.getElementById('cLimite').value)||0,obs:document.getElementById('cObs').value.trim()};
+  if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
+  DB.set('clientes',list);closeModal();render();updateBadges();
+}
+function delCli(id){if(!confirm('Excluir este cliente?'))return;DB.set('clientes',DB.get('clientes').filter(x=>x.id!=id));render();updateBadges()}
+
+/* ══════════════════════ PRODUTOS ══════════════════════ */
+function pgProdutos(){
+  const all=DB.get('produtos');
+  const q=(document.getElementById('sprod')||{}).value||'';
+  const list=all.filter(p=>(p.desc+p.cod+(p.refFab||'')).toLowerCase().includes(q.toLowerCase()));
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Produtos</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
+    <button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button>
+  </div>
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="sprod" type="search" placeholder="Código, descrição ou referência..." oninput="render()" value="${q}"></div>
+  </div>
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">📦</div><div class="empty-t">Nenhum produto encontrado</div></div>`
+    :`<div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
+    ${list.map(p=>`<tr>
+      <td><span class="tag">${p.cod}</span></td>
+      <td style="font-weight:600;max-width:220px">${p.desc}</td>
+      <td style="color:var(--sub);font-size:12px">${p.refFab||'—'}</td>
+      <td><span class="tag tag-a">${p.un}</span></td>
+      <td style="font-weight:800;color:var(--a)">${fmt(p.preco)}</td>
+      <td style="color:var(--sub)">${p.precoMin?fmt(p.precoMin):'—'}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="icon-btn btn-sm" onclick="openFormProd('${p.id}')">✏️ Editar</button>
+        <button class="icon-btn icon-btn-red btn-sm" onclick="delProd('${p.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}`;
+}
+
+function openFormProd(id){
+  editId=id||null;const p=id?DB.get('produtos').find(x=>x.id==id):{};const c=p||{};
+  openModal(id?'Editar Produto':'Novo Produto',`
+  <div>
+    <div class="sec" style="padding-top:0">📦 Identificação</div>
+    <div class="row2">
+      <div class="fld"><label>Código *</label><input id="pCod" value="${c.cod||''}" placeholder="Ex: COD-001"></div>
+      <div class="fld"><label>Ref. Fabricante</label><input id="pRef" value="${c.refFab||''}" placeholder="Ref. original"></div>
+    </div>
+    <div class="fld"><label>Descrição Completa *</label><input id="pDesc" value="${c.desc||''}" placeholder="Nome detalhado do produto"></div>
+    <div class="sec">💰 Preços</div>
+    <div class="row3">
+      <div class="fld"><label>Preço Lista R$</label><input id="pPreco" type="number" step="0.01" min="0" value="${c.preco||''}" placeholder="0,00"></div>
+      <div class="fld"><label>Preço Mínimo R$</label><input id="pPrecoMin" type="number" step="0.01" min="0" value="${c.precoMin||''}" placeholder="0,00"></div>
+      <div class="fld"><label>Unidade</label><select id="pUn">${['un','cx','kg','lt','frd','pc','bd','sc','pct','par','rolo','m','m²'].map(u=>`<option ${(c.un||'un')===u?'selected':''}>${u}</option>`).join('')}</select></div>
+    </div>
+    <div class="fld"><label>Observações</label><textarea id="pObs">${c.obs||''}</textarea></div>
+    <button class="btn btn-p btn-full" onclick="saveProd()">💾 Salvar Produto</button>
+  </div>`);
+}
+function saveProd(){
+  const cod=document.getElementById('pCod').value.trim(),desc=document.getElementById('pDesc').value.trim();
+  if(!cod||!desc)return alert('Código e descrição são obrigatórios.');
+  const list=DB.get('produtos');
+  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim()};
+  if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
+  DB.set('produtos',list);closeModal();render();updateBadges();
+}
+function delProd(id){if(!confirm('Excluir produto?'))return;DB.set('produtos',DB.get('produtos').filter(x=>x.id!=id));render();updateBadges()}
+
+/* ══════════════════════ REPRESENTADAS ══════════════════════ */
+function pgRepresentadas(){
+  const all=DB.get('representadas');
+  const q=(document.getElementById('srep')||{}).value||'';
+  const list=all.filter(r=>(r.razao+r.fantasia+r.cnpj).toLowerCase().includes(q.toLowerCase()));
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Representadas</div><div class="pg-sub">${list.length} empresa(s) cadastrada(s)</div></div>
+    <button class="btn btn-g" onclick="openFormRep()">+ Nova Empresa</button>
+  </div>
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="srep" type="search" placeholder="Buscar empresa..." oninput="render()" value="${q}"></div>
+  </div>
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">🏢</div><div class="empty-t">Nenhuma empresa cadastrada</div><div class="empty-s">Adicione as empresas que você representa</div></div>`
+    :`<div class="tbl-wrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Contato</th><th>WhatsApp Pedidos</th><th>Comissão</th><th>Prazo</th><th>Ações</th></tr></thead><tbody>
+    ${list.map(r=>`<tr>
+      <td><div style="font-weight:700">${r.razao||'—'}</div>${r.fantasia&&r.fantasia!==r.razao?`<div style="font-size:11.5px;color:var(--a)">${r.fantasia}</div>`:''}</td>
+      <td style="font-size:12px;color:var(--sub);white-space:nowrap">${r.cnpj||'—'}</td>
+      <td><div style="font-size:13px">${r.contato||'—'}</div><div style="font-size:11.5px;color:var(--sub)">${r.fone||''}</div></td>
+      <td style="font-size:12.5px;color:var(--sub)">${r.wpp||'—'}</td>
+      <td>${r.comissao?`<span class="tag">${r.comissao}%</span>`:'—'}</td>
+      <td>${r.prazo?`<span style="color:var(--sub)">${r.prazo}d</span>`:'—'}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="icon-btn btn-sm" onclick="openFormRep('${r.id}')">✏️ Editar</button>
+        <button class="icon-btn icon-btn-red btn-sm" onclick="delRep('${r.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}`;
+}
+
+function fmRep(r={}){return `
+<div>
+  <div id="rIbox" class="abox"></div>
+  <div class="sec" style="padding-top:0">🏢 Identificação</div>
+  <div class="cnpj-row fld">
+    <div class="fld" style="margin:0"><label>CNPJ</label><input id="rCnpj" value="${r.cnpj||''}" placeholder="00.000.000/0001-00" oninput="this.value=maskCNPJ(this.value)" maxlength="18"></div>
+    <button id="rBtnCnpj" class="btn-cnpj" onclick="buscarCNPJ('r')">🔍 Consultar Receita</button>
+  </div>
+  <div class="row2">
+    <div class="fld"><label>Razão Social *</label><input id="rRazao" value="${r.razao||''}" placeholder="Razão Social"></div>
+    <div class="fld"><label>Nome Fantasia</label><input id="rFantasia" value="${r.fantasia||''}" placeholder="Nome Fantasia"></div>
+  </div>
+  <div class="sec">📞 Contato</div>
+  <div class="row2">
+    <div class="fld"><label>Telefone Comercial</label><input id="rFone" value="${r.fone||''}" placeholder="(11) 3333-4444" type="tel" oninput="this.value=maskFone(this.value)"></div>
+    <div class="fld"><label>E-mail Comercial</label><input id="rEmail" value="${r.email||''}" placeholder="pedidos@empresa.com"></div>
+  </div>
+  <div class="row2">
+    <div class="fld"><label>Supervisor / Gerente de Vendas</label><input id="rContato" value="${r.contato||''}" placeholder="Nome do responsável"></div>
+    <div class="fld"><label>WhatsApp para Enviar Pedidos</label><input id="rWpp" value="${r.wpp||''}" placeholder="(11) 99999-9999" type="tel" oninput="this.value=maskFone(this.value)"></div>
+  </div>
+  <div class="sec">📍 Endereço</div>
+  <div class="row2">
+    <div class="fld"><label>CEP</label><input id="rCEP" value="${r.cep||''}" placeholder="00000-000" oninput="this.value=maskCEP(this.value)" onblur="buscarCEP('r')" maxlength="9"></div>
+    <div class="fld"><label>Número</label><input id="rNum" value="${r.num||''}" placeholder="Nº"></div>
+  </div>
+  <div class="fld"><label>Logradouro</label><input id="rRua" value="${r.rua||''}" placeholder="Rua / Av."></div>
+  <div class="row-cep">
+    <div class="fld"><label>Bairro</label><input id="rBairro" value="${r.bairro||''}" placeholder="Bairro"></div>
+    <div class="fld"><label>Cidade</label><input id="rCidade" value="${r.cidade||''}" placeholder="Cidade"></div>
+    <div class="fld"><label>UF</label><input id="rUF" value="${r.uf||''}" placeholder="SP" maxlength="2" style="text-transform:uppercase"></div>
+  </div>
+  <div class="sec">💼 Contrato</div>
+  <div class="row2">
+    <div class="fld"><label>% Comissão</label><input id="rComissao" type="number" min="0" max="100" step="0.1" value="${r.comissao||''}" placeholder="Ex: 5,5"></div>
+    <div class="fld"><label>Prazo de Pagamento (dias)</label><input id="rPrazo" type="number" min="0" value="${r.prazo||''}" placeholder="Ex: 30"></div>
+  </div>
+  <div class="fld"><label>Observações / Condições Gerais</label><textarea id="rObs">${r.obs||''}</textarea></div>
+  <button class="btn btn-p btn-full" onclick="saveRep()">💾 Salvar Empresa</button>
+</div>`}
+
+function openFormRep(id){editId=id||null;const r=id?DB.get('representadas').find(x=>x.id==id):{};openModal(id?'Editar Empresa':'Nova Representada',fmRep(r||{}))}
+function saveRep(){
+  const razao=document.getElementById('rRazao').value.trim();
+  if(!razao)return alert('Razão Social é obrigatória.');
+  const list=DB.get('representadas');
+  const o={id:editId||uuid(),cnpj:document.getElementById('rCnpj').value.trim(),razao,fantasia:document.getElementById('rFantasia').value.trim(),fone:document.getElementById('rFone').value.trim(),email:document.getElementById('rEmail').value.trim(),contato:document.getElementById('rContato').value.trim(),wpp:document.getElementById('rWpp').value.trim(),cep:document.getElementById('rCEP').value.trim(),rua:document.getElementById('rRua').value.trim(),num:document.getElementById('rNum').value.trim(),bairro:document.getElementById('rBairro')?document.getElementById('rBairro').value.trim():'',cidade:document.getElementById('rCidade').value.trim(),uf:document.getElementById('rUF').value.trim().toUpperCase(),comissao:parseFloat(document.getElementById('rComissao').value)||0,prazo:parseInt(document.getElementById('rPrazo').value)||0,obs:document.getElementById('rObs').value.trim()};
+  if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
+  DB.set('representadas',list);closeModal();render();updateBadges();
+}
+function delRep(id){if(!confirm('Excluir empresa?'))return;DB.set('representadas',DB.get('representadas').filter(x=>x.id!=id));render();updateBadges()}
+
+/* ══════════════════════ NOVO PEDIDO ══════════════════════ */
+function pgNovoPedido(){
+  const clis=DB.get('clientes'),reps=DB.get('representadas'),prods=DB.get('produtos');
+  const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
+  const q=pSearch;
+  const fp=q?prods.filter(p=>(p.desc+p.cod).toLowerCase().includes(q.toLowerCase())):[];
+  return `
+  <div style="max-width:900px">
+    <div class="pg-head"><div><div class="pg-title">Novo Pedido</div><div class="pg-sub">${np.itens.length} item(ns) · ${fmt(total)}</div></div></div>
+    <div class="pd-block">
+      <div class="sec" style="padding-top:0">📋 Dados do Pedido</div>
+      <div class="row2">
+        <div class="fld"><label>Cliente *</label>
+          <select id="npCli" onchange="np.cliId=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%">
+            <option value="">— Selecione o cliente —</option>
+            ${clis.map(c=>`<option value="${c.id}" ${np.cliId==c.id?'selected':''}>${c.razao||c.fantasia}${c.cidade?' · '+c.cidade+'/'+c.uf:''}</option>`).join('')}
+          </select></div>
+        <div class="fld"><label>Representada *</label>
+          <select id="npRep" onchange="np.repId=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%">
+            <option value="">— Selecione a empresa —</option>
+            ${reps.map(r=>`<option value="${r.id}" ${np.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}
+          </select></div>
+      </div>
+    </div>
+
+    <div class="pd-block">
+      <div class="sec" style="padding-top:0">🔍 Adicionar Produto</div>
+      <input class="dark-input" id="bProd" type="search" placeholder="Digite código ou nome do produto para buscar..." value="${q}" oninput="pSearch=this.value;render()" autocomplete="off">
+      ${fp.length>0?`<div class="prod-result">${fp.slice(0,12).map(p=>`
+        <div class="prod-row" onclick="addItem('${p.id}')">
+          <div><div style="font-weight:700;font-size:13px">${p.desc}</div>
+            <div style="font-size:11.5px;color:var(--sub);margin-top:2px"><span class="tag" style="margin-right:6px">${p.cod}</span>${fmt(p.preco)} / ${p.un}</div></div>
+          <div class="add-ico">+</div>
+        </div>`).join('')}</div>`:''}
+    </div>
+
+    ${np.itens.length>0?`
+    <div class="pd-block">
+      <div class="sec" style="padding-top:0">🛒 Itens (${np.itens.length})</div>
+      <table><thead><tr><th>Produto</th><th>Unid.</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody>
+      ${np.itens.map((it,i)=>`<tr>
+        <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
+        <td style="color:var(--sub)">${it.un}</td>
+        <td><input class="num-inp" type="number" min="0.001" step="0.001" value="${it.qty}" onchange="updItem(${i},'qty',this.value)"></td>
+        <td><input class="num-inp" style="width:95px" type="number" min="0" step="0.01" value="${it.preco}" onchange="updItem(${i},'preco',this.value)"></td>
+        <td style="font-weight:800;color:var(--a)">${fmt(it.qty*it.preco)}</td>
+        <td><button onclick="remItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:20px;line-height:1;padding:0 4px">×</button></td>
+      </tr>`).join('')}
+      </tbody></table>
+      <div class="tot-bar">
+        <div><div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.5px">Total do Pedido</div></div>
+        <div style="font-weight:900;font-size:24px;letter-spacing:-.5px">${fmt(total)}</div>
+      </div>
+    </div>`:''}
+
+    <div class="pd-block">
+      <div class="fld" style="margin:0"><label>Observações / Condições Especiais</label>
+        <textarea class="dark-input" id="npObs" rows="3" placeholder="Prazo de entrega, condição de pagamento especial, instruções..." onchange="np.obs=this.value" style="margin-top:4px">${np.obs}</textarea></div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-a" style="flex:1;padding:14px" onclick="confirmar()">✅ Confirmar Pedido — ${fmt(total)}</button>
+      <button class="btn btn-ghost" onclick="limpar()" style="padding:14px 20px">🗑️ Limpar</button>
+    </div>
+  </div>`;
+}
+
+function addItem(pid){const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return;const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+1).toFixed(3))}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty:1,preco:p.preco});pSearch='';render()}
+function remItem(i){np.itens.splice(i,1);render()}
+function updItem(i,f,v){np.itens[i][f]=parseFloat(v)||0;render()}
+function confirmar(){
+  np.cliId=document.getElementById('npCli').value;
+  np.repId=document.getElementById('npRep').value;
+  np.obs=document.getElementById('npObs').value;
+  if(!np.cliId)return alert('Selecione o cliente.');
+  if(!np.repId)return alert('Selecione a representada.');
+  if(!np.itens.length)return alert('Adicione ao menos um produto.');
+  const peds=DB.get('pedidos');
+  const num=(peds.length?Math.max(...peds.map(p=>p.num)):0)+1;
+  const cli=DB.get('clientes').find(c=>c.id==np.cliId)||{};
+  const rep=DB.get('representadas').find(r=>r.id==np.repId)||{};
+  const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
+  peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,status:'aberto'});
+  DB.set('pedidos',peds);
+  const saved=JSON.parse(JSON.stringify(np));
+  np={cliId:'',repId:'',itens:[],obs:''};pSearch='';
+  alert(`✅ Pedido #${num} emitido!\nCliente: ${saved.cliId?((DB.get('clientes').find(c=>c.id==saved.cliId)||{}).razao||''):''}\nTotal: ${fmt(total)}`);
+  goto('pedidos');updateBadges();
+}
+function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:''};pSearch='';render()}
+
+/* ══════════════════════ PEDIDOS ══════════════════════ */
+function pgPedidos(){
+  const all=[...DB.get('pedidos')].reverse();
+  const q=(document.getElementById('sped')||{}).value||'';
+  const sf=(document.getElementById('sfilt')||{}).value||'todos';
+  let list=all.filter(p=>(p.cliNome+p.repNome+String(p.num)).toLowerCase().includes(q.toLowerCase()));
+  if(sf!=='todos')list=list.filter(p=>p.status===sf);
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Pedidos</div><div class="pg-sub">${list.length} pedido(s) · ${fmt(list.reduce((s,p)=>s+p.total,0))}</div></div>
+    <button class="btn btn-g" onclick="goto('novo-pedido')">+ Novo Pedido</button>
+  </div>
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="sped" type="search" placeholder="Buscar por cliente, empresa ou número..." oninput="render()" value="${q}"></div>
+    <select class="filter-sel" id="sfilt" onchange="render()">
+      <option value="todos">Todos os status</option>
+      <option value="aberto" ${sf==='aberto'?'selected':''}>Aberto</option>
+      <option value="enviado" ${sf==='enviado'?'selected':''}>Enviado</option>
+      <option value="cancelado" ${sf==='cancelado'?'selected':''}>Cancelado</option>
+    </select>
+  </div>
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">📋</div><div class="empty-t">Nenhum pedido encontrado</div></div>`
+    :`<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Representada</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+    ${list.map(p=>`<tr>
+      <td><span style="font-weight:900;color:var(--p);font-size:13px">#${p.num}</span></td>
+      <td><div style="font-weight:600">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub)">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
+      <td style="color:var(--sub);font-size:12.5px;max-width:140px">${p.repNome||'—'}</td>
+      <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${fmtDate(p.data)}</td>
+      <td style="color:var(--sub);text-align:center">${p.itens.length}</td>
+      <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.total)}</td>
+      <td><span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}">${p.status==='aberto'?'Aberto':p.status==='enviado'?'Enviado':'Cancelado'}</span></td>
+      <td><div style="display:flex;gap:5px">
+        <button class="icon-btn btn-sm" onclick="verPedido('${p.id}')">👁️ Ver</button>
+        <button class="icon-btn icon-btn-g btn-sm" onclick="exportWpp('${p.id}')">📲</button>
+        <button class="icon-btn icon-btn-red btn-sm" onclick="delPed('${p.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}`;
+}
+
+function verPedido(id){
+  const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
+  document.getElementById('mpbody').innerHTML=`
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="background:linear-gradient(135deg,#0f2040,#152a50);border-radius:12px;padding:20px;border:1px solid rgba(59,130,246,.2)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:800;letter-spacing:.5px;text-transform:uppercase">Pedido</div>
+          <div style="font-weight:900;font-size:30px;color:#fff;letter-spacing:-1px">#${p.num}</div></div>
+        <span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}" style="font-size:13px">${p.status==='aberto'?'● Aberto':p.status==='enviado'?'✔ Enviado':'✕ Cancelado'}</span>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px">📅 ${fmtDate(p.data)}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
+        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Cliente</div>
+        <div style="font-weight:800;font-size:14px">${p.cliNome||'—'}</div>
+        ${p.cliFan&&p.cliFan!==p.cliNome?`<div style="font-size:12px;color:var(--a);margin-top:2px">${p.cliFan}</div>`:''}
+        ${p.cliCnpj?`<div style="font-size:12px;color:var(--sub);margin-top:4px">${p.cliCnpj}</div>`:''}
+        ${p.cliCid?`<div style="font-size:12px;color:var(--sub)">${p.cliCid}/${p.cliUF}</div>`:''}
+        ${p.cliCond?`<div style="margin-top:6px"><span class="tag">${p.cliCond}</span></div>`:''}
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
+        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Representada</div>
+        <div style="font-weight:800;font-size:14px">${p.repNome||'—'}</div>
+        ${p.repWpp?`<div style="font-size:12px;color:var(--sub);margin-top:4px">📲 ${p.repWpp}</div>`:''}
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:10px">Itens do Pedido</div>
+      <table><thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>
+      ${p.itens.map((it,i)=>`<tr>
+        <td style="color:var(--sub2);font-size:12px">${i+1}</td>
+        <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
+        <td style="color:var(--sub)">${it.qty} ${it.un}</td>
+        <td style="color:var(--sub)">${fmt(it.preco)}</td>
+        <td style="font-weight:800;color:var(--a)">${fmt(it.qty*it.preco)}</td>
+      </tr>`).join('')}
+      </tbody></table>
+      <div class="tot-bar"><div style="font-weight:800;opacity:.9">TOTAL DO PEDIDO</div><div style="font-weight:900;font-size:22px">${fmt(p.total)}</div></div>
+    </div>
+
+    ${p.obs?`<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:14px"><div style="font-size:10px;font-weight:900;color:#d97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Observações</div><div style="font-size:13px;line-height:1.6">${p.obs}</div></div>`:''}
+
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Alterar Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm ${p.status==='aberto'?'btn-p':'btn-ghost'}" onclick="setStatus('${p.id}','aberto')">● Aberto</button>
+        <button class="btn btn-sm ${p.status==='enviado'?'btn-g':'btn-ghost'}" onclick="setStatus('${p.id}','enviado')">✔ Enviado</button>
+        <button class="btn btn-sm ${p.status==='cancelado'?'btn-danger':'btn-ghost'}" onclick="setStatus('${p.id}','cancelado')">✕ Cancelado</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-a" style="flex:1" onclick="exportWpp('${p.id}')">📲 Enviar por WhatsApp</button>
+      <button class="btn btn-ghost" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
+      <button class="btn btn-ghost" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Acompanhar pedido #${p.num}'})">🔔 Follow-up</button>
+      <button class="btn btn-danger" onclick="delPed('${p.id}')">🗑️ Excluir</button>
+    </div>
+  </div>`;
+  document.getElementById('mpedido').classList.add('open');
+}
+
+function setStatus(id,s){const peds=DB.get('pedidos');const p=peds.find(x=>x.id==id);if(p){p.status=s;DB.set('pedidos',peds);render();verPedido(id)}}
+function delPed(id){if(!confirm('Excluir pedido?'))return;DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
+
+function exportWpp(id){
+  const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
+  let t=`*D7 Core Pedidos* 📋\n`;
+  t+=`━━━━━━━━━━━━━━━━━━\n`;
+  t+=`*Pedido #${p.num}* — ${fmtDate(p.data)}\n\n`;
+  t+=`👥 *Cliente:* ${p.cliNome}\n`;
+  if(p.cliCnpj)t+=`📄 *CNPJ:* ${p.cliCnpj}\n`;
+  if(p.cliCid)t+=`📍 *Cidade:* ${p.cliCid}/${p.cliUF}\n`;
+  if(p.cliCond)t+=`💳 *Pagamento:* ${p.cliCond}\n`;
+  t+=`🏢 *Representada:* ${p.repNome}\n`;
+  t+=`━━━━━━━━━━━━━━━━━━\n\n`;
+  t+=`*ITENS:*\n`;
+  p.itens.forEach((it,i)=>{t+=`${i+1}. ${it.desc} [${it.cod}]\n   ${it.qty} ${it.un} × ${fmt(it.preco)} = *${fmt(it.qty*it.preco)}*\n`});
+  t+=`\n━━━━━━━━━━━━━━━━━━\n*TOTAL: ${fmt(p.total)}*`;
+  if(p.obs)t+=`\n\n📝 _${p.obs}_`;
+  if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado para a área de transferência!')));
+  else navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado! Cole no WhatsApp.'));
+}
+
+function imprimirPedido(id){
+  const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
+  const w=window.open('','_blank','width=800,height=600');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pedido #${p.num}</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
+  h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;font-weight:700;margin:16px 0 6px;color:#1d4ed8}
+  .head{border-bottom:2px solid #1d4ed8;padding-bottom:12px;margin-bottom:16px}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px}
+  .lbl{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th{background:#1d4ed8;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase}
+  td{padding:8px 10px;border-bottom:1px solid #e2e8f0}tr:last-child td{border:none}
+  .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
+  @media print{button{display:none}}</style></head><body>
+  <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
+    <div><h1>D7 Core Pedidos</h1><div style="color:#64748b;font-size:12px">Representação Comercial</div></div>
+    <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#1d4ed8">#${p.num}</div><div style="color:#64748b;font-size:12px">${fmtDate(p.data)}</div></div>
+  </div></div>
+  <div class="info">
+    <div class="box"><div class="lbl">Cliente</div><b>${p.cliNome||'—'}</b>${p.cliCnpj?`<br><span style="color:#64748b;font-size:12px">${p.cliCnpj}</span>`:''}${p.cliCid?`<br><span style="color:#64748b;font-size:12px">${p.cliCid}/${p.cliUF}</span>`:''}${p.cliCond?`<br>Pagamento: ${p.cliCond}`:''}</div>
+    <div class="box"><div class="lbl">Representada</div><b>${p.repNome||'—'}</b></div>
+  </div>
+  <h2>Itens do Pedido</h2>
+  <table><tr><th>#</th><th>Código</th><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th></tr>
+  ${p.itens.map((it,i)=>`<tr><td>${i+1}</td><td>${it.cod}</td><td>${it.desc}</td><td>${it.qty} ${it.un}</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.qty*it.preco).toFixed(2).replace('.',',')}</td></tr>`).join('')}
+  </table>
+  <div class="tot"><span>TOTAL DO PEDIDO</span><span>R$ ${Number(p.total).toFixed(2).replace('.',',')}</span></div>
+  ${p.obs?`<div style="margin-top:12px;padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px"><b>Observações:</b> ${p.obs}</div>`:''}
+  <div style="margin-top:20px;text-align:center"><button onclick="window.print()" style="background:#1d4ed8;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700">🖨️ Imprimir</button></div>
+  </body></html>`);w.document.close();
+}
+
+/* ══════════════════════ FOLLOW-UP ══════════════════════ */
+function pgFollowup(){
+  const all=DB.get('followups');
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const sf=(document.getElementById('sffu')||{}).value||'pendente';
+  const q=(document.getElementById('sfu')||{}).value||'';
+  let list=[...all].sort((a,b)=>new Date(a.data)-new Date(b.data));
+  if(sf==='pendente')list=list.filter(f=>f.status==='pendente');
+  else if(sf==='concluido')list=list.filter(f=>f.status==='concluido');
+  else if(sf==='vencido'){list=list.filter(f=>{if(f.status!=='pendente')return false;const d=new Date(f.data);d.setHours(0,0,0,0);return d<hoje})}
+  else if(sf==='hoje'){list=list.filter(f=>{if(f.status!=='pendente')return false;const d=new Date(f.data);d.setHours(0,0,0,0);return d.getTime()===hoje.getTime()})}
+  if(q)list=list.filter(f=>(f.cliNome+f.assunto+f.tipo).toLowerCase().includes(q.toLowerCase()));
+
+  const venc=all.filter(f=>{if(f.status!=='pendente')return false;const d=new Date(f.data);d.setHours(0,0,0,0);return d<hoje}).length;
+  const hj=all.filter(f=>{if(f.status!=='pendente')return false;const d=new Date(f.data);d.setHours(0,0,0,0);return d.getTime()===hoje.getTime()}).length;
+  const pend=all.filter(f=>f.status==='pendente').length;
+
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Follow-up</div><div class="pg-sub">${pend} pendente(s) · ${venc} vencido(s) · ${hj} para hoje</div></div>
+    <button class="btn btn-a" onclick="openFormFU()">+ Novo Follow-up</button>
+  </div>
+
+  <div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="stat orange"><div class="stat-ico">⏳</div><div class="stat-label">Pendentes</div><div class="stat-val">${pend}</div></div>
+    <div class="stat" style="border-color:rgba(239,68,68,.3)"><div class="stat-ico">🔴</div><div class="stat-label" style="color:var(--red)">Vencidos</div><div class="stat-val" style="color:var(--red)">${venc}</div></div>
+    <div class="stat purple"><div class="stat-ico">📅</div><div class="stat-label">Para Hoje</div><div class="stat-val">${hj}</div></div>
+    <div class="stat green"><div class="stat-ico">✔</div><div class="stat-label">Concluídos</div><div class="stat-val">${all.filter(f=>f.status==='concluido').length}</div></div>
+  </div>
+
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="sfu" type="search" placeholder="Cliente, assunto ou tipo..." oninput="render()" value="${q}"></div>
+    <select class="filter-sel" id="sffu" onchange="render()">
+      <option value="pendente" ${sf==='pendente'?'selected':''}>Pendentes</option>
+      <option value="vencido" ${sf==='vencido'?'selected':''}>🔴 Vencidos</option>
+      <option value="hoje" ${sf==='hoje'?'selected':''}>📅 Para Hoje</option>
+      <option value="concluido" ${sf==='concluido'?'selected':''}>✔ Concluídos</option>
+      <option value="todos" ${sf==='todos'?'selected':''}>Todos</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="fuWppLista()">📲 Exportar Lista</button>
+  </div>
+
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">🔔</div><div class="empty-t">Nenhum follow-up encontrado</div><div class="empty-s">Crie um follow-up para acompanhar seus clientes</div></div>`
+    :`<div style="display:flex;flex-direction:column;gap:8px">
+    ${list.map(f=>{
+      const fd=new Date(f.data);fd.setHours(0,0,0,0);
+      const isVenc=f.status==='pendente'&&fd<hoje;
+      const isHoje=f.status==='pendente'&&fd.getTime()===hoje.getTime();
+      const diasDiff=Math.round((fd-hoje)/(1000*60*60*24));
+      const diffLabel=f.status==='concluido'?'Concluído':isVenc?`Venceu há ${Math.abs(diasDiff)}d`:isHoje?'Hoje':diasDiff===1?'Amanhã':`Em ${diasDiff}d`;
+      const borderColor=isVenc?'rgba(239,68,68,.35)':isHoje?'rgba(245,158,11,.35)':'var(--border)';
+      const topColor=isVenc?'var(--red)':isHoje?'var(--yellow)':f.status==='concluido'?'var(--green)':'var(--p)';
+      return `<div style="background:var(--card);border:1px solid ${borderColor};border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${topColor}"></div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+              <span style="font-weight:800;font-size:14px">${f.cliNome||'Sem cliente'}</span>
+              <span class="tag" style="font-size:11px">${f.tipo}</span>
+              ${f.repNome?`<span style="font-size:11.5px;color:var(--sub)">· ${f.repNome}</span>`:''}
+            </div>
+            ${f.assunto?`<div style="font-size:13px;color:var(--text);margin-bottom:6px;font-weight:600">${f.assunto}</div>`:''}
+            ${f.obs?`<div style="font-size:12px;color:var(--sub);margin-bottom:8px;line-height:1.5">${f.obs}</div>`:''}
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <span style="font-size:12px;font-weight:800;color:${topColor}">📅 ${fmtDate(f.data)} — ${diffLabel}</span>
+              ${f.pedNum?`<span style="font-size:11.5px;color:var(--sub)">Pedido #${f.pedNum}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+            ${f.status==='pendente'?`<button class="icon-btn icon-btn-g btn-sm" onclick="concluirFU('${f.id}')">✔ Concluir</button>`:'<span style="color:var(--green);font-size:12px;font-weight:700">✔ Feito</span>'}
+            <button class="icon-btn btn-sm" onclick="verFU('${f.id}')">✏️ Editar</button>
+            <button class="icon-btn btn-sm" onclick="fuWpp('${f.id}')">📲</button>
+            <button class="icon-btn icon-btn-red btn-sm" onclick="delFU('${f.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>`}).join('')}
+    </div>`}`;
+}
+
+function fmFU(f={}){
+  const clis=DB.get('clientes'),reps=DB.get('representadas');
+  const amanha=new Date();amanha.setDate(amanha.getDate()+1);
+  const defaultDate=f.data?f.data.slice(0,10):amanha.toISOString().slice(0,10);
+  return `<div>
+    <div class="sec" style="padding-top:0">📋 Dados do Follow-up</div>
+    <div class="row2">
+      <div class="fld"><label>Cliente</label>
+        <select id="fuCli" onchange="document.getElementById('fuCliNome').value=this.options[this.selectedIndex].dataset.n||''">
+          <option value="">— Selecione (opcional) —</option>
+          ${clis.map(c=>`<option value="${c.id}" data-n="${c.razao||c.fantasia}" ${f.cliId==c.id?'selected':''}>${c.razao||c.fantasia}</option>`).join('')}
+        </select></div>
+      <div class="fld"><label>Representada</label>
+        <select id="fuRep">
+          <option value="">— Opcional —</option>
+          ${reps.map(r=>`<option value="${r.id}" ${f.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}
+        </select></div>
+    </div>
+    <input type="hidden" id="fuCliNome" value="${f.cliNome||''}">
+    <div class="row2">
+      <div class="fld"><label>Tipo de Contato *</label>
+        <select id="fuTipo">${['Ligação','WhatsApp','E-mail','Visita','Videoconferência','Proposta','Negociação','Outro'].map(t=>`<option ${(f.tipo||'Ligação')===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fld"><label>Data do Follow-up *</label>
+        <input id="fuData" type="date" value="${defaultDate}"></div>
+    </div>
+    <div class="fld"><label>Assunto / Objetivo</label>
+      <input id="fuAssunto" value="${f.assunto||''}" placeholder="Ex: Retornar proposta de preço, Confirmar pedido..."></div>
+    <div class="fld"><label>Observações / Contexto</label>
+      <textarea id="fuObs">${f.obs||''}</textarea></div>
+    <div class="fld"><label>Vinculado ao Pedido Nº (opcional)</label>
+      <input id="fuPedNum" type="number" value="${f.pedNum||''}" placeholder="Número do pedido"></div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-a btn-full" onclick="saveFU()">💾 Salvar Follow-up</button>
+    </div>
+  </div>`;
+}
+
+function openFormFU(id,prefill){
+  editId=id||null;
+  let f={};
+  if(id)f=DB.get('followups').find(x=>x.id==id)||{};
+  if(prefill)f={...f,...prefill};
+  openModal(id?'Editar Follow-up':'Novo Follow-up',fmFU(f));
+  // sync clientname on load
+  const sel=document.getElementById('fuCli');
+  if(sel&&sel.value){const opt=sel.options[sel.selectedIndex];document.getElementById('fuCliNome').value=opt.dataset.n||'';}
+}
+
+function saveFU(){
+  const tipo=document.getElementById('fuTipo').value;
+  const data=document.getElementById('fuData').value;
+  if(!data)return alert('Informe a data.');
+  const cliSel=document.getElementById('fuCli');
+  const repSel=document.getElementById('fuRep');
+  const cliId=cliSel.value;
+  const cliNome=cliId?(cliSel.options[cliSel.selectedIndex].dataset.n||''):(document.getElementById('fuCliNome').value||'');
+  const repId=repSel.value;
+  const repNome=repId?(repSel.options[repSel.selectedIndex].text):'';
+  const list=DB.get('followups');
+  const o={id:editId||uuid(),cliId,cliNome,repId,repNome,tipo,data,assunto:document.getElementById('fuAssunto').value.trim(),obs:document.getElementById('fuObs').value.trim(),pedNum:document.getElementById('fuPedNum').value||'',status:'pendente',criadoEm:editId?(list.find(x=>x.id==editId)||{}).criadoEm||new Date().toISOString():new Date().toISOString()};
+  if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
+  DB.set('followups',list);closeModal();render();updateBadges();
+}
+
+function verFU(id){openFormFU(id)}
+function concluirFU(id){
+  const list=DB.get('followups');
+  const f=list.find(x=>x.id==id);
+  if(!f)return;
+  f.status='concluido';f.concluidoEm=new Date().toISOString();
+  DB.set('followups',list);render();updateBadges();
+}
+function delFU(id){if(!confirm('Excluir follow-up?'))return;DB.set('followups',DB.get('followups').filter(x=>x.id!=id));render();updateBadges()}
+
+function fuWpp(id){
+  const f=DB.get('followups').find(x=>x.id==id);if(!f)return;
+  let t=`🔔 *D7 Core — Follow-up*\n━━━━━━━━━━━━━━\n`;
+  if(f.cliNome)t+=`👥 *Cliente:* ${f.cliNome}\n`;
+  t+=`📌 *Tipo:* ${f.tipo}\n`;
+  t+=`📅 *Data:* ${fmtDate(f.data)}\n`;
+  if(f.assunto)t+=`💬 *Assunto:* ${f.assunto}\n`;
+  if(f.obs)t+=`📝 _${f.obs}_\n`;
+  if(f.pedNum)t+=`🧾 Pedido #${f.pedNum}\n`;
+  if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t));
+  else navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado para a área de transferência!'));
+}
+
+function fuWppLista(){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const list=DB.get('followups').filter(f=>f.status==='pendente').sort((a,b)=>new Date(a.data)-new Date(b.data));
+  if(!list.length)return alert('Nenhum follow-up pendente.');
+  let t=`📋 *D7 Core — Follow-ups Pendentes*\n`;
+  t+=`_${new Date().toLocaleDateString('pt-BR')}_\n━━━━━━━━━━━━━━\n`;
+  list.forEach((f,i)=>{
+    const fd=new Date(f.data);fd.setHours(0,0,0,0);
+    const venc=fd<hoje,hj=fd.getTime()===hoje.getTime();
+    t+=`${i+1}. ${venc?'🔴':''}${hj?'📅':'🕐'} ${fmtDate(f.data)} — *${f.cliNome||'Sem cliente'}*\n`;
+    t+=`   ${f.tipo}: ${f.assunto||'(sem assunto)'}\n`;
+  });
+  if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t));
+  else navigator.clipboard.writeText(t).then(()=>alert('✅ Lista copiada!'));
+}
+
+/* ══════════════════════ RELATÓRIOS ══════════════════════ */
+function pgRelatorios(){
+  const peds=DB.get('pedidos'),clis=DB.get('clientes'),prods=DB.get('produtos'),reps=DB.get('representadas');
+  const total=peds.reduce((s,p)=>s+p.total,0);
+  const env=peds.filter(p=>p.status==='enviado');
+  const ab=peds.filter(p=>p.status==='aberto');
+  const ticket=peds.length?total/peds.length:0;
+  const byRep={};peds.forEach(p=>{if(!byRep[p.repNome])byRep[p.repNome]={nome:p.repNome,qtd:0,total:0,env:0};byRep[p.repNome].qtd++;byRep[p.repNome].total+=p.total;if(p.status==='enviado')byRep[p.repNome].env++});
+  const repList=Object.values(byRep).sort((a,b)=>b.total-a.total);
+  const byCli={};peds.forEach(p=>{if(!byCli[p.cliNome])byCli[p.cliNome]={nome:p.cliNome,qtd:0,total:0};byCli[p.cliNome].qtd++;byCli[p.cliNome].total+=p.total});
+  const cliList=Object.values(byCli).sort((a,b)=>b.total-a.total).slice(0,10);
+  return `
+  <div class="pg-head"><div><div class="pg-title">Relatórios</div><div class="pg-sub">Visão geral do negócio</div></div></div>
+  <div class="stats" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat blue"><div class="stat-ico">💰</div><div class="stat-label">Volume Total</div><div class="stat-val">${fmt(total)}</div><div class="stat-sub">${peds.length} pedidos emitidos</div></div>
+    <div class="stat green"><div class="stat-ico">✔</div><div class="stat-label">Enviados</div><div class="stat-val">${fmt(env.reduce((s,p)=>s+p.total,0))}</div><div class="stat-sub">${env.length} pedidos confirmados</div></div>
+    <div class="stat orange"><div class="stat-ico">⏳</div><div class="stat-label">Em Aberto</div><div class="stat-val">${fmt(ab.reduce((s,p)=>s+p.total,0))}</div><div class="stat-sub">${ab.length} aguardando</div></div>
+    <div class="stat purple"><div class="stat-ico">📊</div><div class="stat-label">Ticket Médio</div><div class="stat-val">${fmt(ticket)}</div><div class="stat-sub">por pedido</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="tbl-wrap">
+      <div class="tbl-head"><div class="tbl-head-t">🏢 Por Representada</div></div>
+      ${repList.length===0?`<div class="empty" style="padding:30px"><div>Sem dados</div></div>`:
+      `<table><thead><tr><th>Empresa</th><th>Pedidos</th><th>Enviados</th><th>Total</th></tr></thead><tbody>
+      ${repList.map(r=>`<tr>
+        <td style="font-weight:600">${r.nome}</td>
+        <td style="color:var(--sub);text-align:center">${r.qtd}</td>
+        <td style="text-align:center"><span class="badge bd-sent" style="font-size:11px;padding:2px 8px">${r.env}</span></td>
+        <td style="font-weight:800;color:var(--a)">${fmt(r.total)}</td>
+      </tr>`).join('')}
+      </tbody></table>`}
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><div class="tbl-head-t">👥 Top 10 Clientes</div></div>
+      ${cliList.length===0?`<div class="empty" style="padding:30px"><div>Sem dados</div></div>`:
+      `<table><thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th></tr></thead><tbody>
+      ${cliList.map((c,i)=>`<tr>
+        <td><span style="color:var(--sub2);margin-right:8px;font-size:11px">${i+1}</span><span style="font-weight:600">${c.nome}</span></td>
+        <td style="color:var(--sub);text-align:center">${c.qtd}</td>
+        <td style="font-weight:800;color:var(--a)">${fmt(c.total)}</td>
+      </tr>`).join('')}
+      </tbody></table>`}
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════ BACKUP & RESTORE ══════════════════════ */
+function pgBackup(){
+  const clis=DB.get('clientes'),peds=DB.get('pedidos'),prods=DB.get('produtos'),reps=DB.get('representadas');
+  const bytes=Object.keys(localStorage).filter(k=>k.startsWith('d7_')).reduce((s,k)=>s+(localStorage.getItem(k)||'').length,0);
+  const kb=(bytes/1024).toFixed(2);
+  return `
+  <div style="max-width:700px">
+    <div class="pg-head"><div><div class="pg-title">Backup & Restore</div><div class="pg-sub">Seus dados ficam salvos no dispositivo — faça backup regularmente</div></div></div>
+
+    <div class="tbl-wrap" style="margin-bottom:16px">
+      <div class="tbl-head"><div class="tbl-head-t">📊 Resumo dos Dados</div><div class="tbl-head-s">${kb} KB utilizado</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)">
+        ${[['👥','Clientes',clis.length,'blue'],['📦','Produtos',prods.length,'orange'],['📋','Pedidos',peds.length,'green'],['🏢','Representadas',reps.length,'purple']].map(([ico,lbl,n,c])=>`
+        <div style="background:var(--card2);padding:18px;text-align:center">
+          <div style="font-size:22px;margin-bottom:6px">${ico}</div>
+          <div style="font-size:22px;font-weight:900;color:var(--text)">${n}</div>
+          <div style="font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.4px">${lbl}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-bottom:16px">
+      <div class="tbl-head"><div class="tbl-head-t">💾 Exportar Backup</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+        <div class="abox warn" style="display:flex">⚠️ Faça backup antes de limpar dados ou trocar de dispositivo. O arquivo JSON contém todos os seus dados.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-p" onclick="exportarBackup()">📥 Baixar Backup Completo (.json)</button>
+          <button class="btn btn-ghost" onclick="exportarPedidosCSV()">📊 Exportar Pedidos (.csv)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-bottom:16px">
+      <div class="tbl-head"><div class="tbl-head-t">📤 Restaurar Backup</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+        <div class="abox warn" style="display:flex">⚠️ Importar sobrescreve os dados atuais. Faça backup primeiro.</div>
+        <button class="btn btn-a" onclick="triggerImport()">📂 Selecionar arquivo de backup (.json)</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <div class="tbl-head"><div class="tbl-head-t" style="color:var(--red)">⚠️ Zona de Perigo</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+        <p style="font-size:13px;color:var(--sub);line-height:1.6">Atenção: as ações abaixo são irreversíveis. Faça backup antes de continuar.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-danger" onclick="limparDados('pedidos')">🗑️ Limpar todos os Pedidos</button>
+          <button class="btn btn-danger" onclick="limparDados('all')">💣 Apagar TODOS os dados</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function exportarBackup(){
+  const data={versao:'2.1',app:'D7 Core Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups')};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const d=new Date();
+  a.download=`D7CorePedidos_backup_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}.json`;
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+function exportarPedidosCSV(){
+  const peds=DB.get('pedidos');
+  if(!peds.length)return alert('Nenhum pedido para exportar.');
+  let csv='Nº;Data;Cliente;CNPJ;Cidade;UF;Representada;Itens;Total;Status\n';
+  peds.forEach(p=>{csv+=`${p.num};${fmtDate(p.data)};${p.cliNome};${p.cliCnpj||''};${p.cliCid||''};${p.cliUF||''};${p.repNome};${p.itens.length};${Number(p.total).toFixed(2).replace('.',',')};${p.status}\n`});
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`D7_Pedidos_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+function triggerImport(){document.getElementById('fileInput').click()}
+function importarBackup(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!confirm(`Importar backup de ${new Date(data.exportadoEm).toLocaleString('pt-BR')}?\n\nIsso irá substituir todos os dados atuais.\n\nDados no arquivo:\n• ${(data.clientes||[]).length} clientes\n• ${(data.produtos||[]).length} produtos\n• ${(data.representadas||[]).length} representadas\n• ${(data.pedidos||[]).length} pedidos\n• ${(data.followups||[]).length} follow-ups`))return;
+      if(data.clientes)localStorage.setItem('d7_clientes',JSON.stringify(data.clientes));
+      if(data.produtos)localStorage.setItem('d7_produtos',JSON.stringify(data.produtos));
+      if(data.representadas)localStorage.setItem('d7_representadas',JSON.stringify(data.representadas));
+      if(data.pedidos)localStorage.setItem('d7_pedidos',JSON.stringify(data.pedidos));
+      if(data.followups)localStorage.setItem('d7_followups',JSON.stringify(data.followups));
+      updateStatus();updateBadges();render();
+      alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups`);
+    }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 Core Pedidos.')}
+  };
+  reader.readAsText(file);e.target.value='';
+}
+
+function limparDados(tipo){
+  if(tipo==='pedidos'){
+    if(!confirm('Apagar TODOS os pedidos? Esta ação não pode ser desfeita.'))return;
+    DB.set('pedidos',[]);alert('Pedidos removidos.');
+  }else{
+    if(!confirm('⚠️ ATENÇÃO: Apagar TODOS os dados (clientes, produtos, representadas e pedidos)?\n\nEsta ação NÃO pode ser desfeita!'))return;
+    if(!confirm('Tem certeza absoluta? Todos os dados serão perdidos.'))return;
+    ['clientes','produtos','representadas','pedidos'].forEach(k=>DB.set(k,[]));
+    alert('Todos os dados foram removidos.');
+  }
+  render();updateBadges();
+}
+
+/* ══════════════════════ API ══════════════════════ */
+async function buscarCNPJ(pfx){
+  const raw=document.getElementById(pfx+'Cnpj').value.replace(/\D/g,'');
+  if(raw.length!==14)return alert('Digite os 14 dígitos do CNPJ completo.');
+  const btn=document.getElementById(pfx+'BtnCnpj');
+  const ib=document.getElementById(pfx+'Ibox');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Consultando...';
+  if(ib)ib.className='abox';
+  try{
+    const r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+raw);
+    if(!r.ok)throw new Error('CNPJ não encontrado na Receita Federal.');
+    const d=await r.json();
+    const s=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null&&v!==undefined&&String(v).trim())e.value=String(v).trim()};
+    s(pfx+'Razao',d.razao_social);s(pfx+'Fantasia',d.nome_fantasia||d.razao_social);
+    s(pfx+'Fone',d.ddd_telefone_1?maskFone(d.ddd_telefone_1):'');
+    s(pfx+'Email',d.email);
+    if(d.cep){const cepLimpo=d.cep.replace(/\D/g,'');s(pfx+'CEP',maskCEP(cepLimpo))}
+    s(pfx+'Rua',d.logradouro);s(pfx+'Num',d.numero);s(pfx+'Bairro',d.bairro);
+    s(pfx+'Cidade',d.municipio);s(pfx+'UF',d.uf);
+    if(ib){ib.className='abox ok';ib.innerHTML='✅ Dados preenchidos automaticamente pela Receita Federal!'}
+  }catch(e){if(ib){ib.className='abox err';ib.innerHTML='⚠️ '+e.message}}
+  finally{btn.disabled=false;btn.innerHTML='🔍 Consultar Receita'}
+}
+
+async function buscarCEP(pfx){
+  const raw=document.getElementById(pfx+'CEP').value.replace(/\D/g,'');
+  if(raw.length!==8)return;
+  try{const d=await(await fetch('https://viacep.com.br/ws/'+raw+'/json/')).json();
+    if(d.erro)return;
+    const s=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.value=v};
+    s(pfx+'Rua',d.logradouro);s(pfx+'Bairro',d.bairro);s(pfx+'Cidade',d.localidade);s(pfx+'UF',d.uf);
+  }catch(e){}
+}
+
+// ══ INIT ══
+updateStatus();
+goto('dashboard');
+</script>
+</body>
+</html>
