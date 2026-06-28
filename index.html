@@ -251,6 +251,9 @@ tr:hover td{background:rgba(255,255,255,.018)}
     <div class="sb-section">Empresas</div>
     <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
 
+    <div class="sb-section">Prospecção</div>
+    <div class="sb-item" id="si-prospeccao" onclick="goto('prospeccao')"><span class="ico">🎯</span>Prospecção<span class="sb-badge zero" id="badge-pros">0</span></div>
+
     <div class="sb-section">Vendas</div>
     <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
     <div class="sb-item" id="si-followup" onclick="goto('followup')"><span class="ico">🔔</span>Follow-up<span class="sb-badge zero" id="badge-fu">0</span></div>
@@ -371,10 +374,13 @@ function updateBadges(){
   const fuPend=DB.get('followups').filter(f=>f.status==='pendente');
   const fuVenc=fuPend.filter(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);return d<=hoje}).length;
   upd('badge-fu',fuVenc||fuPend.length,fuVenc>0);
+  const prosAtivos=DB.get('prospectos').filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido').length;
+  const prosVenc=DB.get('prospectos').filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido'&&p.dataProxAcao&&(()=>{const d=new Date(p.dataProxAcao);d.setHours(0,0,0,0);return d<=hoje})()).length;
+  upd('badge-pros',prosVenc||prosAtivos,prosVenc>0);
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',relatorios:'Relatórios',backup:'Backup & Restore'};
+const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore'};
 function goto(t){
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -386,7 +392,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,relatorios:pgRelatorios,backup:pgBackup};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -1115,6 +1121,183 @@ function fuWppLista(){
 }
 
 /* ══════════════════════ RELATÓRIOS ══════════════════════ */
+/* ══════════════════════ PROSPECÇÃO ══════════════════════ */
+const PROS_ETAPAS={contato:{label:'Contato Inicial',color:'var(--sub)',bg:'rgba(107,127,160,.15)',icon:'📞'},apresentacao:{label:'Apresentação',color:'#60a5fa',bg:'rgba(59,130,246,.15)',icon:'🤝'},proposta:{label:'Proposta',color:'var(--yellow)',bg:'rgba(245,158,11,.15)',icon:'📄'},negociacao:{label:'Negociação',color:'var(--purple)',bg:'rgba(168,85,247,.15)',icon:'💬'},ganho:{label:'Ganho ✅',color:'var(--green)',bg:'rgba(34,197,94,.15)',icon:'🏆'},perdido:{label:'Perdido ❌',color:'var(--red)',bg:'rgba(239,68,68,.15)',icon:'❌'}};
+const PROS_ORIGENS=['Indicação','WhatsApp','LinkedIn','Instagram','Ligação Fria','Evento/Feira','E-mail','Outro'];
+const PROS_SEGMENTOS=['Varejo','Atacado','Atacarejo','Indústria','Distribuidor','Farmácias','Serviços','Outro'];
+
+function pgProspeccao(){
+  const todos=DB.get('prospectos');
+  const ativos=todos.filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido');
+  const ganhos=todos.filter(p=>p.etapa==='ganho').length;
+  const perdidos=todos.filter(p=>p.etapa==='perdido').length;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const vencidos=ativos.filter(p=>p.dataProxAcao&&(()=>{const d=new Date(p.dataProxAcao);d.setHours(0,0,0,0);return d<=hoje})()).length;
+
+  // Stats por etapa
+  const porEtapa={};Object.keys(PROS_ETAPAS).forEach(e=>porEtapa[e]=todos.filter(p=>p.etapa===e).length);
+
+  let html=`<div class="pg-head">
+    <div><div class="pg-title">🎯 Prospecção</div><div class="pg-sub">${ativos.length} ativo(s) · ${ganhos} ganho(s) · ${perdidos} perdido(s)${vencidos>0?` · <span style="color:var(--red)">${vencidos} vencido(s)</span>`:''}</div></div>
+    <button class="btn btn-a" onclick="openFormPros()">+ Novo Prospect</button>
+  </div>
+
+  <!-- Funil Cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px">`;
+  Object.entries(PROS_ETAPAS).forEach(([k,e])=>{
+    const n=porEtapa[k]||0;
+    html+=`<div class="card" style="padding:12px;text-align:center;border-left:3px solid ${e.color};cursor:pointer" onclick="filtrarPros('${k}')">
+      <div style="font-size:18px">${e.icon}</div>
+      <div style="font-size:20px;font-weight:900;color:${e.color}">${n}</div>
+      <div style="font-size:10px;color:var(--sub);margin-top:2px">${e.label.replace(' ✅','').replace(' ❌','')}</div>
+    </div>`;
+  });
+  html+=`</div>
+
+  <!-- Lista de Prospects -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px">
+      <div style="font-weight:700;font-size:14px">Prospects</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select onchange="filtrarPros(this.value)" id="sel-etapa-pros" style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px">
+          <option value="">Todas as etapas</option>
+          ${Object.entries(PROS_ETAPAS).map(([k,e])=>`<option value="${k}">${e.icon} ${e.label.replace(' ✅','').replace(' ❌','')}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div id="pros-lista">`;
+
+  if(!todos.length){
+    html+=`<div style="text-align:center;padding:40px 20px;color:var(--sub)"><div style="font-size:32px;margin-bottom:12px">🎯</div><div style="font-weight:700;margin-bottom:6px">Nenhum prospect ainda</div><div style="font-size:12px">Clique em "+ Novo Prospect" para começar</div></div>`;
+  }else{
+    html+=renderProsLista(todos);
+  }
+
+  html+=`</div></div>`;
+  return html;
+}
+
+function renderProsLista(lista){
+  if(!lista.length)return`<div style="text-align:center;padding:30px;color:var(--sub);font-size:13px">Nenhum prospect nesta etapa.</div>`;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  return lista.map(p=>{
+    const e=PROS_ETAPAS[p.etapa]||PROS_ETAPAS.contato;
+    const venc=p.dataProxAcao&&(()=>{const d=new Date(p.dataProxAcao);d.setHours(0,0,0,0);return d<=hoje})();
+    return`<div class="tbl-row" style="cursor:pointer;${venc&&p.etapa!=='ganho'&&p.etapa!=='perdido'?'border-left:3px solid var(--red)':''}">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1" onclick="openFormPros('${p.id}')">
+        <div style="width:36px;height:36px;border-radius:8px;background:${e.bg};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${e.icon}</div>
+        <div style="min-width:0;flex:1">
+          <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.empresa}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">${p.contato||'—'} ${p.fone?'· '+p.fone:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+        <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:${e.bg};color:${e.color}">${e.label.replace(' ✅','').replace(' ❌','')}</span>
+        ${p.dataProxAcao?`<span style="font-size:11px;color:${venc&&p.etapa!=='ganho'&&p.etapa!=='perdido'?'var(--red)':'var(--sub)'}">📅 ${fmtDate(p.dataProxAcao)}</span>`:''}
+        ${p.etapa!=='ganho'&&p.etapa!=='perdido'?`<button class="btn btn-ghost btn-sm" onclick="convertToClient('${p.id}')">👤 Converter</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="deletePros('${p.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filtrarPros(etapa){
+  const sel=document.getElementById('sel-etapa-pros');
+  if(sel)sel.value=etapa;
+  const todos=DB.get('prospectos');
+  const lista=etapa?todos.filter(p=>p.etapa===etapa):todos;
+  const el=document.getElementById('pros-lista');
+  if(el)el.innerHTML=renderProsLista(lista);
+}
+
+function openFormPros(id){
+  const p=id?DB.get('prospectos').find(x=>x.id===id):{};
+  const fmPros=`
+    <div class="sec">🎯 Dados do Prospect</div>
+    <div class="flds2">
+      <div class="fld fld2"><label>Empresa *</label><input id="p-empresa" value="${p.empresa||''}" placeholder="Razão Social / Nome"></div>
+      <div class="fld fld2"><label>Contato</label><input id="p-contato" value="${p.contato||''}" placeholder="Nome do contato"></div>
+    </div>
+    <div class="flds2">
+      <div class="fld"><label>Telefone/WhatsApp</label><input id="p-fone" value="${p.fone||''}" placeholder="(00) 00000-0000" oninput="maskFone(this)"></div>
+      <div class="fld"><label>E-mail</label><input id="p-email" type="email" value="${p.email||''}" placeholder="email@empresa.com"></div>
+    </div>
+    <div class="flds2">
+      <div class="fld"><label>Segmento</label><select id="p-segmento"><option value="">Selecione</option>${PROS_SEGMENTOS.map(s=>`<option${p.segmento===s?' selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="fld"><label>Origem</label><select id="p-origem"><option value="">Selecione</option>${PROS_ORIGENS.map(o=>`<option${p.origem===o?' selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+    <div class="sec" style="margin-top:12px">📊 Funil de Vendas</div>
+    <div class="flds2">
+      <div class="fld"><label>Etapa *</label><select id="p-etapa">
+        ${Object.entries(PROS_ETAPAS).map(([k,e])=>`<option value="${k}"${(p.etapa||'contato')===k?' selected':''}>${e.icon} ${e.label.replace(' ✅','').replace(' ❌','')}</option>`).join('')}
+      </select></div>
+      <div class="fld"><label>Próxima Ação</label><input id="p-proxAcao" value="${p.proxAcao||''}" placeholder="Ex: Enviar proposta"></div>
+    </div>
+    <div class="flds2">
+      <div class="fld"><label>Data da Próxima Ação</label><input id="p-dataProxAcao" type="date" value="${p.dataProxAcao||''}"></div>
+      <div class="fld"><label>Representada Alvo</label><select id="p-repId"><option value="">Selecione</option>${DB.get('representadas').map(r=>`<option value="${r.id}"${p.repId===r.id?' selected':''}>${r.fantasia||r.razao}</option>`).join('')}</select></div>
+    </div>
+    <div class="fld"><label>Observações</label><textarea id="p-obs" rows="3" placeholder="Anotações sobre o prospect, histórico, etc.">${p.obs||''}</textarea></div>
+    <button class="btn btn-a btn-full" onclick="savePros('${id||''}')">💾 Salvar Prospect</button>`;
+  openModal(id?'Editar Prospect':'Novo Prospect',fmPros);
+}
+
+function savePros(id){
+  const empresa=document.getElementById('p-empresa').value.trim();
+  if(!empresa)return alert('Informe o nome da empresa.');
+  const rec={
+    id:id||Date.now().toString(),
+    empresa,
+    contato:document.getElementById('p-contato').value.trim(),
+    fone:document.getElementById('p-fone').value.trim(),
+    email:document.getElementById('p-email').value.trim(),
+    segmento:document.getElementById('p-segmento').value,
+    origem:document.getElementById('p-origem').value,
+    etapa:document.getElementById('p-etapa').value||'contato',
+    proxAcao:document.getElementById('p-proxAcao').value.trim(),
+    dataProxAcao:document.getElementById('p-dataProxAcao').value,
+    repId:document.getElementById('p-repId').value,
+    obs:document.getElementById('p-obs').value.trim(),
+    criadoEm:id?(DB.get('prospectos').find(x=>x.id===id)||{}).criadoEm||new Date().toISOString():new Date().toISOString(),
+    atualizadoEm:new Date().toISOString()
+  };
+  const list=DB.get('prospectos');
+  if(id){const i=list.findIndex(x=>x.id===id);if(i>=0)list[i]=rec;else list.push(rec);}
+  else list.push(rec);
+  DB.set('prospectos',list);
+  closeModal();updateBadges();render();
+}
+
+function deletePros(id){
+  if(!confirm('Remover este prospect?'))return;
+  DB.set('prospectos',DB.get('prospectos').filter(x=>x.id!==id));
+  updateBadges();render();
+}
+
+function convertToClient(prosId){
+  const p=DB.get('prospectos').find(x=>x.id===prosId);
+  if(!p)return;
+  if(!confirm(`Converter "${p.empresa}" em Cliente?\n\nO prospect será marcado como GANHO e um novo cliente será criado.\nVocê poderá completar os dados no cadastro de clientes.`))return;
+  // Create client
+  const clis=DB.get('clientes');
+  const novoCli={
+    id:Date.now().toString(),
+    cnpj:'',razao:p.empresa,fantasia:p.empresa,
+    fone:p.fone||'',email:p.email||'',contato:p.contato||'',
+    cep:'',rua:'',num:'',bairro:'',cidade:'',uf:'',
+    condPag:'',limite:'',obs:`Convertido de prospect em ${new Date().toLocaleDateString('pt-BR')}. Origem: ${p.origem||'—'}. ${p.obs||''}`
+  };
+  clis.push(novoCli);DB.set('clientes',clis);
+  // Mark prospect as ganho
+  const pros=DB.get('prospectos');
+  const i=pros.findIndex(x=>x.id===prosId);
+  if(i>=0){pros[i].etapa='ganho';pros[i].atualizadoEm=new Date().toISOString();}
+  DB.set('prospectos',pros);
+  updateBadges();
+  alert(`✅ "${p.empresa}" convertido em cliente com sucesso!\n\nCadastre o CNPJ e demais dados em Clientes.`);
+  goto('clientes');
+}
+
 function pgRelatorios(){
   const peds=DB.get('pedidos'),clis=DB.get('clientes'),prods=DB.get('produtos'),reps=DB.get('representadas');
   const total=peds.reduce((s,p)=>s+p.total,0);
@@ -1214,7 +1397,7 @@ function pgBackup(){
 }
 
 function exportarBackup(){
-  const data={versao:'2.1',app:'D7 Core Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups')};
+  const data={versao:'2.2',app:'D7 Core Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   const d=new Date();
@@ -1240,14 +1423,15 @@ function importarBackup(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(!confirm(`Importar backup de ${new Date(data.exportadoEm).toLocaleString('pt-BR')}?\n\nIsso irá substituir todos os dados atuais.\n\nDados no arquivo:\n• ${(data.clientes||[]).length} clientes\n• ${(data.produtos||[]).length} produtos\n• ${(data.representadas||[]).length} representadas\n• ${(data.pedidos||[]).length} pedidos\n• ${(data.followups||[]).length} follow-ups`))return;
+      if(!confirm(`Importar backup de ${new Date(data.exportadoEm).toLocaleString('pt-BR')}?\n\nIsso irá substituir todos os dados atuais.\n\nDados no arquivo:\n• ${(data.clientes||[]).length} clientes\n• ${(data.produtos||[]).length} produtos\n• ${(data.representadas||[]).length} representadas\n• ${(data.pedidos||[]).length} pedidos\n• ${(data.followups||[]).length} follow-ups\n• ${(data.prospectos||[]).length} prospects`))return;
       if(data.clientes)localStorage.setItem('d7_clientes',JSON.stringify(data.clientes));
       if(data.produtos)localStorage.setItem('d7_produtos',JSON.stringify(data.produtos));
       if(data.representadas)localStorage.setItem('d7_representadas',JSON.stringify(data.representadas));
       if(data.pedidos)localStorage.setItem('d7_pedidos',JSON.stringify(data.pedidos));
       if(data.followups)localStorage.setItem('d7_followups',JSON.stringify(data.followups));
+      if(data.prospectos)localStorage.setItem('d7_prospectos',JSON.stringify(data.prospectos));
       updateStatus();updateBadges();render();
-      alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups`);
+      alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups\n${(data.prospectos||[]).length} prospects`);
     }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 Core Pedidos.')}
   };
   reader.readAsText(file);e.target.value='';
@@ -1260,7 +1444,7 @@ function limparDados(tipo){
   }else{
     if(!confirm('⚠️ ATENÇÃO: Apagar TODOS os dados (clientes, produtos, representadas e pedidos)?\n\nEsta ação NÃO pode ser desfeita!'))return;
     if(!confirm('Tem certeza absoluta? Todos os dados serão perdidos.'))return;
-    ['clientes','produtos','representadas','pedidos'].forEach(k=>DB.set(k,[]));
+    ['clientes','produtos','representadas','pedidos','followups','prospectos'].forEach(k=>DB.set(k,[]));
     alert('Todos os dados foram removidos.');
   }
   render();updateBadges();
