@@ -300,6 +300,8 @@ tr:hover td{background:rgba(255,255,255,.018)}
     <div style="display:flex;align-items:center;gap:8px">
       <div class="sb-dot" id="statusDot"></div>
       <span id="statusMsg">Dados salvos localmente</span>
+      <div id="syncDot" title="Nuvem" onclick="supaFullSync()" style="width:8px;height:8px;border-radius:50%;background:var(--sub2);cursor:pointer;transition:background .3s;margin-left:4px" title="☁️ Clique para sincronizar"></div>
+      <span style="font-size:10px;color:var(--sub2)">☁️</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px;color:var(--sub2)">
       <span id="stCli">0 clientes</span>
@@ -327,10 +329,65 @@ tr:hover td{background:rgba(255,255,255,.018)}
 </div>
 
 <script>
+// ══ SUPABASE ══
+const SUPA_URL='https://uewcjlfctumjvqsagnxg.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVld2NqbGZjdHVtanZxc2FnbnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NTU5OTMsImV4cCI6MjA5ODMzMTk5M30.pobUbUe4QijHzYei3dPlZbXuZyw4M8EkqB4ohivphaY';
+const SUPA_H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+
+async function supaSyncTable(tbl,rows){
+  try{
+    const payload=rows.map(r=>({id:String(r.id||r.num||Date.now()),data:r,updated_at:new Date().toISOString()}));
+    if(!payload.length){
+      await fetch(SUPA_URL+'/rest/v1/'+tbl+'?id=neq.VOID',{method:'DELETE',headers:SUPA_H});
+      return;
+    }
+    await fetch(SUPA_URL+'/rest/v1/'+tbl,{
+      method:'POST',headers:{...SUPA_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(payload)
+    });
+    setSyncDot('ok');
+  }catch(e){setSyncDot('err');console.warn('Supa sync:',e)}
+}
+
+let _syncT=null;
+function queueSync(tbl,rows){
+  setSyncDot('wait');
+  clearTimeout(_syncT);
+  _syncT=setTimeout(()=>supaSyncTable(tbl,rows),800);
+}
+
+function setSyncDot(s){
+  const el=document.getElementById('syncDot');
+  if(!el)return;
+  const m={'ok':'var(--green)','wait':'var(--yellow)','err':'var(--red)'};
+  el.style.background=m[s]||'var(--sub)';
+  el.title=s==='ok'?'✅ Nuvem sincronizada':s==='wait'?'⏳ Sincronizando...':'❌ Erro de sincronização';
+}
+
+async function supaFullSync(){
+  setSyncDot('wait');
+  const tabs=['clientes','produtos','representadas','pedidos','followups','prospectos'];
+  for(const t of tabs)await supaSyncTable(t,DB.get(t));
+  setSyncDot('ok');
+}
+
+async function supaPull(){
+  const tabs=['clientes','produtos','representadas','pedidos','followups','prospectos'];
+  let total=0;
+  for(const t of tabs){
+    try{
+      const r=await fetch(SUPA_URL+'/rest/v1/'+t+'?select=data&order=created_at',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+      if(r.ok){const rows=await r.json();const d=rows.map(x=>x.data).filter(Boolean);if(d.length){localStorage.setItem('d7_'+t,JSON.stringify(d));total+=d.length;}}
+    }catch(e){console.warn('Supa pull:',t,e)}
+  }
+  updateStatus();updateBadges();render();
+  return total;
+}
+
 // ══ DB ══
 const DB={
   get:k=>JSON.parse(localStorage.getItem('d7_'+k)||'[]'),
-  set:(k,v)=>{localStorage.setItem('d7_'+k,JSON.stringify(v));updateStatus()}
+  set:(k,v)=>{localStorage.setItem('d7_'+k,JSON.stringify(v));updateStatus();queueSync(k,v);}
 };
 function updateStatus(){
   const clis=DB.get('clientes'),peds=DB.get('pedidos'),prods=DB.get('produtos');
@@ -1365,6 +1422,18 @@ function pgBackup(){
     </div>
 
     <div class="tbl-wrap" style="margin-bottom:16px">
+      <div class="tbl-head"><div class="tbl-head-t">☁️ Nuvem Supabase</div><div class="tbl-head-s" style="color:var(--green)">● Conectado</div></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+        <div class="abox" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.2)">✅ Seus dados são automaticamente sincronizados com a nuvem a cada modificação. Acesse de qualquer dispositivo.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-p" onclick="supaFullSync().then(()=>alert('✅ Sincronização completa!'))">☁️ Sincronizar Agora</button>
+          <button class="btn btn-ghost" onclick="supaPull().then(n=>{ alert('✅ '+n+' registros carregados da nuvem!'); })">⬇️ Restaurar da Nuvem</button>
+        </div>
+        <div style="font-size:11px;color:var(--sub)">Projeto: d7core-pedidos · Supabase · Região: us-east-2</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-bottom:16px">
       <div class="tbl-head"><div class="tbl-head-t">💾 Exportar Backup</div></div>
       <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
         <div class="abox warn" style="display:flex">⚠️ Faça backup antes de limpar dados ou trocar de dispositivo. O arquivo JSON contém todos os seus dados.</div>
@@ -1487,6 +1556,8 @@ async function buscarCEP(pfx){
 // ══ INIT ══
 updateStatus();
 goto('dashboard');
+// Sync to cloud on startup (non-blocking)
+setTimeout(()=>supaFullSync(),2000);
 </script>
 </body>
 </html>
