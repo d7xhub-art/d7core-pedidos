@@ -798,9 +798,10 @@ function pgNovoPedido(){
     ${np.itens.length>0?`
     <div class="pd-block">
       <div class="sec" style="padding-top:0">🛒 Itens (${np.itens.length})</div>
-      <table><thead><tr><th>Produto</th><th>Unid.</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th><th></th></tr></thead><tbody>
+      <table><thead><tr><th>Produto</th><th>Discriminação</th><th>Unid.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th><th></th></tr></thead><tbody>
       ${np.itens.map((it,i)=>`<tr>
         <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
+        <td><input class="dark-input" style="width:110px;padding:5px 8px;font-size:12px" type="text" placeholder="Especificação..." value="${it.disc||''}" oninput="updItemDisc(${i},this.value)"></td>
         <td style="color:var(--sub)">${it.un}</td>
         <td><input class="num-inp" type="number" min="0.001" step="0.001" value="${it.qty}" onchange="updItem(${i},'qty',this.value)"></td>
         <td><input class="num-inp" style="width:95px" type="number" min="0" step="0.01" value="${it.preco}" onchange="updItem(${i},'preco',this.value)"></td>
@@ -846,9 +847,10 @@ function pgNovoPedido(){
   </div>`;
 }
 
-function addItem(pid){const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return;const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+1).toFixed(3))}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty:1,preco:p.preco});pSearch='';render()}
+function addItem(pid){const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return;const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+1).toFixed(3))}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty:1,preco:p.preco,disc:''});pSearch='';render()}
 function remItem(i){np.itens.splice(i,1);render()}
 function updItem(i,f,v){np.itens[i][f]=parseFloat(v)||0;render()}
+function updItemDisc(i,v){np.itens[i].disc=v}
 function confirmar(){
   np.cliId=document.getElementById('npCli').value;
   np.repId=document.getElementById('npRep').value;
@@ -940,7 +942,8 @@ function verPedido(id){
       </div>
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
         <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">🚚 Frete</div>
-        ${p.freteValor?`<div style="font-weight:900;font-size:16px;color:var(--a)">${fmt(p.freteValor)}</div>`:'<div style="font-size:12px;color:var(--sub)">Não informado</div>'}
+        <div style="font-size:11px;color:var(--sub);margin-bottom:6px">📦 ${p.itens.length} iten(s) · <span style="color:var(--text);font-weight:700">${fmt(p.total)}</span></div>
+        ${p.freteValor?`<div style="font-weight:900;font-size:15px;color:var(--a)">Frete: ${fmt(p.freteValor)}</div>`:'<div style="font-size:12px;color:var(--sub)">Frete não informado</div>'}
         ${p.freteResp?`<div style="margin-top:4px"><span class="tag" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)">${p.freteResp}</span></div>`:''}
         ${p.fretePeso?`<div style="font-size:12px;color:var(--sub);margin-top:4px">⚖️ ${p.fretePeso} kg</div>`:''}
         ${p.freteKm?`<div style="font-size:12px;color:var(--sub)">📍 ${p.freteKm} km</div>`:''}
@@ -950,10 +953,11 @@ function verPedido(id){
 
     <div>
       <div style="font-size:13px;font-weight:800;margin-bottom:10px">Itens do Pedido</div>
-      <table><thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>
+      <table><thead><tr><th>#</th><th>Produto</th><th>Discriminação</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr></thead><tbody>
       ${p.itens.map((it,i)=>`<tr>
         <td style="color:var(--sub2);font-size:12px">${i+1}</td>
         <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
+        <td style="color:var(--sub);font-size:12px">${it.disc||'—'}</td>
         <td style="color:var(--sub)">${it.qty} ${it.un}</td>
         <td style="color:var(--sub)">${fmt(it.preco)}</td>
         <td style="font-weight:800;color:var(--a)">${fmt(it.qty*it.preco)}</td>
@@ -1037,8 +1041,8 @@ function imprimirPedido(id){
     </div>
   </div>
   <h2>Itens do Pedido</h2>
-  <table><tr><th>#</th><th>Código</th><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th></tr>
-  ${p.itens.map((it,i)=>`<tr><td>${i+1}</td><td>${it.cod}</td><td>${it.desc}</td><td>${it.qty} ${it.un}</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.qty*it.preco).toFixed(2).replace('.',',')}</td></tr>`).join('')}
+  <table><tr><th>#</th><th>Código</th><th>Produto</th><th>Discriminação</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr>
+  ${p.itens.map((it,i)=>`<tr><td>${i+1}</td><td>${it.cod}</td><td>${it.desc}</td><td>${it.disc||'—'}</td><td>${it.qty} ${it.un}</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.qty*it.preco).toFixed(2).replace('.',',')}</td></tr>`).join('')}
   </table>
   <div class="tot"><span>TOTAL DO PEDIDO</span><span>R$ ${Number(p.total).toFixed(2).replace('.',',')}</span></div>
   ${p.obs?`<div style="margin-top:12px;padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px"><b>Observações:</b> ${p.obs}</div>`:''}
