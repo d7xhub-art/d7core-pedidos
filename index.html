@@ -815,6 +815,26 @@ function pgNovoPedido(){
     </div>`:''}
 
     <div class="pd-block">
+      <div class="sec" style="padding-top:0">🚚 Frete <span style="font-size:11px;color:var(--sub);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></div>
+      <div class="row2">
+        <div class="fld"><label>Peso Total (kg)</label>
+          <input class="dark-input" id="npFretePeso" type="number" min="0" step="0.1" placeholder="0,00" value="${np.fretePeso||''}" oninput="np.fretePeso=this.value"></div>
+        <div class="fld"><label>Distância (km)</label>
+          <input class="dark-input" id="npFreteKm" type="number" min="0" step="1" placeholder="0" value="${np.freteKm||''}" oninput="np.freteKm=this.value"></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Valor do Frete (R$)</label>
+          <input class="dark-input" id="npFreteValor" type="number" min="0" step="0.01" placeholder="0,00" value="${np.freteValor||''}" oninput="np.freteValor=this.value"></div>
+        <div class="fld"><label>Responsável pelo Frete</label>
+          <select class="dark-input" id="npFreteResp" oninput="np.freteResp=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text)">
+            <option value="">— Selecione —</option>
+            <option value="CIF" ${(np.freteResp||'')==='CIF'?'selected':''}>CIF (por conta do vendedor)</option>
+            <option value="FOB" ${(np.freteResp||'')==='FOB'?'selected':''}>FOB (por conta do comprador)</option>
+          </select></div>
+      </div>
+    </div>
+
+    <div class="pd-block">
       <div class="fld" style="margin:0"><label>Observações / Condições Especiais</label>
         <textarea class="dark-input" id="npObs" rows="3" placeholder="Prazo de entrega, condição de pagamento especial, instruções..." onchange="np.obs=this.value" style="margin-top:4px">${np.obs}</textarea></div>
     </div>
@@ -833,6 +853,10 @@ function confirmar(){
   np.cliId=document.getElementById('npCli').value;
   np.repId=document.getElementById('npRep').value;
   np.obs=document.getElementById('npObs').value;
+  np.fretePeso=parseFloat(document.getElementById('npFretePeso').value)||0;
+  np.freteKm=parseFloat(document.getElementById('npFreteKm').value)||0;
+  np.freteValor=parseFloat(document.getElementById('npFreteValor').value)||0;
+  np.freteResp=document.getElementById('npFreteResp').value||'';
   if(!np.cliId)return alert('Selecione o cliente.');
   if(!np.repId)return alert('Selecione a representada.');
   if(!np.itens.length)return alert('Adicione ao menos um produto.');
@@ -841,14 +865,14 @@ function confirmar(){
   const cli=DB.get('clientes').find(c=>c.id==np.cliId)||{};
   const rep=DB.get('representadas').find(r=>r.id==np.repId)||{};
   const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
-  peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,status:'aberto'});
+  peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,status:'aberto'});
   DB.set('pedidos',peds);
   const saved=JSON.parse(JSON.stringify(np));
-  np={cliId:'',repId:'',itens:[],obs:''};pSearch='';
+  np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';
   alert(`✅ Pedido #${num} emitido!\nCliente: ${saved.cliId?((DB.get('clientes').find(c=>c.id==saved.cliId)||{}).razao||''):''}\nTotal: ${fmt(total)}`);
   goto('pedidos');updateBadges();
 }
-function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:''};pSearch='';render()}
+function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';render()}
 
 /* ══════════════════════ PEDIDOS ══════════════════════ */
 function pgPedidos(){
@@ -915,9 +939,12 @@ function verPedido(id){
         ${p.cliCond?`<div style="margin-top:6px"><span class="tag">${p.cliCond}</span></div>`:''}
       </div>
       <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
-        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Representada</div>
-        <div style="font-weight:800;font-size:14px">${p.repNome||'—'}</div>
-        ${p.repWpp?`<div style="font-size:12px;color:var(--sub);margin-top:4px">📲 ${p.repWpp}</div>`:''}
+        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">🚚 Frete</div>
+        ${p.freteValor?`<div style="font-weight:900;font-size:16px;color:var(--a)">${fmt(p.freteValor)}</div>`:'<div style="font-size:12px;color:var(--sub)">Não informado</div>'}
+        ${p.freteResp?`<div style="margin-top:4px"><span class="tag" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)">${p.freteResp}</span></div>`:''}
+        ${p.fretePeso?`<div style="font-size:12px;color:var(--sub);margin-top:4px">⚖️ ${p.fretePeso} kg</div>`:''}
+        ${p.freteKm?`<div style="font-size:12px;color:var(--sub)">📍 ${p.freteKm} km</div>`:''}
+        <div style="font-size:11px;color:var(--sub2);margin-top:6px">${p.repNome||''}</div>
       </div>
     </div>
 
@@ -969,7 +996,9 @@ function exportWpp(id){
   if(p.cliCid)t+=`📍 *Cidade:* ${p.cliCid}/${p.cliUF}\n`;
   if(p.cliCond)t+=`💳 *Pagamento:* ${p.cliCond}\n`;
   t+=`🏢 *Representada:* ${p.repNome}\n`;
+  if(p.freteValor){t+=`🚚 *Frete:* R$ ${Number(p.freteValor).toFixed(2).replace('.',',')}${p.freteResp?' ('+p.freteResp+')':''}${p.fretePeso?' · '+p.fretePeso+' kg':''}${p.freteKm?' · '+p.freteKm+' km':''}\n`;}
   t+=`━━━━━━━━━━━━━━━━━━\n\n`;
+
   t+=`*ITENS:*\n`;
   p.itens.forEach((it,i)=>{t+=`${i+1}. ${it.desc} [${it.cod}]\n   ${it.qty} ${it.un} × ${fmt(it.preco)} = *${fmt(it.qty*it.preco)}*\n`});
   t+=`\n━━━━━━━━━━━━━━━━━━\n*TOTAL: ${fmt(p.total)}*`;
@@ -999,7 +1028,13 @@ function imprimirPedido(id){
   </div></div>
   <div class="info">
     <div class="box"><div class="lbl">Cliente</div><b>${p.cliNome||'—'}</b>${p.cliCnpj?`<br><span style="color:#64748b;font-size:12px">${p.cliCnpj}</span>`:''}${p.cliCid?`<br><span style="color:#64748b;font-size:12px">${p.cliCid}/${p.cliUF}</span>`:''}${p.cliCond?`<br>Pagamento: ${p.cliCond}`:''}</div>
-    <div class="box"><div class="lbl">Representada</div><b>${p.repNome||'—'}</b></div>
+    <div class="box"><div class="lbl">🚚 Frete</div>
+      ${p.freteValor?`<b style="color:#f97316">${'R$ '+Number(p.freteValor).toFixed(2).replace('.',',')}</b>`:'<span style="color:#64748b">Não informado</span>'}
+      ${p.freteResp?`<br><span style="font-size:11px;background:#fff7ed;color:#ea580c;padding:1px 6px;border-radius:4px">${p.freteResp}</span>`:''}
+      ${p.fretePeso?`<br><span style="color:#64748b;font-size:12px">⚖️ ${p.fretePeso} kg</span>`:''}
+      ${p.freteKm?`<br><span style="color:#64748b;font-size:12px">📍 ${p.freteKm} km</span>`:''}
+      <br><span style="color:#94a3b8;font-size:11px">${p.repNome||''}</span>
+    </div>
   </div>
   <h2>Itens do Pedido</h2>
   <table><tr><th>#</th><th>Código</th><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Subtotal</th></tr>
