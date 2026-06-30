@@ -16,9 +16,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0f0a0a;--sidebar:#160d0d;--card:#1e1010;--card2:#231212;
-  --border:#3a1818;--border2:#4a1f1f;
-  --text:#f5f0f0;--sub:#9a7070;--sub2:#5a3030;
+  --bg:#0d0d0d;--sidebar:#141414;--card:#1a1a1a;--card2:#202020;
+  --border:#2a2a2a;--border2:#333333;
+  --text:#f0f0f0;--sub:#888888;--sub2:#444444;
   --p:#dc2626;--p2:#991b1b;--a:#ffffff;--a2:#e5e5e5;
   --green:#22c55e;--green2:#15803d;
   --purple:#a855f7;--red:#ef4444;--yellow:#f59e0b;
@@ -879,7 +879,7 @@ function verPedido(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
   document.getElementById('mpbody').innerHTML=`
   <div style="display:flex;flex-direction:column;gap:14px">
-    <div style="background:linear-gradient(135deg,#1a0a0a,#2a0f0f);border-radius:12px;padding:20px;border:1px solid rgba(220,38,38,.2)">
+    <div style="background:linear-gradient(135deg,#181818,#1f1f1f);border-radius:12px;padding:20px;border:1px solid rgba(220,38,38,.25)">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:800;letter-spacing:.5px;text-transform:uppercase">Pedido</div>
           <div style="font-weight:900;font-size:30px;color:#fff;letter-spacing:-1px">#${p.num}</div></div>
