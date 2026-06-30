@@ -423,7 +423,7 @@ function maskCNPJ(v){return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1.$2').
 function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'):d.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3')}
 function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
 
-let tab='dashboard',editId=null,pSearch='';
+let tab='dashboard',editId=null,pSearch='',npEditId=null;
 let np={cliId:'',repId:'',itens:[],obs:''};
 
 // ══ MODAL ══
@@ -767,7 +767,7 @@ function pgNovoPedido(){
   const fp=q?prods.filter(p=>(p.desc+p.cod).toLowerCase().includes(q.toLowerCase())):prods;
   return `
   <div style="max-width:900px">
-    <div class="pg-head"><div><div class="pg-title">Novo Pedido</div><div class="pg-sub">${np.itens.length} item(ns) · ${fmt(total)}</div></div></div>
+    <div class="pg-head"><div><div class="pg-title">${npEditId?'✏️ Editar Pedido':'Novo Pedido'}</div><div class="pg-sub">${np.itens.length} item(ns) · ${fmt(total)}</div></div></div>
     <div class="pd-block">
       <div class="sec" style="padding-top:0">📋 Dados do Pedido</div>
       <div class="row2">
@@ -863,18 +863,30 @@ function confirmar(){
   if(!np.repId)return alert('Selecione a representada.');
   if(!np.itens.length)return alert('Adicione ao menos um produto.');
   const peds=DB.get('pedidos');
-  const num=(peds.length?Math.max(...peds.map(p=>p.num)):0)+1;
   const cli=DB.get('clientes').find(c=>c.id==np.cliId)||{};
   const rep=DB.get('representadas').find(r=>r.id==np.repId)||{};
   const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
-  peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,status:'aberto'});
-  DB.set('pedidos',peds);
-  const saved=JSON.parse(JSON.stringify(np));
-  np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';
-  alert(`✅ Pedido #${num} emitido!\nCliente: ${saved.cliId?((DB.get('clientes').find(c=>c.id==saved.cliId)||{}).razao||''):''}\nTotal: ${fmt(total)}`);
+  if(npEditId){
+    const idx=peds.findIndex(p=>p.id==npEditId);
+    if(idx>=0){
+      const existing=peds[idx];
+      peds[idx]={...existing,cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp};
+      DB.set('pedidos',peds);
+      const num=existing.num;
+      np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;
+      alert(`✅ Pedido #${num} atualizado!\nTotal: ${fmt(total)}`);
+    }
+  } else {
+    const num=(peds.length?Math.max(...peds.map(p=>p.num)):0)+1;
+    peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,status:'aberto'});
+    DB.set('pedidos',peds);
+    const saved=JSON.parse(JSON.stringify(np));
+    np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;
+    alert(`✅ Pedido #${num} emitido!\nCliente: ${saved.cliId?((DB.get('clientes').find(c=>c.id==saved.cliId)||{}).razao||''):''}\nTotal: ${fmt(total)}`);
+  }
   goto('pedidos');updateBadges();
 }
-function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';render()}
+function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;render()}
 
 /* ══════════════════════ PEDIDOS ══════════════════════ */
 function pgPedidos(){
@@ -911,6 +923,7 @@ function pgPedidos(){
       <td><span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}">${p.status==='aberto'?'Aberto':p.status==='enviado'?'Enviado':'Cancelado'}</span></td>
       <td><div style="display:flex;gap:5px">
         <button class="icon-btn btn-sm" onclick="verPedido('${p.id}')">👁️ Ver</button>
+        <button class="icon-btn btn-sm" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)" onclick="editarPedido('${p.id}')">✏️</button>
         <button class="icon-btn icon-btn-g btn-sm" onclick="exportWpp('${p.id}')">📲</button>
         <button class="icon-btn icon-btn-red btn-sm" onclick="delPed('${p.id}')">🗑️</button>
       </div></td>
@@ -979,6 +992,7 @@ function verPedido(id){
 
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-a" style="flex:1" onclick="exportWpp('${p.id}')">📲 Enviar por WhatsApp</button>
+      <button class="btn" style="background:rgba(249,115,22,.15);color:var(--a);border:1px solid rgba(249,115,22,.3)" onclick="editarPedido('${p.id}')">✏️ Editar</button>
       <button class="btn btn-ghost" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
       <button class="btn btn-ghost" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Acompanhar pedido #${p.num}'})">🔔 Follow-up</button>
       <button class="btn btn-danger" onclick="delPed('${p.id}')">🗑️ Excluir</button>
@@ -989,6 +1003,7 @@ function verPedido(id){
 
 function setStatus(id,s){const peds=DB.get('pedidos');const p=peds.find(x=>x.id==id);if(p){p.status=s;DB.set('pedidos',peds);render();verPedido(id)}}
 function delPed(id){if(!confirm('Excluir pedido?'))return;DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
+function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;npEditId=id;np={cliId:p.cliId,repId:p.repId,itens:p.itens.map(i=>({...i})),obs:p.obs||'',fretePeso:p.fretePeso||0,freteKm:p.freteKm||0,freteValor:p.freteValor||0,freteResp:p.freteResp||''};pSearch='';closeMPed();goto('novo-pedido')}
 
 function exportWpp(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
