@@ -19,7 +19,7 @@
   --bg:#0d0d0d;--sidebar:#141414;--card:#1a1a1a;--card2:#202020;
   --border:#2a2a2a;--border2:#333333;
   --text:#f0f0f0;--sub:#888888;--sub2:#444444;
-  --p:#dc2626;--p2:#991b1b;--a:#ffffff;--a2:#e5e5e5;
+  --p:#dc2626;--p2:#991b1b;--a:#f97316;--a2:#c2410c;
   --green:#22c55e;--green2:#15803d;
   --purple:#a855f7;--red:#ef4444;--yellow:#f59e0b;
   --radius:10px;
@@ -174,6 +174,20 @@ tr:hover td{background:rgba(255,255,255,.018)}
 .icon-btn-g{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#4ade80}
 .icon-btn-g:hover{background:rgba(34,197,94,.15)}
 
+/* ══ MIC BUTTON ══ */
+.mic-btn{background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:7px 11px;cursor:pointer;font-size:16px;transition:all .15s;flex-shrink:0;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.mic-btn:hover{background:rgba(220,38,38,.2);border-color:var(--p)}
+.mic-btn.mic-on{background:rgba(220,38,38,.3);border-color:var(--p);box-shadow:0 0 0 3px rgba(220,38,38,.2);animation:micpulse .7s infinite}
+.tb-mic{background:rgba(220,38,38,.1);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:15px;transition:all .15s;color:var(--text);display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700}
+.tb-mic:hover{background:rgba(220,38,38,.2)}
+.tb-mic.mic-on{background:rgba(220,38,38,.35);border-color:var(--p);box-shadow:0 0 10px rgba(220,38,38,.3);animation:micpulse .7s infinite}
+@keyframes micpulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* ══ CALENDAR ══ */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.cal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cal-setup{padding:24px;display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+
 /* ══ ALERT BOX ══ */
 .abox{border-radius:8px;padding:10px 14px;font-size:12.5px;display:none;gap:8px;align-items:flex-start;margin-bottom:14px;line-height:1.5}
 .abox.ok{background:rgba(34,197,94,.08);color:#4ade80;border:1px solid rgba(34,197,94,.2);display:flex}
@@ -258,6 +272,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
     <div class="sb-section">Vendas</div>
     <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
     <div class="sb-item" id="si-followup" onclick="goto('followup')"><span class="ico">🔔</span>Follow-up<span class="sb-badge zero" id="badge-fu">0</span></div>
+    <div class="sb-item" id="si-agenda" onclick="goto('agenda')"><span class="ico">📅</span>Agenda</div>
 
     <div class="sb-section">Gestão</div>
     <div class="sb-item" id="si-relatorios" onclick="goto('relatorios')"><span class="ico">📈</span>Relatórios</div>
@@ -289,6 +304,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
       <div class="tb-line"></div>
     </div>
     <div class="tb-right">
+      <button class="tb-mic" id="voiceBtn" onclick="toggleVoice(this)" title="Clique em um campo, depois aqui para falar">🎤 Falar</button>
       <button class="tb-btn btn-imp" onclick="triggerImport()">📥 Importar</button>
       <button class="tb-btn btn-bk" onclick="exportarBackup()">💾 Backup</button>
       <button class="tb-btn btn-add" onclick="goto('novo-pedido')">+ Novo Pedido</button>
@@ -450,7 +466,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -1066,6 +1082,7 @@ function pgFollowup(){
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
             ${f.status==='pendente'?`<button class="icon-btn icon-btn-g btn-sm" onclick="concluirFU('${f.id}')">✔ Concluir</button>`:'<span style="color:var(--green);font-size:12px;font-weight:700">✔ Feito</span>'}
+            <button class="icon-btn btn-sm" style="color:#4ade80;border-color:rgba(74,222,128,.25)" onclick="agendarGCal('${f.id}')">📅 Google</button>
             <button class="icon-btn btn-sm" onclick="verFU('${f.id}')">✏️ Editar</button>
             <button class="icon-btn btn-sm" onclick="fuWpp('${f.id}')">📲</button>
             <button class="icon-btn icon-btn-red btn-sm" onclick="delFU('${f.id}')">🗑️</button>
@@ -1552,6 +1569,114 @@ async function buscarCEP(pfx){
     const s=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.value=v};
     s(pfx+'Rua',d.logradouro);s(pfx+'Bairro',d.bairro);s(pfx+'Cidade',d.localidade);s(pfx+'UF',d.uf);
   }catch(e){}
+}
+
+// ══ VOZ ══
+let _mic=null;
+function toggleVoice(btn){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('⚠️ Use Chrome para reconhecimento de voz');return;}
+  if(_mic){_mic.stop();_mic=null;btn.classList.remove('mic-on');btn.innerHTML='🎤 Falar';return;}
+  const focused=document.activeElement;
+  const isField=focused&&(focused.tagName==='INPUT'||focused.tagName==='TEXTAREA')&&focused.type!=='submit'&&focused.type!=='button';
+  if(!isField){showToast('👆 Clique primeiro no campo que quer preencher, depois em Falar');return;}
+  _mic=new SR();
+  _mic.lang='pt-BR';
+  _mic.continuous=false;
+  _mic.interimResults=false;
+  btn.classList.add('mic-on');
+  btn.innerHTML='⏹️ Parar';
+  _mic.onresult=e=>{
+    const txt=e.results[0][0].transcript;
+    focused.value=(focused.value?focused.value+' ':'')+txt;
+    focused.dispatchEvent(new Event('input',{bubbles:true}));
+    showToast('🎤 "'+txt+'"');
+  };
+  _mic.onend=()=>{_mic=null;btn.classList.remove('mic-on');btn.innerHTML='🎤 Falar';};
+  _mic.onerror=()=>{_mic=null;btn.classList.remove('mic-on');btn.innerHTML='🎤 Falar';showToast('❌ Erro no microfone');};
+  _mic.start();
+}
+
+// ══ GOOGLE CALENDAR ══
+function agendarGCal(id){
+  const fu=DB.get('followups').find(f=>f.id===id);
+  if(!fu)return;
+  const d=new Date(fu.data+'T09:00:00');
+  const fmt=dt=>`${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}T${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}00`;
+  const end=new Date(d);end.setHours(d.getHours()+1);
+  const title=encodeURIComponent(`Follow-up: ${fu.cliNome||'Cliente'} — ${fu.tipo}`);
+  const details=encodeURIComponent(`Assunto: ${fu.assunto||''}\nObs: ${fu.obs||''}\nD7 Core Pedidos`);
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${details}`;
+  window.open(url,'_blank');
+}
+
+function pgAgenda(){
+  const calUrl=localStorage.getItem('d7_cal_url')||'';
+  const calId=localStorage.getItem('d7_cal_id')||'';
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">📅 Agenda</div><div class="pg-sub">Google Calendar integrado</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('calSetup').style.display=document.getElementById('calSetup').style.display==='none'?'block':'none'">⚙️ Configurar</button>
+  </div>
+
+  <div id="calSetup" style="display:none;margin-bottom:16px">
+    <div class="cal-wrap">
+      <div class="cal-header"><span style="font-weight:800;font-size:13px">Configurar Google Calendar</span></div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12.5px;line-height:1.7;color:var(--sub)">
+          <b style="color:var(--text)">Como configurar:</b><br>
+          1. Abra <a href="https://calendar.google.com/calendar/r/settings" target="_blank" style="color:var(--p)">Google Calendar → Configurações</a><br>
+          2. Clique no seu calendário → "Integrar calendário"<br>
+          3. Copie a URL do iframe (começa com <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px">https://calendar.google.com/calendar/embed?src=...</code>)<br>
+          4. Cole abaixo e salve
+        </div>
+        <div class="fld">
+          <label>URL do iframe do Google Calendar</label>
+          <input type="url" id="calUrlInput" placeholder="https://calendar.google.com/calendar/embed?src=..." value="${calUrl}" style="font-size:12px">
+        </div>
+        <button class="btn btn-p" onclick="saveCalUrl()">💾 Salvar URL do Calendário</button>
+      </div>
+    </div>
+  </div>
+
+  ${calUrl
+    ?`<div class="cal-wrap" style="height:600px">
+       <iframe src="${calUrl}&bgcolor=%230d0d0d&color=%23dc2626&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&mode=MONTH"
+         style="width:100%;height:100%;border:none;display:block"
+         frameborder="0" scrolling="no" allowfullscreen></iframe>
+     </div>`
+    :`<div class="cal-wrap">
+       <div class="cal-setup">
+         <div style="font-size:44px">📅</div>
+         <div style="font-weight:800;font-size:16px">Conecte seu Google Calendar</div>
+         <div style="color:var(--sub);font-size:13px;max-width:340px;line-height:1.6">Clique em <b style="color:var(--text)">⚙️ Configurar</b> acima e cole a URL embed do seu Google Calendar para ver aqui.</div>
+         <a href="https://calendar.google.com/calendar/r/settings" target="_blank" class="btn btn-p" style="text-decoration:none;margin-top:8px">Abrir Google Calendar →</a>
+       </div>
+     </div>`}
+
+  <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px">
+    <div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--text)">📌 Follow-ups de hoje</div>
+    ${(()=>{
+      const hoje=new Date();hoje.setHours(0,0,0,0);
+      const hj=DB.get('followups').filter(f=>{if(f.status!=='pendente')return false;const d=new Date(f.data);d.setHours(0,0,0,0);return d.getTime()===hoje.getTime();});
+      if(!hj.length)return '<div style="color:var(--sub);font-size:13px">Nenhum follow-up para hoje 🎉</div>';
+      return hj.map(f=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:700;font-size:13px">${f.cliNome||'Sem cliente'}</div>
+          <div style="font-size:12px;color:var(--sub)">${f.tipo} — ${f.assunto||''}</div>
+        </div>
+        <button class="btn btn-sm" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2)" onclick="agendarGCal('${f.id}')">📅 Agendar</button>
+      </div>`).join('');
+    })()}
+  </div>`;
+}
+
+function saveCalUrl(){
+  const v=document.getElementById('calUrlInput').value.trim();
+  if(!v){showToast('❌ Cole a URL do calendário');return;}
+  localStorage.setItem('d7_cal_url',v);
+  showToast('✅ Calendário salvo!');
+  render();
 }
 
 // ══ INIT ══
