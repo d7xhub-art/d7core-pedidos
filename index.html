@@ -448,8 +448,9 @@ function updateBadges(){
   const fuPend=DB.get('followups').filter(f=>f.status==='pendente');
   const fuVenc=fuPend.filter(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);return d<=hoje}).length;
   upd('badge-fu',fuVenc||fuPend.length,fuVenc>0);
+  const hoje2=new Date();hoje2.setHours(0,0,0,0);
   const prosAtivos=DB.get('prospectos').filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido').length;
-  const prosVenc=DB.get('prospectos').filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido'&&p.dataProxAcao&&(()=>{const d=new Date(p.dataProxAcao);d.setHours(0,0,0,0);return d<=hoje})()).length;
+  const prosVenc=DB.get('prospectos').filter(p=>p.etapa!=='ganho'&&p.etapa!=='perdido'&&p.dataProxAcao&&(()=>{const d=new Date(p.dataProxAcao);d.setHours(0,0,0,0);return d<=hoje2})()).length;
   upd('badge-pros',prosVenc||prosAtivos,prosVenc>0);
 }
 
@@ -763,7 +764,7 @@ function pgNovoPedido(){
   const clis=DB.get('clientes'),reps=DB.get('representadas'),prods=DB.get('produtos');
   const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
   const q=pSearch;
-  const fp=q?prods.filter(p=>(p.desc+p.cod).toLowerCase().includes(q.toLowerCase())):[];
+  const fp=q?prods.filter(p=>(p.desc+p.cod).toLowerCase().includes(q.toLowerCase())):prods;
   return `
   <div style="max-width:900px">
     <div class="pg-head"><div><div class="pg-title">Novo Pedido</div><div class="pg-sub">${np.itens.length} item(ns) · ${fmt(total)}</div></div></div>
