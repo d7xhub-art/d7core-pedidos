@@ -353,12 +353,10 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SUPA_H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
 
 async function supaSyncTable(tbl,rows){
+  // Never push empty arrays — would wipe cloud data on a fresh device
+  if(!rows||!rows.length)return;
   try{
     const payload=rows.map(r=>({id:String(r.id||r.num||Date.now()),data:r,updated_at:new Date().toISOString()}));
-    if(!payload.length){
-      await fetch(SUPA_URL+'/rest/v1/'+tbl+'?id=neq.VOID',{method:'DELETE',headers:SUPA_H});
-      return;
-    }
     await fetch(SUPA_URL+'/rest/v1/'+tbl,{
       method:'POST',headers:{...SUPA_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify(payload)
@@ -1950,8 +1948,36 @@ function saveCalUrl(){
 // ══ INIT ══
 updateStatus();
 goto('dashboard');
-// Sync to cloud on startup (non-blocking)
-setTimeout(()=>supaFullSync(),2000);
+// On startup: pull cloud first, then push any local data that exists
+(async()=>{
+  setSyncDot('wait');
+  try{
+    const tabs=['clientes','produtos','representadas','pedidos','followups','prospectos'];
+    let pulled=0;
+    // Pull cloud data
+    for(const t of tabs){
+      try{
+        const r=await fetch(SUPA_URL+'/rest/v1/'+t+'?select=data&order=created_at',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+        if(r.ok){
+          const rows=await r.json();
+          const d=rows.map(x=>x.data).filter(Boolean);
+          if(d.length){
+            // Merge: cloud wins for IDs not in local; local wins for IDs in local
+            const local=DB.get(t);
+            const localIds=new Set(local.map(x=>String(x.id||x.num)));
+            const merged=[...local,...d.filter(x=>!localIds.has(String(x.id||x.num)))];
+            localStorage.setItem('d7_'+t,JSON.stringify(merged));
+            pulled+=d.length;
+          }
+        }
+      }catch(e){console.warn('pull:',t,e)}
+    }
+    if(pulled>0){updateStatus();updateBadges();render();}
+    // Push local data to cloud (won't push empties)
+    for(const t of tabs)await supaSyncTable(t,DB.get(t));
+    setSyncDot('ok');
+  }catch(e){setSyncDot('err');}
+})();
 </script>
 </body>
 </html>
