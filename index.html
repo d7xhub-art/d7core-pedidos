@@ -1380,6 +1380,81 @@ function fuWppLista(){
 }
 
 /* ══════════════════════ RELATÓRIOS ══════════════════════ */
+/* ══════════════════════ MAKE.COM WEBHOOK ══════════════════════ */
+function getMakeWebhook(){return localStorage.getItem('d7_make_webhook')||'';}
+function setMakeWebhook(url){localStorage.setItem('d7_make_webhook',url);}
+
+async function fireWebhook(evento,pros){
+  const url=getMakeWebhook();
+  if(!url)return;
+  const rep=DB.get('representadas').find(r=>r.id===pros.repId)||{};
+  const payload={
+    evento,
+    timestamp:new Date().toISOString(),
+    prospect:{
+      id:pros.id,
+      empresa:pros.empresa,
+      contato:pros.contato||'',
+      fone:pros.fone||'',
+      email:pros.email||'',
+      segmento:pros.segmento||'',
+      origem:pros.origem||'',
+      etapa:pros.etapa||'',
+      etapaLabel:(PROS_ETAPAS[pros.etapa]||{}).label||pros.etapa||'',
+      proxAcao:pros.proxAcao||'',
+      dataProxAcao:pros.dataProxAcao||'',
+      representada:rep.fantasia||rep.razao||'',
+      obs:pros.obs||'',
+      criadoEm:pros.criadoEm||'',
+      atualizadoEm:pros.atualizadoEm||''
+    }
+  };
+  try{
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch(e){console.warn('Make webhook error:',e);}
+}
+
+function openMakeConfig(){
+  const atual=getMakeWebhook();
+  const html=`
+    <div class="sec">🔗 Configurar Webhook Make.com</div>
+    <div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.3);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--sub)">
+      <b style="color:var(--a)">Como configurar:</b><br>
+      1. Crie um cenário no Make.com<br>
+      2. Adicione um módulo <b>Webhooks → Custom Webhook</b><br>
+      3. Copie a URL gerada e cole abaixo<br>
+      4. Salve — o D7 irá disparar o webhook a cada novo prospect ou mudança de etapa
+    </div>
+    <div class="fld">
+      <label>URL do Webhook Make.com</label>
+      <input id="make-url" value="${atual}" placeholder="https://hook.eu2.make.com/xxxxx..." style="font-size:12px">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-a btn-full" onclick="salvarMakeWebhook()">💾 Salvar</button>
+      ${atual?`<button class="btn btn-ghost" onclick="testarWebhook()" style="white-space:nowrap">🧪 Testar</button>`:''}
+    </div>
+    ${atual?`<div style="margin-top:10px;font-size:11px;color:var(--green)">✅ Webhook configurado</div>`:`<div style="margin-top:10px;font-size:11px;color:var(--sub)">⚪ Nenhum webhook configurado</div>`}`;
+  openModal('⚙️ Make.com — Automação',html);
+}
+
+function salvarMakeWebhook(){
+  const url=document.getElementById('make-url').value.trim();
+  setMakeWebhook(url);
+  closeModal();
+  if(url) alert('✅ Webhook Make.com configurado!\n\nO D7 irá disparar o webhook para:\n• Novo prospect criado\n• Prospect atualizado\n• Mudança de etapa\n• Prospect convertido em cliente');
+  else alert('Webhook removido.');
+}
+
+async function testarWebhook(){
+  const url=getMakeWebhook();
+  if(!url)return alert('Configure a URL primeiro.');
+  const testData={evento:'teste',timestamp:new Date().toISOString(),prospect:{empresa:'Empresa Teste',contato:'Contato Teste',fone:'(11) 99999-9999',email:'teste@exemplo.com',segmento:'Varejo',origem:'WhatsApp',etapa:'contato',etapaLabel:'Contato Inicial',proxAcao:'Ligar amanhã',dataProxAcao:'',representada:'',obs:'Teste de integração D7 Core'}};
+  try{
+    await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(testData)});
+    alert('✅ Webhook de teste disparado!\nVerifique no Make.com se chegou.');
+  }catch(e){alert('❌ Erro ao disparar webhook:\n'+e.message);}
+}
+
 /* ══════════════════════ PROSPECÇÃO ══════════════════════ */
 const PROS_ETAPAS={contato:{label:'Contato Inicial',color:'var(--sub)',bg:'rgba(107,127,160,.15)',icon:'📞'},apresentacao:{label:'Apresentação',color:'#ff8080',bg:'rgba(220,38,38,.15)',icon:'🤝'},proposta:{label:'Proposta',color:'var(--yellow)',bg:'rgba(245,158,11,.15)',icon:'📄'},negociacao:{label:'Negociação',color:'var(--purple)',bg:'rgba(168,85,247,.15)',icon:'💬'},ganho:{label:'Ganho ✅',color:'var(--green)',bg:'rgba(34,197,94,.15)',icon:'🏆'},perdido:{label:'Perdido ❌',color:'var(--red)',bg:'rgba(239,68,68,.15)',icon:'❌'}};
 const PROS_ORIGENS=['Indicação','WhatsApp','LinkedIn','Instagram','Ligação Fria','Evento/Feira','E-mail','Outro'];
@@ -1396,9 +1471,15 @@ function pgProspeccao(){
   // Stats por etapa
   const porEtapa={};Object.keys(PROS_ETAPAS).forEach(e=>porEtapa[e]=todos.filter(p=>p.etapa===e).length);
 
+  const makeOk=getMakeWebhook();
   let html=`<div class="pg-head">
     <div><div class="pg-title">🎯 Prospecção</div><div class="pg-sub">${ativos.length} ativo(s) · ${ganhos} ganho(s) · ${perdidos} perdido(s)${vencidos>0?` · <span style="color:var(--red)">${vencidos} vencido(s)</span>`:''}</div></div>
-    <button class="btn btn-a" onclick="openFormPros()">+ Novo Prospect</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="openMakeConfig()" title="${makeOk?'Make.com conectado':'Configurar Make.com'}" style="${makeOk?'border-color:rgba(34,197,94,.5);color:var(--green)':''}">
+        ${makeOk?'🟢':'⚙️'} Make.com
+      </button>
+      <button class="btn btn-a" onclick="openFormPros()">+ Novo Prospect</button>
+    </div>
   </div>
 
   <!-- Funil Cards -->
@@ -1524,6 +1605,8 @@ function savePros(id){
   if(id){const i=list.findIndex(x=>x.id===id);if(i>=0)list[i]=rec;else list.push(rec);}
   else list.push(rec);
   DB.set('prospectos',list);
+  const evento=id?'prospect_atualizado':'novo_prospect';
+  fireWebhook(evento,rec);
   closeModal();updateBadges();render();
 }
 
@@ -1552,6 +1635,7 @@ function convertToClient(prosId){
   const i=pros.findIndex(x=>x.id===prosId);
   if(i>=0){pros[i].etapa='ganho';pros[i].atualizadoEm=new Date().toISOString();}
   DB.set('prospectos',pros);
+  fireWebhook('prospect_convertido',{...p,etapa:'ganho',atualizadoEm:new Date().toISOString()});
   updateBadges();
   alert(`✅ "${p.empresa}" convertido em cliente com sucesso!\n\nCadastre o CNPJ e demais dados em Clientes.`);
   goto('clientes');
