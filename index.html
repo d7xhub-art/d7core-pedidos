@@ -851,8 +851,9 @@ function imprimirCatalogoRep(repId){
   ${prods.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b>${p.obs?`<br><span style="color:#64748b;font-size:11px">${p.obs}</span>`:''}</td><td style="color:#64748b">${p.refFab||'—'}</td><td style="color:#475569">${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
   </tbody></table>
   <div class="foot">D7 Core Pedidos · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
-  ${'<script>'}window.onload=()=>window.print()${'</script>'}</body></html>`);
+  </body></html>`);
   w.document.close();
+  setTimeout(()=>w.print(),300);
 }
 
 function imprimirCatalogo(){
@@ -882,8 +883,9 @@ function imprimirCatalogo(){
     </tbody></table>`;
   }).join('')}
   <div class="foot">D7 Core Pedidos · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
-  ${'<script>'}window.onload=()=>window.print()${'</script>'}</body></html>`);
+  </body></html>`);
   w.document.close();
+  setTimeout(()=>w.print(),300);
 }
 
 /* ══════════════════════ NOVO PEDIDO ══════════════════════ */
