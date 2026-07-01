@@ -613,6 +613,39 @@ function saveCli(){
 function delCli(id){if(!confirm('Excluir este cliente?'))return;DB.set('clientes',DB.get('clientes').filter(x=>x.id!=id));render();updateBadges()}
 
 /* ══════════════════════ PRODUTOS ══════════════════════ */
+/* ── FOTO PRODUTO ── */
+let _prodFoto=''; // base64 da foto carregada no form
+function onFotoChange(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=400;
+      let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){const r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      _prodFoto=canvas.toDataURL('image/jpeg',0.75);
+      const prev=document.getElementById('foto-preview');
+      if(prev){prev.src=_prodFoto;prev.style.display='block';}
+      const lbl=document.getElementById('foto-lbl');
+      if(lbl)lbl.textContent='✅ Foto carregada';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removerFoto(){
+  _prodFoto='__remover__';
+  const prev=document.getElementById('foto-preview');
+  if(prev){prev.src='';prev.style.display='none';}
+  const lbl=document.getElementById('foto-lbl');
+  if(lbl)lbl.textContent='📷 Adicionar foto';
+}
+
 function pgProdutos(){
   const all=DB.get('produtos');
   const q=(document.getElementById('sprod')||{}).value||'';
@@ -628,8 +661,9 @@ function pgProdutos(){
   </div>
   ${list.length===0
     ?`<div class="empty"><div class="empty-ico">📦</div><div class="empty-t">Nenhum produto encontrado</div></div>`
-    :`<div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
+    :`<div class="tbl-wrap"><table><thead><tr><th style="width:52px">Foto</th><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
     ${list.map(p=>`<tr>
+      <td>${p.foto?`<img src="${p.foto}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--border)">`:`<div style="width:42px;height:42px;border-radius:6px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer" onclick="openFormProd('${p.id}')" title="Adicionar foto">📷</div>`}</td>
       <td><span class="tag">${p.cod}</span></td>
       <td style="font-weight:600;max-width:220px">${p.desc}</td>
       <td style="color:var(--sub);font-size:12px">${p.refFab||'—'}</td>
@@ -647,6 +681,7 @@ function pgProdutos(){
 function openFormProd(id){
   editId=id||null;const p=id?DB.get('produtos').find(x=>x.id==id):{};const c=p||{};
   const reps=DB.get('representadas');
+  _prodFoto='';
   openModal(id?'Editar Produto':'Novo Produto',`
   <div>
     <div class="sec" style="padding-top:0">📦 Identificação</div>
@@ -660,6 +695,19 @@ function openFormProd(id){
         <option value="">— Sem representada —</option>
         ${reps.map(r=>`<option value="${r.id}" ${(c.repId||'')==r.id?'selected':''}>${r.fantasia||r.razao}</option>`).join('')}
       </select></div>
+    <div class="sec">📷 Foto do Produto</div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
+      ${c.foto?`<img id="foto-preview" src="${c.foto}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--a)">`
+               :`<img id="foto-preview" src="" style="display:none;width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid var(--a)">`}
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1.5px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600" id="foto-lbl">
+          ${c.foto?'✅ Foto cadastrada':'📷 Adicionar foto'}
+          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="onFotoChange(this)">
+        </label>
+        ${c.foto?`<button type="button" class="btn btn-ghost btn-sm" onclick="removerFoto()" style="color:var(--red);border-color:rgba(220,38,38,.3)">🗑️ Remover foto</button>`:''}
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--sub);margin-bottom:8px">📱 No celular: usa a câmera diretamente. No PC: selecione um arquivo.</div>
     <div class="sec">💰 Preços</div>
     <div class="row3">
       <div class="fld"><label>Preço Lista R$</label><input id="pPreco" type="number" step="0.01" min="0" value="${c.preco||''}" placeholder="0,00"></div>
@@ -676,7 +724,9 @@ function saveProd(){
   const list=DB.get('produtos');
   const repId=document.getElementById('pRepId').value||'';
   const rep=DB.get('representadas').find(r=>r.id==repId)||{};
-  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),repId,repNome:rep.fantasia||rep.razao||''};
+  const fotoAtual=editId?(DB.get('produtos').find(x=>x.id==editId)||{}).foto||'':'';
+  const foto=_prodFoto==='__remover__'?'':(_prodFoto||fotoAtual);
+  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
@@ -812,17 +862,35 @@ function pgCatalogo(){
             ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button>`:''}
           </div>
         </div>
-        <div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th></th></tr></thead><tbody>
-        ${g.items.map(p=>`<tr>
-          <td><span class="tag">${p.cod}</span></td>
-          <td style="font-weight:600;white-space:nowrap">${p.desc}</td>
-          <td style="color:var(--sub);font-size:12px;white-space:nowrap">${p.refFab||'—'}</td>
-          <td><span class="tag tag-a">${p.un}</span></td>
-          <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.preco)}</td>
-          <td style="color:var(--sub);white-space:nowrap">${p.precoMin?fmt(p.precoMin):'—'}</td>
-          <td><button class="icon-btn btn-sm" onclick="openFormProd('${p.id}')">✏️</button></td>
-        </tr>`).join('')}
-        </tbody></table></div>
+        ${g.items.some(p=>p.foto)
+          ?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:14px">
+            ${g.items.map(p=>`
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
+              ${p.foto
+                ?`<img src="${p.foto}" style="width:100%;aspect-ratio:1/1;object-fit:cover">`
+                :`<div style="width:100%;aspect-ratio:1/1;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer" onclick="openFormProd('${p.id}')" title="Adicionar foto">📦</div>`}
+              <div style="padding:8px 10px;flex:1">
+                <div style="font-size:10px;color:var(--a);font-weight:700">${p.cod}</div>
+                <div style="font-size:12px;font-weight:700;margin:2px 0;line-height:1.3">${p.desc}</div>
+                <div style="font-size:13px;font-weight:900;color:var(--a);margin-top:4px">${fmt(p.preco)}</div>
+                ${p.precoMin?`<div style="font-size:10px;color:var(--sub)">Mín: ${fmt(p.precoMin)}</div>`:''}
+              </div>
+              <div style="padding:0 10px 10px">
+                <button class="btn btn-ghost btn-sm btn-full" onclick="openFormProd('${p.id}')" style="font-size:11px">✏️ Editar</button>
+              </div>
+            </div>`).join('')}
+          </div>`
+          :`<div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th></th></tr></thead><tbody>
+          ${g.items.map(p=>`<tr>
+            <td><span class="tag">${p.cod}</span></td>
+            <td style="font-weight:600;white-space:nowrap">${p.desc}</td>
+            <td style="color:var(--sub);font-size:12px;white-space:nowrap">${p.refFab||'—'}</td>
+            <td><span class="tag tag-a">${p.un}</span></td>
+            <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.preco)}</td>
+            <td style="color:var(--sub);white-space:nowrap">${p.precoMin?fmt(p.precoMin):'—'}</td>
+            <td><button class="icon-btn btn-sm" onclick="openFormProd('${p.id}')">✏️</button></td>
+          </tr>`).join('')}
+          </tbody></table></div>`}
       </div>`;
     }).join('')}`;
 }
@@ -835,19 +903,37 @@ function imprimirCatalogoRep(repId){
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Catálogo ${nome}</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
   h1{font-size:20px;color:#dc2626;margin-bottom:4px}h2{font-size:12px;color:#64748b;margin-bottom:20px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px}
+  .card{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;break-inside:avoid}
+  .card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+  .card-no-img{width:100%;aspect-ratio:1/1;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:40px}
+  .card-body{padding:10px 12px}
+  .cod{background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700}
+  .desc{font-weight:700;font-size:12px;margin:4px 0 2px}
+  .preco{font-weight:900;color:#dc2626;font-size:14px}
+  .sub{color:#64748b;font-size:10px}
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th{background:#f1f5f9;padding:9px 12px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#475569;border-bottom:2px solid #e2e8f0}
   td{padding:9px 12px;border-bottom:1px solid #f1f5f9;font-size:13px}
-  tr:last-child td{border-bottom:none}
-  .cod{background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
-  .preco{font-weight:800;color:#f97316}
   .foot{margin-top:24px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
-  @media print{body{padding:15px}}</style></head><body>
+  @media print{body{padding:15px}.grid{grid-template-columns:repeat(3,1fr)}}</style></head><body>
   <h1>📒 Catálogo — ${nome}</h1>
   <h2>${r.cnpj?r.cnpj+' · ':''} ${prods.length} produto(s) · Emitido em ${new Date().toLocaleDateString('pt-BR')}</h2>
-  <table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
-  ${prods.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b>${p.obs?`<br><span style="color:#64748b;font-size:11px">${p.obs}</span>`:''}</td><td style="color:#64748b">${p.refFab||'—'}</td><td style="color:#475569">${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
-  </tbody></table>
+  ${prods.some(p=>p.foto)
+    ?`<div class="grid">${prods.map(p=>`
+      <div class="card">
+        ${p.foto?`<img src="${p.foto}">`:`<div class="card-no-img">📦</div>`}
+        <div class="card-body">
+          <span class="cod">${p.cod}</span>${p.refFab?` <span style="color:#94a3b8;font-size:10px">${p.refFab}</span>`:''}
+          <div class="desc">${p.desc}</div>
+          <div class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</div>
+          ${p.precoMin?`<div class="sub">Mín: R$ ${p.precoMin.toFixed(2).replace('.',',')}</div>`:''}
+          ${p.obs?`<div class="sub">${p.obs}</div>`:''}
+        </div>
+      </div>`).join('')}</div>`
+    :`<table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
+    ${prods.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b>${p.obs?`<br><span style="color:#64748b;font-size:11px">${p.obs}</span>`:''}</td><td style="color:#64748b">${p.refFab||'—'}</td><td style="color:#475569">${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
+    </tbody></table>`}
   <div class="foot">D7 Core Pedidos · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   w.document.close();
@@ -861,24 +947,43 @@ function imprimirCatalogo(){
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Catálogo Completo</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
   h1{font-size:22px;color:#dc2626;margin-bottom:4px}h2{font-size:12px;color:#64748b;margin-bottom:20px}
-  h3{font-size:15px;font-weight:900;color:#dc2626;margin:24px 0 8px;padding-bottom:6px;border-bottom:2px solid #fee2e2}
+  h3{font-size:15px;font-weight:900;color:#dc2626;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #fee2e2;page-break-before:auto}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:10px}
+  .card{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;break-inside:avoid}
+  .card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+  .card-no-img{width:100%;aspect-ratio:1/1;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:36px}
+  .card-body{padding:9px 11px}
+  .cod{background:#fee2e2;color:#dc2626;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700}
+  .desc{font-weight:700;font-size:11px;margin:3px 0 2px;line-height:1.3}
+  .preco{font-weight:900;color:#dc2626;font-size:13px}
+  .sub{color:#64748b;font-size:10px}
   table{width:100%;border-collapse:collapse;margin-bottom:10px}
   th{background:#f1f5f9;padding:8px 10px;text-align:left;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#475569;border-bottom:2px solid #e2e8f0}
   td{padding:8px 10px;border-bottom:1px solid #f1f5f9;font-size:12px}
-  tr:last-child td{border-bottom:none}
-  .cod{background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:700}
-  .preco{font-weight:800;color:#f97316}
+  .preco-td{font-weight:800;color:#f97316}
   .foot{margin-top:24px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
-  @media print{body{padding:15px}h3{page-break-before:auto}}</style></head><body>
+  @media print{body{padding:15px}.grid{grid-template-columns:repeat(3,1fr)}}</style></head><body>
   <h1>📒 Catálogo Completo de Produtos</h1>
   <h2>${prods.length} produto(s) · ${reps.length} representada(s) · ${new Date().toLocaleDateString('pt-BR')}</h2>
   ${reps.map(r=>{
     const items=prods.filter(p=>p.repId===r.id);
     if(!items.length)return '';
+    const temFoto=items.some(p=>p.foto);
     return `<h3>🏢 ${r.fantasia||r.razao}</h3>
-    <table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
-    ${items.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b></td><td style="color:#64748b">${p.refFab||'—'}</td><td>${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
-    </tbody></table>`;
+    ${temFoto
+      ?`<div class="grid">${items.map(p=>`
+        <div class="card">
+          ${p.foto?`<img src="${p.foto}">`:`<div class="card-no-img">📦</div>`}
+          <div class="card-body">
+            <span class="cod">${p.cod}</span>${p.refFab?` <span class="sub">${p.refFab}</span>`:''}
+            <div class="desc">${p.desc}</div>
+            <div class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</div>
+            ${p.precoMin?`<div class="sub">Mín: R$ ${p.precoMin.toFixed(2).replace('.',',')}</div>`:''}
+          </div>
+        </div>`).join('')}</div>`
+      :`<table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
+      ${items.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b></td><td style="color:#64748b">${p.refFab||'—'}</td><td>${p.un}</td><td class="preco-td">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
+      </tbody></table>`}`;
   }).join('')}
   <div class="foot">D7 Core Pedidos · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
