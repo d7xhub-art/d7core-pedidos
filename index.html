@@ -1396,6 +1396,7 @@ async function fireWebhook(evento,pros){
       fone:pros.fone||'',
       email:pros.email||'',
       segmento:pros.segmento||'',
+      cidade:pros.cidade||'',
       origem:pros.origem||'',
       etapa:pros.etapa||'',
       etapaLabel:(PROS_ETAPAS[pros.etapa]||{}).label||pros.etapa||'',
@@ -1412,16 +1413,41 @@ async function fireWebhook(evento,pros){
   }catch(e){console.warn('Make webhook error:',e);}
 }
 
+function buscarNoMaps(){
+  const seg=document.getElementById('p-segmento')?document.getElementById('p-segmento').value:'';
+  const cidade=document.getElementById('p-cidade')?document.getElementById('p-cidade').value.trim():'';
+  if(!seg&&!cidade)return alert('Preencha o Segmento e/ou Cidade primeiro.');
+  const q=encodeURIComponent([seg,cidade].filter(Boolean).join(' em '));
+  window.open('https://www.google.com/maps/search/'+q,'_blank');
+}
+
+async function pullProspectosMaps(){
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/prospectos?select=data&order=created_at',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const rows=await r.json();
+    const remote=rows.map(x=>x.data).filter(Boolean);
+    if(!remote.length)return alert('Nenhum prospect no Supabase ainda.');
+    const local=DB.get('prospectos');
+    const localIds=new Set(local.map(x=>String(x.id)));
+    const novos=remote.filter(x=>!localIds.has(String(x.id)));
+    if(!novos.length)return alert('✅ Tudo atualizado — nenhum prospect novo para importar.');
+    DB.set('prospectos',[...local,...novos]);
+    closeModal();updateBadges();render();
+    alert('✅ '+novos.length+' prospect(s) importado(s)!');
+  }catch(e){alert('❌ Erro ao importar:\n'+e.message);}
+}
+
 function openMakeConfig(){
   const atual=getMakeWebhook();
   const html=`
-    <div class="sec">🔗 Configurar Webhook Make.com</div>
+    <div class="sec">🔗 D7 → Make.com (Enviar eventos)</div>
     <div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.3);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--sub)">
       <b style="color:var(--a)">Como configurar:</b><br>
       1. Crie um cenário no Make.com<br>
       2. Adicione um módulo <b>Webhooks → Custom Webhook</b><br>
       3. Copie a URL gerada e cole abaixo<br>
-      4. Salve — o D7 irá disparar o webhook a cada novo prospect ou mudança de etapa
+      4. Salve — o D7 dispara o webhook a cada novo prospect, atualização ou conversão
     </div>
     <div class="fld">
       <label>URL do Webhook Make.com</label>
@@ -1431,7 +1457,35 @@ function openMakeConfig(){
       <button class="btn btn-a btn-full" onclick="salvarMakeWebhook()">💾 Salvar</button>
       ${atual?`<button class="btn btn-ghost" onclick="testarWebhook()" style="white-space:nowrap">🧪 Testar</button>`:''}
     </div>
-    ${atual?`<div style="margin-top:10px;font-size:11px;color:var(--green)">✅ Webhook configurado</div>`:`<div style="margin-top:10px;font-size:11px;color:var(--sub)">⚪ Nenhum webhook configurado</div>`}`;
+    ${atual?`<div style="margin-top:8px;font-size:11px;color:var(--green)">✅ Webhook configurado</div>`:`<div style="margin-top:8px;font-size:11px;color:var(--sub)">⚪ Nenhum webhook configurado</div>`}
+    <div class="sec" style="margin-top:16px">📍 Make.com → D7 (Importar do Google Maps)</div>
+    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--sub)">
+      <b style="color:var(--green)">Cenário Make.com → Google My Business → D7:</b><br><br>
+      <b>1.</b> No Make.com, crie cenário com <b>Google My Business → Search Businesses</b><br>
+      <b>2.</b> Conecte a um módulo <b>HTTP → Make a request</b> com:<br>
+      &nbsp;&nbsp;• URL: <span style="font-family:monospace;color:var(--a);user-select:all">${SUPA_URL}/rest/v1/prospectos</span><br>
+      &nbsp;&nbsp;• Method: <b>POST</b><br>
+      &nbsp;&nbsp;• Headers: <code>apikey: ${SUPA_KEY.slice(0,20)}...</code> | <code>Prefer: resolution=merge-duplicates,return=minimal</code><br>
+      <b>3.</b> Body (JSON array):<br>
+      <pre style="font-size:10px;margin:6px 0;overflow-x:auto;color:var(--fg)">[{
+  "id": "maps_{{unix timestamp}}",
+  "data": {
+    "id": "maps_{{unix timestamp}}",
+    "empresa": "{{business name}}",
+    "fone": "{{phone}}",
+    "cidade": "{{city}}",
+    "segmento": "{{category}}",
+    "origem": "Google Maps",
+    "etapa": "contato",
+    "obs": "{{address}} | ⭐ {{rating}}",
+    "criadoEm": "{{now}}",
+    "atualizadoEm": "{{now}}"
+  },
+  "updated_at": "{{now}}"
+}]</pre>
+      <b>4.</b> Clique "📥 Verificar novos" abaixo para importar após o cenário rodar
+    </div>
+    <button class="btn btn-ghost btn-full" onclick="pullProspectosMaps()" style="border-color:rgba(34,197,94,.4);color:var(--green)">📥 Verificar prospects novos do Maps/Make</button>`;
   openModal('⚙️ Make.com — Automação',html);
 }
 
@@ -1473,10 +1527,11 @@ function pgProspeccao(){
   let html=`<div class="pg-head">
     <div><div class="pg-title">🎯 Prospecção</div><div class="pg-sub">${ativos.length} ativo(s) · ${ganhos} ganho(s) · ${perdidos} perdido(s)${vencidos>0?` · <span style="color:var(--red)">${vencidos} vencido(s)</span>`:''}</div></div>
     <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="pullProspectosMaps()" title="Importar prospects novos do Make.com/Maps via Supabase" style="border-color:rgba(34,197,94,.3);color:var(--green)">📥 Maps</button>
       <button class="btn btn-ghost btn-sm" onclick="openMakeConfig()" title="${makeOk?'Make.com conectado':'Configurar Make.com'}" style="${makeOk?'border-color:rgba(34,197,94,.5);color:var(--green)':''}">
-        ${makeOk?'🟢':'⚙️'} Make.com
+        ${makeOk?'🟢':'⚙️'} Make
       </button>
-      <button class="btn btn-a" onclick="openFormPros()">+ Novo Prospect</button>
+      <button class="btn btn-a" onclick="openFormPros()">+ Novo</button>
     </div>
   </div>
 
@@ -1526,7 +1581,7 @@ function renderProsLista(lista){
         <div style="width:36px;height:36px;border-radius:8px;background:${e.bg};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${e.icon}</div>
         <div style="min-width:0;flex:1">
           <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.empresa}</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:2px">${p.contato||'—'} ${p.fone?'· '+p.fone:''}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px">${p.contato||'—'} ${p.fone?'· '+p.fone:''} ${p.cidade?'· 📍'+p.cidade:''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
@@ -1564,6 +1619,10 @@ function openFormPros(id){
       <div class="fld"><label>Segmento</label><select id="p-segmento"><option value="">Selecione</option>${PROS_SEGMENTOS.map(s=>`<option${p.segmento===s?' selected':''}>${s}</option>`).join('')}</select></div>
       <div class="fld"><label>Origem</label><select id="p-origem"><option value="">Selecione</option>${PROS_ORIGENS.map(o=>`<option${p.origem===o?' selected':''}>${o}</option>`).join('')}</select></div>
     </div>
+    <div class="flds2">
+      <div class="fld"><label>Cidade / Região</label><input id="p-cidade" value="${p.cidade||''}" placeholder="Ex: São Paulo - SP"></div>
+      <div class="fld" style="display:flex;align-items:flex-end"><button type="button" class="btn btn-ghost btn-full" onclick="buscarNoMaps()" title="Abre Google Maps com segmento + cidade" style="height:38px">🗺️ Buscar no Maps</button></div>
+    </div>
     <div class="sec" style="margin-top:12px">📊 Funil de Vendas</div>
     <div class="flds2">
       <div class="fld"><label>Etapa *</label><select id="p-etapa">
@@ -1590,6 +1649,7 @@ function savePros(id){
     fone:document.getElementById('p-fone').value.trim(),
     email:document.getElementById('p-email').value.trim(),
     segmento:document.getElementById('p-segmento').value,
+    cidade:document.getElementById('p-cidade').value.trim(),
     origem:document.getElementById('p-origem').value,
     etapa:document.getElementById('p-etapa').value||'contato',
     proxAcao:document.getElementById('p-proxAcao').value.trim(),
@@ -1624,7 +1684,7 @@ function convertToClient(prosId){
     id:Date.now().toString(),
     cnpj:'',razao:p.empresa,fantasia:p.empresa,
     fone:p.fone||'',email:p.email||'',contato:p.contato||'',
-    cep:'',rua:'',num:'',bairro:'',cidade:'',uf:'',
+    cep:'',rua:'',num:'',bairro:'',cidade:p.cidade||'',uf:'',
     condPag:'',limite:'',obs:`Convertido de prospect em ${new Date().toLocaleDateString('pt-BR')}. Origem: ${p.origem||'—'}. ${p.obs||''}`
   };
   clis.push(novoCli);DB.set('clientes',clis);
