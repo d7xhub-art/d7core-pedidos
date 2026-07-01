@@ -548,7 +548,7 @@ function pgClientes(){
     ?`<div class="empty"><div class="empty-ico">👥</div><div class="empty-t">Nenhum cliente encontrado</div>${q?'':'<div class="empty-s">Cadastre o primeiro cliente</div>'}</div>`
     :`<div class="tbl-wrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Cidade/UF</th><th>Telefone</th><th>Cond. Pag.</th><th>Ações</th></tr></thead><tbody>
     ${list.map(c=>`<tr>
-      <td><div style="font-weight:700">${c.razao||'—'}</div>${c.fantasia&&c.fantasia!==c.razao?`<div style="font-size:11.5px;color:var(--a)">${c.fantasia}</div>`:''}</td>
+      <td style="max-width:220px"><div style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.razao||''}">${c.razao||'—'}</div>${c.fantasia&&c.fantasia!==c.razao?`<div style="font-size:11.5px;color:var(--a);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.fantasia}</div>`:''}</td>
       <td style="font-size:12px;color:var(--sub);white-space:nowrap">${c.cnpj||'—'}</td>
       <td style="font-size:12.5px;color:var(--sub)">${c.cidade||'—'}${c.uf?'/'+c.uf:''}</td>
       <td style="font-size:12.5px;color:var(--sub)">${c.fone||'—'}</td>
@@ -915,8 +915,8 @@ function pgPedidos(){
     :`<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Representada</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>
     ${list.map(p=>`<tr>
       <td><span style="font-weight:900;color:var(--p);font-size:13px">#${p.num}</span></td>
-      <td><div style="font-weight:600">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub)">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
-      <td style="color:var(--sub);font-size:12.5px;max-width:140px">${p.repNome||'—'}</td>
+      <td style="max-width:200px"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.cliNome||''}">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub);white-space:nowrap">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
+      <td style="color:var(--sub);font-size:12.5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.repNome||''}">${p.repNome||'—'}</td>
       <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${fmtDate(p.data)}</td>
       <td style="color:var(--sub);text-align:center">${p.itens.length}</td>
       <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.total)}</td>
