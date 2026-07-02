@@ -1032,7 +1032,7 @@ function pgNovoPedido(){
     ${np.itens.length>0?`
     <div class="pd-block">
       <div class="sec" style="padding-top:0">🛒 Itens (${np.itens.length})</div>
-      <table><thead><tr><th>Produto</th><th>DObs./th><th>Unid.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th><th></th></tr></thead><tbody>
+      <table><thead><tr><th>Produto</th><th>Obs.</th><th>Unid.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th><th></th></tr></thead><tbody>
       ${np.itens.map((it,i)=>`<tr>
         <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
         <td><input class="dark-input" style="width:110px;padding:5px 8px;font-size:12px" type="text" placeholder="Especificação..." value="${it.disc||''}" oninput="updItemDisc(${i},this.value)"></td>
@@ -1200,7 +1200,7 @@ function verPedido(id){
 
     <div>
       <div style="font-size:13px;font-weight:800;margin-bottom:10px">Itens do Pedido</div>
-      <table><thead><tr><th>#</th><th>Produto</th><th>DObs./th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr></thead><tbody>
+      <table><thead><tr><th>#</th><th>Produto</th><th>Obs.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr></thead><tbody>
       ${p.itens.map((it,i)=>`<tr>
         <td style="color:var(--sub2);font-size:12px">${i+1}</td>
         <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
@@ -1290,7 +1290,7 @@ function imprimirPedido(id){
     </div>
   </div>
   <h2>Itens do Pedido</h2>
-  <table><tr><th>#</th><th>Código</th><th>Produto</th><th>DObs./th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr>
+  <table><tr><th>#</th><th>Código</th><th>Produto</th><th>Obs.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr>
   ${p.itens.map((it,i)=>`<tr><td>${i+1}</td><td>${it.cod}</td><td>${it.desc}</td><td>${it.disc||'—'}</td><td>${it.qty} ${it.un}</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.qty*it.preco).toFixed(2).replace('.',',')}</td></tr>`).join('')}
   </table>
   <div class="tot"><span>TOTAL DO PEDIDO</span><span>R$ ${Number(p.total).toFixed(2).replace('.',',')}</span></div>
