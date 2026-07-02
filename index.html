@@ -1171,23 +1171,23 @@ function verPedido(id){
   const sc={aberto:{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'},enviado:{bg:'rgba(34,197,94,.15)',cl:'#4ade80',bd:'rgba(34,197,94,.3)',lb:'✓ Enviado'},cancelado:{bg:'rgba(100,116,139,.15)',cl:'#94a3b8',bd:'rgba(100,116,139,.3)',lb:'✗ Cancelado'}}[st]||{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'};
   document.getElementById('mpbody').innerHTML=`
   <div style="display:flex;flex-direction:column;gap:12px">
-    <div style="background:linear-gradient(135deg,#1a0808,#200a0a);border:1px solid rgba(220,38,38,.35);border-radius:14px;padding:18px 20px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+    <div style="padding:2px 0 12px;border-bottom:1px solid var(--bdr)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
         <div>
           <div style="font-size:10px;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase">Pedido</div>
-          <div style="font-size:32px;font-weight:800;color:var(--txt);line-height:1;letter-spacing:-1px">#${p.num}</div>
-          <div style="font-size:12px;color:var(--sub);margin-top:5px">📅 ${fmtDate(p.data)}</div>
+          <div style="font-size:28px;font-weight:800;color:var(--txt);line-height:1;letter-spacing:-1px">#${p.num}</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:4px">📅 ${fmtDate(p.data)}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           <span style="background:${sc.bg};color:${sc.cl};border:1px solid ${sc.bd};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">${sc.lb}</span>
-          <div style="font-size:20px;font-weight:800;color:#fff">${fmt(p.total)}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--txt)">${fmt(p.total)}</div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-ghost" onclick="exportWpp('${p.id}')">💬 WhatsApp</button>
-        <button class="btn btn-sm btn-ghost" onclick="editarPedido('${p.id}')">✏️ Editar</button>
-        <button class="btn btn-sm btn-ghost" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
-        <button class="btn btn-sm btn-ghost" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Pedido #${p.num}'})">📌 Follow-up</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="background:#25d366;border:none;color:#fff;font-weight:600" onclick="exportWpp('${p.id}')">💬 WhatsApp</button>
+        <button class="btn btn-sm btn-r" onclick="editarPedido('${p.id}')">✏️ Editar</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:var(--txt);border:1px solid var(--bdr)" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:var(--txt);border:1px solid var(--bdr)" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Pedido #${p.num}'})">📌 Follow-up</button>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
