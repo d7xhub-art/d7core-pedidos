@@ -715,6 +715,7 @@ function openFormProd(id){
       <div class="fld"><label>Unidade</label><select id="pUn">${['un','cx','kg','lt','frd','pc','bd','sc','pct','par','rolo','m','m²'].map(u=>`<option ${(c.un||'un')===u?'selected':''}>${u}</option>`).join('')}</select></div>
     </div>
     <div class="fld"><label>Observações</label><textarea id="pObs">${c.obs||''}</textarea></div>
+    <div class="fld"><label>⚖️ Peso / Qtd por Fardo</label><input id="pPeso" type="text" value="${c.pesoPorFardo||''}" placeholder="Ex: 12kg, 24un, 10x1kg"></div>
     <button class="btn btn-p btn-full" onclick="saveProd()">💾 Salvar Produto</button>
   </div>`);
 }
@@ -726,7 +727,7 @@ function saveProd(){
   const rep=DB.get('representadas').find(r=>r.id==repId)||{};
   const fotoAtual=editId?(DB.get('produtos').find(x=>x.id==editId)||{}).foto||'':'';
   const foto=_prodFoto==='__remover__'?'':(_prodFoto||fotoAtual);
-  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
+  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
@@ -874,6 +875,7 @@ function pgCatalogo(){
                 <div style="font-size:12px;font-weight:700;margin:2px 0;line-height:1.3">${p.desc}</div>
                 <div style="font-size:13px;font-weight:900;color:var(--a);margin-top:4px">${fmt(p.preco)}</div>
                 ${p.precoMin?`<div style="font-size:10px;color:var(--sub)">Mín: ${fmt(p.precoMin)}</div>`:''}
+                  ${p.pesoPorFardo?`<div style="font-size:10px;color:var(--sub);margin-top:2px">📦 ${p.pesoPorFardo}/fardo</div>`:''}
               </div>
               <div style="padding:0 10px 10px">
                 <button class="btn btn-ghost btn-sm btn-full" onclick="openFormProd('${p.id}')" style="font-size:11px">✏️ Editar</button>
