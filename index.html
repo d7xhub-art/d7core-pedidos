@@ -1167,74 +1167,81 @@ function pgPedidos(){
 
 function verPedido(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
+  const st=p.status||'aberto';
+  const sc={aberto:{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'},enviado:{bg:'rgba(34,197,94,.15)',cl:'#4ade80',bd:'rgba(34,197,94,.3)',lb:'✓ Enviado'},cancelado:{bg:'rgba(100,116,139,.15)',cl:'#94a3b8',bd:'rgba(100,116,139,.3)',lb:'✗ Cancelado'}}[st]||{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'};
   document.getElementById('mpbody').innerHTML=`
-  <div style="display:flex;flex-direction:column;gap:14px">
-    <div style="background:linear-gradient(135deg,#181818,#1f1f1f);border-radius:12px;padding:20px;border:1px solid rgba(220,38,38,.25)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div><div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:800;letter-spacing:.5px;text-transform:uppercase">Pedido</div>
-          <div style="font-weight:900;font-size:30px;color:#fff;letter-spacing:-1px">#${p.num}</div></div>
-        <span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}" style="font-size:13px">${p.status==='aberto'?'● Aberto':p.status==='enviado'?'✔ Enviado':'✕ Cancelado'}</span>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:linear-gradient(135deg,#1a0808,#200a0a);border:1px solid rgba(220,38,38,.35);border-radius:14px;padding:18px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:10px;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase">Pedido</div>
+          <div style="font-size:32px;font-weight:800;color:var(--txt);line-height:1;letter-spacing:-1px">#${p.num}</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:5px">📅 ${fmtDate(p.data)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <span style="background:${sc.bg};color:${sc.cl};border:1px solid ${sc.bd};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">${sc.lb}</span>
+          <div style="font-size:20px;font-weight:800;color:#fff">${fmt(p.total)}</div>
+        </div>
       </div>
-      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px">📅 ${fmtDate(p.data)}</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
-        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Cliente</div>
-        <div style="font-weight:800;font-size:14px">${p.cliNome||'—'}</div>
-        ${p.cliFan&&p.cliFan!==p.cliNome?`<div style="font-size:12px;color:var(--a);margin-top:2px">${p.cliFan}</div>`:''}
-        ${p.cliCnpj?`<div style="font-size:12px;color:var(--sub);margin-top:4px">${p.cliCnpj}</div>`:''}
-        ${p.cliCid?`<div style="font-size:12px;color:var(--sub)">${p.cliCid}/${p.cliUF}</div>`:''}
-        ${p.cliCond?`<div style="margin-top:6px"><span class="tag">${p.cliCond}</span></div>`:''}
-      </div>
-      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px">
-        <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">🚚 Frete</div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:6px">📦 ${p.itens.length} iten(s) · <span style="color:var(--text);font-weight:700">${fmt(p.total)}</span></div>
-        ${p.freteValor?`<div style="font-weight:900;font-size:15px;color:var(--a)">Frete: ${fmt(p.freteValor)}</div>`:'<div style="font-size:12px;color:var(--sub)">Frete não informado</div>'}
-        ${p.freteResp?`<div style="margin-top:4px"><span class="tag" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)">${p.freteResp}</span></div>`:''}
-        ${p.fretePeso?`<div style="font-size:12px;color:var(--sub);margin-top:4px">⚖️ ${p.fretePeso} kg</div>`:''}
-        ${p.freteKm?`<div style="font-size:12px;color:var(--sub)">📍 ${p.freteKm} km</div>`:''}
-        <div style="font-size:11px;color:var(--sub2);margin-top:6px">${p.repNome||''}</div>
-      </div>
-    </div>
-
-    <div>
-      <div style="font-size:13px;font-weight:800;margin-bottom:10px">Itens do Pedido</div>
-      <table><thead><tr><th>#</th><th>Produto</th><th>Obs.</th><th>Qtd</th><th>Vl. Fardo</th><th>Total</th></tr></thead><tbody>
-      ${p.itens.map((it,i)=>`<tr>
-        <td style="color:var(--sub2);font-size:12px">${i+1}</td>
-        <td><div style="font-weight:600">${it.desc}</div><div style="font-size:11.5px;color:var(--sub)"><span class="tag">${it.cod}</span></div></td>
-        <td style="color:var(--sub);font-size:12px">${it.disc||'—'}</td>
-        <td style="color:var(--sub)">${it.qty} ${it.un}</td>
-        <td style="color:var(--sub)">${fmt(it.preco)}</td>
-        <td style="font-weight:800;color:var(--a)">${fmt(it.qty*it.preco)}</td>
-      </tr>`).join('')}
-      </tbody></table>
-      <div class="tot-bar"><div style="font-weight:800;opacity:.9">TOTAL DO PEDIDO</div><div style="font-weight:900;font-size:22px">${fmt(p.total)}</div></div>
-    </div>
-
-    ${p.obs?`<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:14px"><div style="font-size:10px;font-weight:900;color:#d97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Observações</div><div style="font-size:13px;line-height:1.6">${p.obs}</div></div>`:''}
-
-    <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px">
-      <div style="font-size:10px;font-weight:900;color:var(--sub2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Alterar Status</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm ${p.status==='aberto'?'btn-p':'btn-ghost'}" onclick="setStatus('${p.id}','aberto')">● Aberto</button>
-        <button class="btn btn-sm ${p.status==='enviado'?'btn-g':'btn-ghost'}" onclick="setStatus('${p.id}','enviado')">✔ Enviado</button>
-        <button class="btn btn-sm ${p.status==='cancelado'?'btn-danger':'btn-ghost'}" onclick="setStatus('${p.id}','cancelado')">✕ Cancelado</button>
+        <button class="btn btn-sm btn-ghost" onclick="exportWpp('${p.id}')">💬 WhatsApp</button>
+        <button class="btn btn-sm btn-ghost" onclick="editarPedido('${p.id}')">✏️ Editar</button>
+        <button class="btn btn-sm btn-ghost" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
+        <button class="btn btn-sm btn-ghost" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Pedido #${p.num}'})">📌 Follow-up</button>
       </div>
     </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-a" style="flex:1" onclick="exportWpp('${p.id}')">📲 Enviar por WhatsApp</button>
-      <button class="btn" style="background:rgba(249,115,22,.15);color:var(--a);border:1px solid rgba(249,115,22,.3)" onclick="editarPedido('${p.id}')">✏️ Editar</button>
-      <button class="btn btn-ghost" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
-      <button class="btn btn-ghost" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Acompanhar pedido #${p.num}'})">🔔 Follow-up</button>
-      <button class="btn btn-danger" onclick="delPed('${p.id}')">🗑️ Excluir</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">👤 Cliente</div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt);line-height:1.3">${p.cliNome}</div>
+        ${p.cliFan?'<div style="font-size:11px;color:var(--acc);margin-top:2px">'+p.cliFan+'</div>':''}
+        ${p.cliCnpj?'<div style="font-size:11px;color:var(--sub);margin-top:6px">'+p.cliCnpj+'</div>':''}
+        ${p.cliCid?'<div style="font-size:11px;color:var(--sub)">'+p.cliCid+(p.cliUF?'/'+p.cliUF:'')+'</div>':''}
+        <div style="margin-top:8px"><span class="tag-a">${p.cliCond||'—'}</span></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🚛 Frete</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:4px">${p.itens.length} item(s) · <span style="color:var(--txt);font-weight:600">${fmt(p.total)}</span></div>
+        <div style="font-size:12px;color:${p.frete?'var(--txt)':'var(--sub)'};">${p.frete||'Frete não informado'}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:8px">🏢 <span style="color:var(--txt);font-weight:500">${p.repNome}</span></div>
+      </div>
     </div>
-  </div>`;
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:700;color:var(--txt)">Itens do Pedido</span>
+        <span style="font-size:11px;color:var(--sub)">${p.itens.length} produto(s)</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:rgba(220,38,38,.05)">
+          <th style="padding:8px 14px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">#</th>
+          <th style="padding:8px 8px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Produto</th>
+          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Obs.</th>
+          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Qtd</th>
+          <th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Vl. Fardo</th>
+          <th style="padding:8px 14px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Total</th>
+        </tr></thead>
+        <tbody>${p.itens.map((it,i)=>'<tr style="border-top:1px solid var(--bdr)'+(i%2?';background:rgba(255,255,255,.02)':'')+'"><td style="padding:10px 14px;font-size:12px;color:var(--sub)">'+(i+1)+'</td><td style="padding:10px 8px"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">'+it.desc+'</div><span class="tag">'+it.cod+'</span></td><td style="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(220,38,38,.18),rgba(220,38,38,.08));border:1px solid rgba(220,38,38,.35);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.7)">Total do Pedido</span>
+      <span style="font-size:24px;font-weight:800;color:#ff4444;letter-spacing:-.5px">${fmt(p.total)}</span>
+    </div>
+    ${p.obs?'<div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px"><div style="font-size:10px;font-weight:900;color:#d97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Observações</div><div style="font-size:13px;line-height:1.6;color:var(--txt)">'+p.obs+'</div></div>':''}
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin-bottom:10px">Alterar Status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm ${st==='aberto'?'btn-r':'btn-ghost'}" onclick="setStatus('${p.id}','aberto')">● Aberto</button>
+        <button class="btn btn-sm ${st==='enviado'?'btn-g':'btn-ghost'}" onclick="setStatus('${p.id}','enviado')">✓ Enviado</button>
+        <button class="btn btn-sm ${st==='cancelado'?'':'btn-ghost'}" style="${st==='cancelado'?'background:rgba(100,116,139,.2);color:#94a3b8;border:1px solid #64748b':''}" onclick="setStatus('${p.id}','cancelado')">✗ Cancelado</button>
+        <button class="btn btn-sm btn-ghost" style="margin-left:auto;color:rgba(220,38,38,.6)" onclick="delPed('${p.id}')">🗑 Excluir</button>
+      </div>
+    </div>
+  </div>
+  `;
   document.getElementById('mpedido').classList.add('open');
 }
-
 function setStatus(id,s){const peds=DB.get('pedidos');const p=peds.find(x=>x.id==id);if(p){p.status=s;DB.set('pedidos',peds);render();verPedido(id)}}
 function delPed(id){if(!confirm('Excluir pedido?'))return;DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
 function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;npEditId=id;np={cliId:p.cliId,repId:p.repId,itens:p.itens.map(i=>({...i})),obs:p.obs||'',fretePeso:p.fretePeso||0,freteKm:p.freteKm||0,freteValor:p.freteValor||0,freteResp:p.freteResp||''};pSearch='';closeMPed();goto('novo-pedido')}
