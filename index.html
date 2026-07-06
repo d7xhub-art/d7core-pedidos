@@ -422,7 +422,7 @@ function maskCNPJ(v){return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1.$2').
 function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'):d.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3')}
 function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
 
-let tab='dashboard',editId=null,pSearch='',npEditId=null;
+let tab='dashboard',editId=null,pSearch='',npEditId=null,_selReps=new Set();
 let np={cliId:'',repId:'',itens:[],obs:''};
 
 // ══ MODAL ══
@@ -839,7 +839,8 @@ function pgCatalogo(){
   return `
   <div class="pg-head">
     <div><div class="pg-title">📒 Catálogo</div><div class="pg-sub">${totalProds} produto(s) · ${reps.length} representada(s)</div></div>
-    <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="enviarCatalogoWpp('')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 WhatsApp</button><button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️ Imprimir Catálogo</button></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toggleSelMode()" style="background:${_selReps.size>0?'rgba(37,211,102,.2)':'rgba(99,102,241,.1)'};border-color:${_selReps.size>0?'rgba(37,211,102,.5)':'rgba(99,102,241,.3)'};color:${_selReps.size>0?'#25d366':'#818cf8'}">☑️ ${_selReps.size>0?_selReps.size+' selecionada(s)':'Selecionar'}</button><button class="btn btn-ghost" onclick="enviarCatalogoWpp('')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 Tudo</button><button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️</button></div>
+  ${_selReps.size>0?`<div style="position:sticky;top:0;z-index:50;margin:0 0 14px;background:linear-gradient(135deg,#25d366,#128c7e);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between"><span style="color:#fff;font-weight:700;font-size:14px">✅ ${_selReps.size} empresa(s) selecionada(s)</span><div style="display:flex;gap:8px"><button onclick="_selReps.clear();render()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px">✕ Limpar</button><button onclick="enviarRepsSelecionadasWpp()" style="background:#fff;border:none;color:#128c7e;padding:7px 16px;border-radius:8px;cursor:pointer;font-weight:900;font-size:13px">📲 Enviar Seleção</button></div></div>`:''}
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -863,7 +864,7 @@ function pgCatalogo(){
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;color:var(--sub);font-weight:700">${g.items.length} produto(s)</span>
-            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲</button>`:''}
+            ${r?`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:${_selReps.has(r.id)?'rgba(37,211,102,.18)':'rgba(255,255,255,.05)'};border:1px solid ${_selReps.has(r.id)?'rgba(37,211,102,.5)':'var(--border)'};border-radius:8px"><input type="checkbox" ${_selReps.has(r.id)?'checked':''} onchange="toggleRepSel('${r.id}')" style="width:15px;height:15px;accent-color:#25d366;cursor:pointer"><span style="font-size:12px;font-weight:700;color:${_selReps.has(r.id)?'#25d366':'var(--sub)'}">Incluir</span></label><button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲</button>`:''}
           </div>
         </div>
         ${g.items.some(p=>p.foto)
@@ -996,6 +997,54 @@ function imprimirCatalogo(){
   setTimeout(()=>w.print(),300);
 }
 
+function toggleRepSel(id){if(_selReps.has(id))_selReps.delete(id);else _selReps.add(id);render();}
+function toggleSelMode(){if(_selReps.size>0){_selReps.clear();render();}else{const reps=DB.get('representadas');reps.forEach(r=>_selReps.add(r.id));render();}}
+function enviarRepsSelecionadasWpp(){
+  if(_selReps.size===0)return alert('Nenhuma empresa selecionada.');
+  const allReps=DB.get('representadas');
+  const allProds=DB.get('produtos');
+  const repsSelList=allReps.filter(r=>_selReps.has(r.id));
+  const clis=DB.get('clientes').filter(c=>c.wppComp||c.fone);
+  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">${c.contato||c.fantasia||c.razao}${c.wppComp?' — '+c.wppComp:c.fone?' — '+c.fone:''}</option>`).join('');
+  const repNames=repsSelList.map(r=>r.fantasia||r.razao).join(', ');
+  openModal('📲 Enviar Catálogo Selecionado',`
+  <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#25d366;font-weight:700">✅ ${repsSelList.length} empresa(s): ${repNames}</div>
+  <div class="fld" style="margin-bottom:14px"><label>Selecionar Comprador Cadastrado</label>
+    <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
+      <option value="">— Digite o número abaixo —</option>${opts}
+    </select>
+  </div>
+  <div class="fld" style="margin-bottom:14px"><label>WhatsApp do Comprador</label>
+    <input id="wppNum" type="tel" placeholder="(62) 99999-9999" oninput="this.value=maskFone(this.value)" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px">
+  </div>
+  <div class="fld" style="margin-bottom:16px"><label>Mensagem inicial (opcional)</label>
+    <textarea id="wppMsg" placeholder="Olá! Segue nossa seleção de produtos." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:55px;resize:vertical"></textarea>
+  </div>
+  <button class="btn btn-full" onclick="confirmarEnvioRepsSel()" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📲 Abrir WhatsApp</button>`);
+}
+function confirmarEnvioRepsSel(){
+  const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
+  const intro=document.getElementById('wppMsg').value.trim();
+  const selEl=document.getElementById('wppSelect');
+  const selCli=selEl&&selEl.value?DB.get('clientes').find(c=>c.id===selEl.value):null;
+  if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
+  const allReps=DB.get('representadas'),allProds=DB.get('produtos');
+  const repsSelList=allReps.filter(r=>_selReps.has(r.id));
+  const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
+  let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
+  if(intro)msg+=intro+'\n\n';
+  msg+='📒 *Catálogo Selecionado*\n'+'━━━━━━━━━━━━━━━━━\n\n';
+  repsSelList.forEach(r=>{
+    const prods=allProds.filter(p=>p.repId===r.id);
+    if(!prods.length)return;
+    msg+='🏢 *'+(r.fantasia||r.razao)+'*\n';
+    prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});
+    msg+='\n';
+  });
+  msg+='_Pedidos pelo WhatsApp_ 📦';
+  window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  closeModal();
+}
 function enviarCatalogoWpp(repId){
   const clis=DB.get('clientes').filter(c=>c.wppComp||c.fone);
   const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
