@@ -577,7 +577,10 @@ function fmCli(c={}){return `
     <div class="fld"><label>Telefone / WhatsApp</label><input id="cFone" value="${c.fone||''}" placeholder="(11) 99999-9999" type="tel" oninput="this.value=maskFone(this.value)"></div>
     <div class="fld"><label>E-mail</label><input id="cEmail" value="${c.email||''}" placeholder="email@empresa.com.br" type="email"></div>
   </div>
-  <div class="fld"><label>Nome do Responsável / Comprador</label><input id="cContato" value="${c.contato||''}" placeholder="Contato principal"></div>
+  <div class="row2">
+    <div class="fld"><label>Nome do Comprador</label><input id="cContato" value="${c.contato||''}" placeholder="Nome do comprador"></div>
+    <div class="fld"><label>WhatsApp do Comprador</label><input id="cWppComp" value="${c.wppComp||''}" placeholder="(62) 99999-9999" type="tel" oninput="this.value=maskFone(this.value)"></div>
+  </div>
   <div class="sec">📍 Endereço</div>
   <div class="row2">
     <div class="fld"><label>CEP</label><input id="cCEP" value="${c.cep||''}" placeholder="00000-000" oninput="this.value=maskCEP(this.value)" onblur="buscarCEP('c')" maxlength="9"></div>
@@ -606,7 +609,7 @@ function saveCli(){
   const razao=document.getElementById('cRazao').value.trim();
   if(!razao)return alert('Razão Social é obrigatória.');
   const list=DB.get('clientes');
-  const o={id:editId||uuid(),cnpj:document.getElementById('cCnpj').value.trim(),razao,fantasia:document.getElementById('cFantasia').value.trim(),fone:document.getElementById('cFone').value.trim(),email:document.getElementById('cEmail').value.trim(),contato:document.getElementById('cContato').value.trim(),cep:document.getElementById('cCEP').value.trim(),rua:document.getElementById('cRua').value.trim(),num:document.getElementById('cNum').value.trim(),bairro:document.getElementById('cBairro').value.trim(),cidade:document.getElementById('cCidade').value.trim(),uf:document.getElementById('cUF').value.trim().toUpperCase(),condPag:document.getElementById('cCond').value,limite:parseFloat(document.getElementById('cLimite').value)||0,obs:document.getElementById('cObs').value.trim()};
+  const o={id:editId||uuid(),cnpj:document.getElementById('cCnpj').value.trim(),razao,fantasia:document.getElementById('cFantasia').value.trim(),fone:document.getElementById('cFone').value.trim(),email:document.getElementById('cEmail').value.trim(),contato:document.getElementById('cContato').value.trim(),cep:document.getElementById('cCEP').value.trim(),rua:document.getElementById('cRua').value.trim(),num:document.getElementById('cNum').value.trim(),bairro:document.getElementById('cBairro').value.trim(),cidade:document.getElementById('cCidade').value.trim(),uf:document.getElementById('cUF').value.trim().toUpperCase(),condPag:document.getElementById('cCond').value,limite:parseFloat(document.getElementById('cLimite').value)||0,obs:document.getElementById('cObs').value.trim(),wppComp:(document.getElementById('cWppComp')||{}).value||''};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('clientes',list);closeModal();render();updateBadges();
 }
@@ -994,34 +997,52 @@ function imprimirCatalogo(){
 }
 
 function enviarCatalogoWpp(repId){
-  openModal('📲 Enviar Catálogo via WhatsApp',`<div class="fld" style="margin-bottom:14px"><label>WhatsApp do Comprador</label><input id="wppNum" type="tel" placeholder="(62) 99999-9999" oninput="this.value=maskFone(this.value)" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px"></div><div class="fld" style="margin-bottom:16px"><label>Mensagem inicial (opcional)</label><textarea id="wppMsg" placeholder="Olá! Segue nosso catálogo." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:70px;resize:vertical"></textarea></div><button class="btn btn-p btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none">📲 Abrir WhatsApp</button>`);
+  const clis=DB.get('clientes').filter(c=>c.wppComp||c.fone);
+  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
+  openModal('📲 Enviar Catálogo via WhatsApp',`
+  <div class="fld" style="margin-bottom:14px">
+    <label>Selecionar Comprador Cadastrado</label>
+    <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
+      <option value="">— Digite o número abaixo —</option>
+      ${opts}
+    </select>
+  </div>
+  <div class="fld" style="margin-bottom:14px">
+    <label>WhatsApp do Comprador</label>
+    <input id="wppNum" type="tel" placeholder="(62) 99999-9999" oninput="this.value=maskFone(this.value)" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px">
+  </div>
+  <div class="fld" style="margin-bottom:16px">
+    <label>Mensagem inicial (opcional)</label>
+    <textarea id="wppMsg" placeholder="Olá! Segue nosso catálogo de produtos." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:60px;resize:vertical"></textarea>
+  </div>
+  <button class="btn btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📲 Abrir WhatsApp</button>
+  `);
 }
 
 function confirmarEnvioWpp(repId){
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
   const intro=document.getElementById('wppMsg').value.trim();
+  const selEl=document.getElementById('wppSelect');
+  const selId=selEl?selEl.value:'';
+  const selCli=selId?DB.get('clientes').find(c=>c.id===selId):null;
   if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
   let prods,titulo;
-  if(repId){
-    prods=allProds.filter(p=>p.repId==repId);
-    const r=allReps.find(x=>x.id==repId)||{};
-    titulo=r.fantasia||r.razao||'Catálogo';
-  }else{
-    prods=allProds;
-    titulo='Catálogo Completo';
-  }
+  if(repId){prods=allProds.filter(p=>p.repId==repId);const r=allReps.find(x=>x.id==repId)||{};titulo=r.fantasia||r.razao||'Catálogo';}
+  else{prods=allProds;titulo='Catálogo Completo';}
   if(!prods.length)return alert('Nenhum produto neste catálogo.');
-  let msg=intro?intro+'\n\n':'';
+  const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
+  let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
+  if(intro)msg+=intro+'\n\n';
   msg+='📒 *'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
   if(!repId){
     const groups={};
     allReps.forEach(r=>{const items=prods.filter(p=>p.repId===r.id);if(items.length)groups[r.id]={nome:r.fantasia||r.razao,items};});
     const semRep=prods.filter(p=>!p.repId);
     if(semRep.length)groups['__']={nome:'Outros',items:semRep};
-    Object.values(groups).forEach(g=>{msg+='🏢 *'+g.nome+'*\n';g.items.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n'+'  '+fmt(p.preco)+'/'+p.un+'\n';});msg+='\n';});
+    Object.values(groups).forEach(g=>{msg+='🏢 *'+g.nome+'*\n';g.items.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});msg+='\n';});
   }else{
-    prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n'+'  '+fmt(p.preco)+'/'+p.un+'\n';});
+    prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});
   }
   msg+='\n_Pedidos pelo WhatsApp_ 📦';
   window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
