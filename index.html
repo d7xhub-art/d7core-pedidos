@@ -1004,8 +1004,8 @@ function enviarRepsSelecionadasWpp(){
   const allReps=DB.get('representadas');
   const allProds=DB.get('produtos');
   const repsSelList=allReps.filter(r=>_selReps.has(r.id));
-  const clis=DB.get('clientes').filter(c=>c.wppComp||c.fone);
-  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">${c.contato||c.fantasia||c.razao}${c.wppComp?' — '+c.wppComp:c.fone?' — '+c.fone:''}</option>`).join('');
+  const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
+  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp?' — '+c.wppComp:c.fone?' — '+c.fone:''}</option>`).join('');
   const repNames=repsSelList.map(r=>r.fantasia||r.razao).join(', ');
   openModal('📲 Enviar Catálogo Selecionado',`
   <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#25d366;font-weight:700">✅ ${repsSelList.length} empresa(s): ${repNames}</div>
@@ -1026,7 +1026,7 @@ function confirmarEnvioRepsSel(){
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
   const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
-  const selCli=selEl&&selEl.value?DB.get('clientes').find(c=>c.id===selEl.value):null;
+  const _sp2=selEl&&selEl.value?DB.get('prospectos').find(p=>p.id===selEl.value):null;const selCli=selEl&&selEl.value?(DB.get('clientes').find(c=>c.id===selEl.value)||(_sp2?{id:_sp2.id,contato:_sp2.nome,fantasia:_sp2.empresa,fone:_sp2.fone,wppComp:_sp2.fone}:null)):null;
   if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
   const repsSelList=allReps.filter(r=>_selReps.has(r.id));
@@ -1046,8 +1046,8 @@ function confirmarEnvioRepsSel(){
   closeModal();
 }
 function enviarCatalogoWpp(repId){
-  const clis=DB.get('clientes').filter(c=>c.wppComp||c.fone);
-  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
+  const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
+  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
   openModal('📲 Enviar Catálogo via WhatsApp',`
   <div class="fld" style="margin-bottom:14px">
     <label>Selecionar Comprador Cadastrado</label>
@@ -1073,7 +1073,7 @@ function confirmarEnvioWpp(repId){
   const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
   const selId=selEl?selEl.value:'';
-  const selCli=selId?DB.get('clientes').find(c=>c.id===selId):null;
+  const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
   if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
   let prods,titulo;
