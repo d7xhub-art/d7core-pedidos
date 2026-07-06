@@ -836,7 +836,7 @@ function pgCatalogo(){
   return `
   <div class="pg-head">
     <div><div class="pg-title">📒 Catálogo</div><div class="pg-sub">${totalProds} produto(s) · ${reps.length} representada(s)</div></div>
-    <button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️ Imprimir Catálogo</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="enviarCatalogoWpp('')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 WhatsApp</button><button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️ Imprimir Catálogo</button></div>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -860,7 +860,7 @@ function pgCatalogo(){
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;color:var(--sub);font-weight:700">${g.items.length} produto(s)</span>
-            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button>`:''}
+            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲</button>`:''}
           </div>
         </div>
         ${g.items.some(p=>p.foto)
@@ -991,6 +991,41 @@ function imprimirCatalogo(){
   </body></html>`);
   w.document.close();
   setTimeout(()=>w.print(),300);
+}
+
+function enviarCatalogoWpp(repId){
+  openModal('📲 Enviar Catálogo via WhatsApp',`<div class="fld" style="margin-bottom:14px"><label>WhatsApp do Comprador</label><input id="wppNum" type="tel" placeholder="(62) 99999-9999" oninput="this.value=maskFone(this.value)" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px"></div><div class="fld" style="margin-bottom:16px"><label>Mensagem inicial (opcional)</label><textarea id="wppMsg" placeholder="Olá! Segue nosso catálogo." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:70px;resize:vertical"></textarea></div><button class="btn btn-p btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none">📲 Abrir WhatsApp</button>`);
+}
+
+function confirmarEnvioWpp(repId){
+  const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
+  const intro=document.getElementById('wppMsg').value.trim();
+  if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
+  const allReps=DB.get('representadas'),allProds=DB.get('produtos');
+  let prods,titulo;
+  if(repId){
+    prods=allProds.filter(p=>p.repId==repId);
+    const r=allReps.find(x=>x.id==repId)||{};
+    titulo=r.fantasia||r.razao||'Catálogo';
+  }else{
+    prods=allProds;
+    titulo='Catálogo Completo';
+  }
+  if(!prods.length)return alert('Nenhum produto neste catálogo.');
+  let msg=intro?intro+'\n\n':'';
+  msg+='📒 *'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
+  if(!repId){
+    const groups={};
+    allReps.forEach(r=>{const items=prods.filter(p=>p.repId===r.id);if(items.length)groups[r.id]={nome:r.fantasia||r.razao,items};});
+    const semRep=prods.filter(p=>!p.repId);
+    if(semRep.length)groups['__']={nome:'Outros',items:semRep};
+    Object.values(groups).forEach(g=>{msg+='🏢 *'+g.nome+'*\n';g.items.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n'+'  '+fmt(p.preco)+'/'+p.un+'\n';});msg+='\n';});
+  }else{
+    prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n'+'  '+fmt(p.preco)+'/'+p.un+'\n';});
+  }
+  msg+='\n_Pedidos pelo WhatsApp_ 📦';
+  window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  closeModal();
 }
 
 /* ══════════════════════ NOVO PEDIDO ══════════════════════ */
