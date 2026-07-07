@@ -318,7 +318,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
     <div style="display:flex;align-items:center;gap:8px">
       <div class="sb-dot" id="statusDot"></div>
       <span id="statusMsg">Dados salvos localmente</span>
-      <div id="syncDot" title="Nuvem" onclick="supaFullSync()" style="width:8px;height:8px;border-radius:50%;background:var(--sub2);cursor:pointer;transition:background .3s;margin-left:4px" title="☁️ Clique para sincronizar"></div>
+      <div id="syncDot" title="Nuvem" onclick="openSupabaseSetup()" style="width:8px;height:8px;border-radius:50%;background:var(--sub2);cursor:pointer;transition:background .3s;margin-left:4px" title="☁️ Clique para sincronizar"></div>
       <span style="font-size:10px;color:var(--sub2)">☁️</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px;color:var(--sub2)">
@@ -380,11 +380,65 @@ function setSyncDot(s){
   el.title=s==='ok'?'✅ Nuvem sincronizada':s==='wait'?'⏳ Sincronizando...':'❌ Erro de sincronização';
 }
 
-async function supaFullSync(){
+async async function supaFullSync(){
   setSyncDot('wait');
   const tabs=['clientes','produtos','representadas','pedidos','followups','prospectos'];
   for(const t of tabs)await supaSyncTable(t,DB.get(t));
   setSyncDot('ok');
+}
+
+async function openSupabaseSetup(){
+  // Test connection first
+  let status='⏳ Testando...', detail='';
+  const modal = openModal('☁️ Supabase — Configuração',`
+    <div id="sbStatus" style="margin-bottom:12px;padding:10px;border-radius:6px;background:#f5f5f5;font-size:13px">⏳ Testando conexão...</div>
+    <div class="sec">📋 SQL para criar as tabelas</div>
+    <div style="font-size:11px;color:#666;margin-bottom:6px">Cole isso no <b>Supabase → SQL Editor → New query</b> e clique em RUN:</div>
+    <textarea id="sbSql" readonly style="width:100%;height:160px;font-size:11px;font-family:monospace;border:1px solid #ddd;border-radius:4px;padding:8px;resize:none;box-sizing:border-box">-- Execute no Supabase SQL Editor
+create table if not exists clientes(id text primary key,data jsonb,updated_at timestamptz default now());
+create table if not exists prospectos(id text primary key,data jsonb,updated_at timestamptz default now());
+create table if not exists representadas(id text primary key,data jsonb,updated_at timestamptz default now());
+create table if not exists produtos(id text primary key,data jsonb,updated_at timestamptz default now());
+create table if not exists pedidos(id text primary key,data jsonb,updated_at timestamptz default now());
+create table if not exists followups(id text primary key,data jsonb,updated_at timestamptz default now());
+alter table clientes enable row level security;
+alter table prospectos enable row level security;
+alter table representadas enable row level security;
+alter table produtos enable row level security;
+alter table pedidos enable row level security;
+alter table followups enable row level security;
+create policy "anon_all" on clientes for all to anon using(true) with check(true);
+create policy "anon_all" on prospectos for all to anon using(true) with check(true);
+create policy "anon_all" on representadas for all to anon using(true) with check(true);
+create policy "anon_all" on produtos for all to anon using(true) with check(true);
+create policy "anon_all" on pedidos for all to anon using(true) with check(true);
+create policy "anon_all" on followups for all to anon using(true) with check(true);</textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-p" onclick="navigator.clipboard.writeText(document.getElementById('sbSql').value).then(()=>alert('SQL copiado!'))">📋 Copiar SQL</button>
+      <a href="https://supabase.com/dashboard/project/uewcjlfctumjvqsagnxg/sql/new" target="_blank" class="btn btn-p" style="text-decoration:none">🔗 Abrir SQL Editor</a>
+      <button class="btn" onclick="supaFullSync().then(()=>openSupabaseSetup())">🔄 Sincronizar Agora</button>
+    </div>
+  `);
+  // Test async
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/clientes?limit=1',{headers:SUPA_H});
+    const el=document.getElementById('sbStatus');
+    if(!el)return;
+    if(r.ok){
+      const d=await r.json();
+      el.style.background='#e8f5e9';
+      el.textContent='✅ Conectado! Tabela clientes ok — '+d.length+' registro(s) encontrado(s).';
+    } else if(r.status===404||r.status===400){
+      el.style.background='#fff3e0';
+      el.innerHTML='⚠️ Conectado mas <b>tabelas não existem</b>. Execute o SQL acima no Supabase.';
+    } else {
+      el.style.background='#fce4ec';
+      el.textContent='❌ Erro '+r.status+'. Verifique URL e Key no código.';
+    }
+  }catch(e){
+    const el=document.getElementById('sbStatus');
+    if(el){el.style.background='#fce4ec';el.textContent='❌ Falha de rede: '+e.message;}
+  }
 }
 
 async function supaPull(){
