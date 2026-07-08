@@ -380,7 +380,7 @@ function setSyncDot(s){
   el.title=s==='ok'?'✅ Nuvem sincronizada':s==='wait'?'⏳ Sincronizando...':'❌ Erro de sincronização';
 }
 
-async async function supaFullSync(){
+async function supaFullSync(){
   setSyncDot('wait');
   const tabs=['clientes','produtos','representadas','pedidos','followups','prospectos'];
   for(const t of tabs)await supaSyncTable(t,DB.get(t));
@@ -418,9 +418,7 @@ create policy "anon_all" on followups for all to anon using(true) with check(tru
       <a href="https://supabase.com/dashboard/project/uewcjlfctumjvqsagnxg/sql/new" target="_blank" class="btn btn-p" style="text-decoration:none">🔗 Abrir SQL Editor</a>
       <button class="btn" onclick="supaFullSync().then(()=>openSupabaseSetup())">🔄 Sincronizar Agora</button>
     </div>
-  `);
-  // Test async
-  try{
+  `);  try{
     const r=await fetch(SUPA_URL+'/rest/v1/clientes?limit=1',{headers:SUPA_H});
     const el=document.getElementById('sbStatus');
     if(!el)return;
