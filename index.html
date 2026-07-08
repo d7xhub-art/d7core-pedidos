@@ -461,7 +461,7 @@ function updateStatus(){
   document.getElementById('stProd').textContent=prods.length+' produtos';
   document.getElementById('stPed').textContent=peds.length+' pedidos';
   const now=new Date();
-  document.getElementById('lastSave').textContent='Salvo às '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('lastSave').textContent='Salvo às '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+'  v1.1';
 }
 
 // ══ UTILS ══
@@ -476,7 +476,7 @@ let tab='dashboard',editId=null,pSearch='',npEditId=null,_selReps=new Set();
 let np={cliId:'',repId:'',itens:[],obs:''};
 
 // ══ MODAL ══
-function openModal(title,html){document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
+function openModal(title,html){closeMPed();document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open');editId=null}
 function closeMPed(){document.getElementById('mpedido').classList.remove('open')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
@@ -2302,7 +2302,7 @@ goto('dashboard');
         }
       }catch(e){console.warn('pull:',t,e)}
     }
-    if(pulled>0){updateStatus();updateBadges();render();}else{supaPull();}
+    if(pulled>0){updateStatus();updateBadges();render();}supaPull();
     // Push local data to cloud (won't push empties)
     for(const t of tabs)await supaSyncTable(t,DB.get(t));
     setSyncDot('ok');
