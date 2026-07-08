@@ -119,9 +119,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 .search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--sub2);pointer-events:none}
 .filter-sel{background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;outline:none;transition:border .15s}
 .filter-sel:focus{border-color:var(--p)}
-.filter-sel option{background:#141c2b;color:var(--text)}
-
-/* ══ BADGE / TAG ══ */
+.filter-sel option{.filter-sel option{color:var(--text)} ══ */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
 .bd-open{background:rgba(220,38,38,.12);color:#ff6666;border:1px solid rgba(220,38,38,.2)}
 .bd-sent{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
@@ -145,7 +143,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 .fld label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
 .fld input,.fld select,.fld textarea{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:rgba(255,255,255,.025);outline:none;color:var(--text);width:100%;transition:border .15s;font-family:inherit}
 .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--p);background:rgba(220,38,38,.04)}
-.fld select option{background:#141c2b;color:var(--text)}
+.fld select option{color:var(--text)}
 .fld textarea{resize:vertical;min-height:70px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .row3{display:grid;grid-template-columns:1fr 1fr 90px;gap:10px}
@@ -735,7 +733,8 @@ function pgProdutos(){
 
 function openFormProd(id){
   editId=id||null;const p=id?DB.get('produtos').find(x=>x.id==id):{};const c=p||{};
-  const reps=DB.get('representadas');
+  if(!DB.get('representadas').length){supaPull().then(()=>openFormProd(id));return;}
+const reps=DB.get('representadas');
   _prodFoto='';
   openModal(id?'Editar Produto':'Novo Produto',`
   <div>
@@ -2303,7 +2302,7 @@ goto('dashboard');
         }
       }catch(e){console.warn('pull:',t,e)}
     }
-    if(pulled>0){updateStatus();updateBadges();render();}
+    if(pulled>0){updateStatus();updateBadges();render();}else{supaPull();}
     // Push local data to cloud (won't push empties)
     for(const t of tabs)await supaSyncTable(t,DB.get(t));
     setSyncDot('ok');
