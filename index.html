@@ -510,7 +510,7 @@ function goto(t){
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('si-'+t);if(el)el.classList.add('on');
   document.getElementById('tb-title').textContent=titles[t]||t;
-  closeSidebar();render();updateBadges();
+  closeModal();closeMPed();closeSidebar();render();updateBadges();
 }
 
 // ══ RENDER ══
