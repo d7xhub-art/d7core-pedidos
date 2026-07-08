@@ -280,7 +280,8 @@ tr:hover td{background:rgba(255,255,255,.018)}
 
     <div class="sb-section">Dados</div>
     <div class="sb-item" id="si-backup" onclick="goto('backup')"><span class="ico">💾</span>Backup & Restore</div>
-  </div>
+  
+    <div class="sb-item" id="si-config" onclick="goto('config')"><span class="ico">⚙️</span>Configurações</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
     <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0<br><span style="color:#253350">© 2025 • Todos os direitos</span></div>
@@ -504,7 +505,7 @@ function updateBadges(){
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore'};
+const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore',config:'Configurações'};
 function goto(t){
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -516,7 +517,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda,config:pgConfig};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -2308,6 +2309,42 @@ goto('dashboard');
     setSyncDot('ok');
   }catch(e){setSyncDot('err');}
 })();
+
+function pgConfig(){
+  const cfg=DB.get('config')||{};
+  const cal=localStorage.getItem('d7_cal_url')||'';
+  return `<div style="padding:20px;max-width:600px">
+    <h2 style="margin-bottom:20px;color:var(--text)">⚙️ Configurações</h2>
+    <div class="pd-block">
+      <h4 style="margin-bottom:12px;color:var(--sub)">📅 Agenda</h4>
+      <div class="fld"><label>URL do Google Calendar</label>
+        <input class="dark-input" id="cfgCal" value="${cal}" placeholder="https://calendar.google.com/calendar/embed?src=..."></div>
+    </div>
+    <div class="pd-block">
+      <h4 style="margin-bottom:12px;color:var(--sub)">🎯 Metas de Distribuição</h4>
+      <div class="fld"><label>Nome da Meta</label>
+        <input class="dark-input" id="cfgMetaNome" value="${cfg.metaDistNome||''}" placeholder="Ex: Novos Clientes"></div>
+      <div class="fld"><label>Total da Meta</label>
+        <input class="dark-input" id="cfgMetaTotal" type="number" value="${cfg.metaDistTotal||''}" placeholder="Ex: 80"></div>
+    </div>
+    <div class="pd-block">
+      <h4 style="margin-bottom:12px;color:var(--sub)">☁️ Sincronização</h4>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-a" onclick="supaFullSync()">☁️ Sincronizar Agora</button>
+        <button class="btn btn-ghost" onclick="supaPull()">⬇️ Restaurar da Nuvem</button>
+      </div>
+    </div>
+    <button class="btn btn-a" style="margin-top:8px;width:100%" onclick="saveConfig()">💾 Salvar</button>
+  </div>`;
+}
+function saveConfig(){
+  const cfg=DB.get('config')||{};
+  cfg.metaDistNome=document.getElementById('cfgMetaNome').value;
+  cfg.metaDistTotal=parseInt(document.getElementById('cfgMetaTotal').value)||0;
+  DB.set('config',cfg);
+  localStorage.setItem('d7_cal_url',document.getElementById('cfgCal').value);
+  alert('✅ Configurações salvas!');
+}
 </script>
 </body>
 </html>
