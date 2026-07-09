@@ -2419,11 +2419,11 @@ function openFormOrc(id){
         <div>Frete p/ kg: <input class="dark-input" id="orcFreteUn"></div>
       </div>
     </div>
-    <div class="pd-block">
+    <div class="pd-block" style="overflow-x:auto">
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
       <table style="width:100%;border-collapse:collapse">
         <thead style="font-size:11px;color:var(--sub)">
-          <tr><th align="left" style="padding:4px">Produto</th><th>Qtd</th><th>Un</th><th>Peso(kg)</th><th>Preço Un</th><th>Subtotal</th><th></th></tr>
+          <tr><th align="left" style="padding:4px;min-width:140px">Produto</th><th>Qtd</th><th>Un</th><th>Peso(kg)</th><th>Preço Un</th><th>Subtotal</th><th></th></tr>
         </thead>
         <tbody id="orc-itens-body">${itensHtml}</tbody>
       </table>
