@@ -163,6 +163,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 .btn-danger{background:rgba(239,68,68,.1);color:#f87171;border:1.5px solid rgba(239,68,68,.25)!important}
 .btn-full{width:100%;display:block;text-align:center}
 .btn-sm{padding:7px 12px;font-size:12px;border-radius:7px}
+.btn-primary{border:none;cursor:pointer;border-radius:8px;font-weight:700;font-size:13px;padding:10px 16px;transition:all .15s;font-family:inherit;letter-spacing:.1px;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;box-shadow:0 2px 12px rgba(249,115,22,.3);white-space:nowrap}
 .btn-cnpj{background:rgba(220,38,38,.1);color:#ff8080;border:1.5px solid rgba(220,38,38,.25)!important;padding:10px 14px;font-size:13px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit}
 .btn-cnpj:disabled{opacity:.4;cursor:not-allowed}
 .btn-cnpj:hover:not(:disabled){background:rgba(220,38,38,.2)}
@@ -2387,7 +2388,7 @@ function openFormOrc(id){
   function buildRow(it,i){
     const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
     return `<tr class="orc-item-row">
-      <td style="min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+      <td style="min-width:340px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
       <td><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:65px"></td>
       <td class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
       <td><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:65px" placeholder="kg" value="${it?.peso||0}"></td>
@@ -2423,7 +2424,7 @@ function openFormOrc(id){
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
       <table style="width:100%;border-collapse:collapse">
         <thead style="font-size:11px;color:var(--sub)">
-          <tr><th align="left" style="padding:4px;min-width:140px">Produto</th><th>Qtd</th><th>Un</th><th>Peso(kg)</th><th>Preço Un</th><th>Subtotal</th><th></th></tr>
+          <tr><th align="left" style="padding:4px;min-width:340px">Produto</th><th>Qtd</th><th>Un</th><th>Peso(kg)</th><th>Preço Un</th><th>Subtotal</th><th></th></tr>
         </thead>
         <tbody id="orc-itens-body">${itensHtml}</tbody>
       </table>
@@ -2454,7 +2455,7 @@ function addOrcRow(){
   const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
   const tr=document.createElement('tr');
   tr.className='orc-item-row';
-  tr.innerHTML=`<td style="min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+  tr.innerHTML=`<td style="min-width:340px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
     <td><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:65px"></td>
     <td class="orc-un-cell"><span class="tag">—</span></td>
     <td><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:65px" placeholder="kg"></td>
