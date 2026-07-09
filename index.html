@@ -310,6 +310,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
       <button class="tb-btn btn-imp" onclick="triggerImport()">📥 Importar</button>
       <button class="tb-btn btn-bk" onclick="exportarBackup()">💾 Backup</button>
       <button class="tb-btn btn-add" onclick="goto('novo-pedido')">+ Novo Pedido</button>
+    <button class="tb-btn btn-primary" onclick="openFormOrc()">📋 Novo Orçamento</button>
     </div>
   </div>
   <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importarBackup(event)">
@@ -2410,6 +2411,14 @@ function openFormOrc(id){
       </div>
     </div>
     <div class="pd-block">
+      <h4>🚚 Frete</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div>Distância (km): <input class="dark-input" id="orcDist" type="number" onchange="calcOrcTotal()"></div>
+        <div>Frete Total (R$): <input class="dark-input" id="orcFreteTotal" type="number" onchange="calcOrcTotal()"></div>
+        <div>Frete p/ Unid: <input class="dark-input" id="orcFreteUn" readonly></div>
+      </div>
+    </div>
+    <div class="pd-block">
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
       <table style="width:100%;border-collapse:collapse">
         <thead style="font-size:11px;color:var(--sub)">
@@ -2465,15 +2474,20 @@ function orcProdChange(sel){
   calcOrcTotal();
 }
 function calcOrcTotal(){
-  let total=0;
+  let subProd=0,totalQty=0;
   document.querySelectorAll('#orc-itens-body tr').forEach(row=>{
     const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
     const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
     const sub=qty*preco;
-    total+=sub;
+    subProd+=sub;totalQty+=qty;
     const s=row.querySelector('.orc-sub');
     if(s)s.textContent='R$ '+sub.toFixed(2).replace('.',',');
   });
+  const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0');
+  const freteUn=totalQty>0?(freteTotal/totalQty):0;
+  const fuEl=document.getElementById('orcFreteUn');
+  if(fuEl)fuEl.value=freteUn.toFixed(2);
+  const total=subProd+freteTotal;
   const el=document.getElementById('orc-total-display');
   if(el)el.textContent=fmt(total);
   return total;
@@ -2498,10 +2512,10 @@ function saveOrc(id){
   const orcs=DB.get('orcamentos')||[];
   if(id){
     const idx=orcs.findIndex(o=>o.id===id);
-    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||''};
+    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0')};
   }else{
     const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
-    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||''});
+    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0')});
   }
   DB.set('orcamentos',orcs);
   closeModal();
@@ -2521,6 +2535,7 @@ function shareOrcWpp(id){
   lines.push('📅 '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
   (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
   lines.push('','*TOTAL: '+fmt(o.total)+'*');
+  if(o.freteTotal)lines.push('🚚 Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/un');
   if(o.obs)lines.push('📝 '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
