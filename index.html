@@ -310,7 +310,6 @@ tr:hover td{background:rgba(255,255,255,.018)}
       <button class="tb-btn btn-imp" onclick="triggerImport()">📥 Importar</button>
       <button class="tb-btn btn-bk" onclick="exportarBackup()">💾 Backup</button>
       <button class="tb-btn btn-add" onclick="goto('novo-pedido')">+ Novo Pedido</button>
-    <button class="tb-btn btn-primary" onclick="openFormOrc()">📋 Novo Orçamento</button>
     </div>
   </div>
   <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importarBackup(event)">
@@ -1297,6 +1296,7 @@ function pgPedidos(){
   <div class="pg-head">
     <div><div class="pg-title">Pedidos</div><div class="pg-sub">${list.length} pedido(s) · ${fmt(list.reduce((s,p)=>s+p.total,0))}</div></div>
     <button class="btn btn-g" onclick="goto('novo-pedido')">+ Novo Pedido</button>
+  <button class="tb-btn btn-primary" onclick="openFormOrc()">📋 Novo Orçamento</button>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
