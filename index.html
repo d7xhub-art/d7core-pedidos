@@ -282,7 +282,8 @@ tr:hover td{background:rgba(255,255,255,.018)}
     <div class="sb-section">Dados</div>
     <div class="sb-item" id="si-backup" onclick="goto('backup')"><span class="ico">💾</span>Backup & Restore</div>
   
-    <div class="sb-item" id="si-config" onclick="goto('config')"><span class="ico">⚙️</span>Configurações</div></div>
+    <div class="sb-item" id="si-config" onclick="goto('config')"><span class="ico">⚙️</span>Configurações</div>
+<div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
     <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0<br><span style="color:#253350">© 2025 • Todos os direitos</span></div>
@@ -506,7 +507,7 @@ function updateBadges(){
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore',config:'Configurações'};
+const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore',config:'Configurações',orcamento:'Orçamento'};
 function goto(t){
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -518,7 +519,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda,config:pgConfig};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda,config:pgConfig,orcamento:pgOrcamento};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -2349,6 +2350,181 @@ function saveConfig(){
   DB.set('config',cfg);
   localStorage.setItem('d7_cal_url',document.getElementById('cfgCal').value);
   alert('✅ Configurações salvas!');
+}
+
+function pgOrcamento(){
+  const orcs=DB.get('orcamentos')||[];
+  const rows=orcs.sort((a,b)=>b.num-a.num).map(o=>{
+    const d=new Date(o.data).toLocaleDateString('pt-BR');
+    return `<tr>
+      <td><span class="tag">#${o.num}</span></td>
+      <td style="font-weight:600">${o.comprador}</td>
+      <td style="color:var(--sub);font-size:12px">${o.cpf||'—'}</td>
+      <td style="color:var(--sub);font-size:12px">${o.tel||'—'}</td>
+      <td>${o.itens?.length||0} item(s)</td>
+      <td style="font-weight:800;color:var(--a)">${fmt(o.total||0)}</td>
+      <td style="color:var(--sub);font-size:12px">${d}</td>
+      <td>
+        <button onclick="openFormOrc('${o.id}')">✏️ Editar</button>
+        <button onclick="shareOrcWpp('${o.id}')">📲 WPP</button>
+        <button onclick="delOrc('${o.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  return `<div class="pg-head"><h2>📋 Orçamentos</h2>
+    <button class="btn-primary" onclick="openFormOrc()">＋ Novo Orçamento</button></div>
+    ${orcs.length===0?'<div class="empty-state" style="text-align:center;padding:40px">Nenhum orçamento ainda.<br><button class="btn-primary" style="margin-top:12px" onclick="openFormOrc()">＋ Criar Orçamento</button></div>':
+    `<table class="data-table"><thead><tr>
+      <th>#</th><th>Comprador</th><th>CPF</th><th>Tel/WPP</th><th>Itens</th><th>Total</th><th>Data</th><th>Ações</th>
+    </tr></thead><tbody>${rows}</tbody></table>`}`;
+}
+function openFormOrc(id){
+  const orcs=DB.get('orcamentos')||[];
+  const o=id?orcs.find(x=>x.id===id):null;
+  const prods=DB.get('produtos')||[];
+  const itens=o?.itens||[];
+  function buildRow(it,i){
+    const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
+    return `<tr class="orc-item-row">
+      <td style="width:45%"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+      <td><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:65px"></td>
+      <td class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
+      <td><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:90px"></td>
+      <td style="font-weight:700;color:var(--a);min-width:80px" class="orc-sub">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</td>
+      <td><button onclick="this.closest('tr').remove();calcOrcTotal()">🗑️</button></td>
+    </tr>`;
+  }
+  const itensHtml=itens.map((it,i)=>buildRow(it,i)).join('');
+  const h=`<div style="padding:4px">
+    <div class="pd-block">
+      <h4 style="margin-bottom:10px">👤 Comprador (Pessoa Física — sem cadastro)</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label style="font-size:11px;color:var(--sub)">Nome completo *</label>
+          <input class="dark-input" id="orcNome" value="${o?.comprador||''}" placeholder="Nome completo" style="width:100%"></div>
+        <div><label style="font-size:11px;color:var(--sub)">CPF (opcional)</label>
+          <input class="dark-input" id="orcCpf" value="${o?.cpf||''}" placeholder="000.000.000-00" style="width:100%"></div>
+        <div><label style="font-size:11px;color:var(--sub)">WhatsApp</label>
+          <input class="dark-input" id="orcTel" value="${o?.tel||''}" placeholder="(62) 9 0000-0000" style="width:100%"></div>
+        <div><label style="font-size:11px;color:var(--sub)">Email</label>
+          <input class="dark-input" id="orcEmail" value="${o?.email||''}" placeholder="email@..." style="width:100%"></div>
+      </div>
+    </div>
+    <div class="pd-block">
+      <h4 style="margin-bottom:8px">🛒 Produtos</h4>
+      <table style="width:100%;border-collapse:collapse">
+        <thead style="font-size:11px;color:var(--sub)">
+          <tr><th align="left" style="padding:4px">Produto</th><th>Qtd</th><th>Un</th><th>Preço Un</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody id="orc-itens-body">${itensHtml}</tbody>
+      </table>
+      <button onclick="addOrcRow()" style="margin-top:8px;width:100%">＋ Adicionar Produto</button>
+    </div>
+    <div class="pd-block" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="flex:1"><label style="font-size:11px;color:var(--sub)">Observação</label>
+        <textarea class="dark-input" id="orcObs" rows="2" style="width:100%">${o?.obs||''}</textarea></div>
+      <div style="text-align:right;min-width:150px;padding-top:16px">
+        <div style="font-size:12px;color:var(--sub)">TOTAL</div>
+        <div style="font-size:22px;font-weight:900;color:var(--a)" id="orc-total-display">${fmt(o?.total||0)}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="saveOrc('${id||''}')">💾 Salvar Orçamento</button>
+      ${id?`<button onclick="shareOrcWpp('${id}')">📲 Enviar WhatsApp</button>`:''}
+      <button onclick="closeModal()">✖ Cancelar</button>
+    </div>
+  </div>`;
+  openModal(o?`✏️ Orçamento #${o.num}`:'📋 Novo Orçamento',h);
+  if(!id)addOrcRow();
+  else calcOrcTotal();
+}
+function addOrcRow(){
+  const prods=DB.get('produtos')||[];
+  const tbody=document.getElementById('orc-itens-body');
+  if(!tbody)return;
+  const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
+  const tr=document.createElement('tr');
+  tr.className='orc-item-row';
+  tr.innerHTML=`<td style="width:45%"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+    <td><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:65px"></td>
+    <td class="orc-un-cell"><span class="tag">—</span></td>
+    <td><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:90px"></td>
+    <td style="font-weight:700;color:var(--a);min-width:80px" class="orc-sub">R$ 0,00</td>
+    <td><button onclick="this.closest('tr').remove();calcOrcTotal()">🗑️</button>`;
+  tbody.appendChild(tr);
+}
+function orcProdChange(sel){
+  const opt=sel.options[sel.selectedIndex];
+  const preco=parseFloat(opt.getAttribute('data-preco')||'0');
+  const un=opt.getAttribute('data-un')||'—';
+  const row=sel.closest('tr');
+  if(!row)return;
+  const pi=row.querySelector('.orc-preco');
+  const uc=row.querySelector('.orc-un-cell');
+  if(pi)pi.value=preco;
+  if(uc)uc.innerHTML=`<span class="tag">${un||'—'}</span>`;
+  calcOrcTotal();
+}
+function calcOrcTotal(){
+  let total=0;
+  document.querySelectorAll('#orc-itens-body tr').forEach(row=>{
+    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
+    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
+    const sub=qty*preco;
+    total+=sub;
+    const s=row.querySelector('.orc-sub');
+    if(s)s.textContent='R$ '+sub.toFixed(2).replace('.',',');
+  });
+  const el=document.getElementById('orc-total-display');
+  if(el)el.textContent=fmt(total);
+  return total;
+}
+function saveOrc(id){
+  const nome=(document.getElementById('orcNome')?.value||'').trim();
+  if(!nome){alert('⚠️ Informe o nome do comprador');return;}
+  const itens=[];
+  document.querySelectorAll('#orc-itens-body tr').forEach(row=>{
+    const sel=row.querySelector('.orc-prod-sel');
+    const pid=sel?.value;
+    if(!pid)return;
+    const opt=sel.options[sel.selectedIndex];
+    const desc=opt.getAttribute('data-desc')||opt.textContent.split('—')[0].trim();
+    const un=opt.getAttribute('data-un')||'—';
+    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
+    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
+    itens.push({pid,desc,un,qty,preco,total:qty*preco});
+  });
+  if(!itens.length){alert('⚠️ Adicione pelo menos 1 produto');return;}
+  const total=itens.reduce((s,it)=>s+(it.total||0),0);
+  const orcs=DB.get('orcamentos')||[];
+  if(id){
+    const idx=orcs.findIndex(o=>o.id===id);
+    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||''};
+  }else{
+    const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
+    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||''});
+  }
+  DB.set('orcamentos',orcs);
+  closeModal();
+  goto('orcamento');
+  alert('✅ Orçamento salvo!');
+}
+function delOrc(id){
+  if(!confirm('Excluir este orçamento?'))return;
+  DB.set('orcamentos',(DB.get('orcamentos')||[]).filter(o=>o.id!==id));
+  goto('orcamento');
+}
+function shareOrcWpp(id){
+  const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);
+  if(!o)return;
+  const lines=['📋 *ORÇAMENTO #'+o.num+'*','👤 *'+o.comprador+'*'];
+  if(o.cpf)lines.push('CPF: '+o.cpf);
+  lines.push('📅 '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
+  (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
+  lines.push('','*TOTAL: '+fmt(o.total)+'*');
+  if(o.obs)lines.push('📝 '+o.obs);
+  const tel=(o.tel||'').replace(/\D/g,'');
+  const msg=encodeURIComponent(lines.join('\n'));
+  window.open(tel?'https://wa.me/55'+tel+'?text='+msg:'https://wa.me/?text='+msg,'_blank');
 }
 </script>
 </body>
