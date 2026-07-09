@@ -2387,13 +2387,13 @@ function openFormOrc(id){
   function buildRow(it,i){
     const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
     return `<tr class="orc-item-row">
-      <td style="text-align:center;padding:4px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:4px 6px">🗑️</button></td>
-      <td style="padding:4px"><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:50px"></td>
-      <td style="padding:4px;text-align:center" class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
-      <td style="padding:4px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px" placeholder="kg" value="${it?.peso||0}"></td>
-      <td style="padding:4px"><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:75px"></td>
-      <td style="padding:4px;font-weight:700;color:var(--a);white-space:nowrap" class="orc-sub">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</td>
-      <td style="padding:4px;min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+      <td style="text-align:center;padding:2px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:2px 4px;font-size:11px">🗑️</button></td>
+      <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:36px;padding:2px"></td>
+      <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
+      <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:40px;padding:2px" placeholder="kg" value="${it?.peso||0}"></td>
+      <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:50px;padding:2px"></td>
+      <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden" class="orc-sub">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</td>
+      <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
     </tr>`;
   }
   const itensHtml=itens.map((it,i)=>buildRow(it,i)).join('');
@@ -2423,16 +2423,17 @@ function openFormOrc(id){
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
       <div style="border:1px solid var(--border,rgba(0,0,0,.12));border-radius:8px;overflow:hidden">
         <div style="max-height:320px;overflow-y:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:11.5px">
+            <colgroup><col style="width:26px"><col style="width:44px"><col style="width:44px"><col style="width:50px"><col style="width:60px"><col style="width:62px"><col></colgroup>
             <thead style="position:sticky;top:0;background:var(--card,#e9e9e9);z-index:1">
-              <tr style="font-size:11px;color:var(--sub)">
-                <th style="padding:6px 4px"></th>
-                <th style="padding:6px 4px">Qtd</th>
-                <th style="padding:6px 4px">Un</th>
-                <th style="padding:6px 4px">Peso(kg)</th>
-                <th style="padding:6px 4px">Preço Un</th>
-                <th style="padding:6px 4px">Subtotal</th>
-                <th style="padding:6px 4px;text-align:left">Produto</th>
+              <tr style="font-size:10.5px;color:var(--sub)">
+                <th style="padding:5px 2px"></th>
+                <th style="padding:5px 2px">Qtd</th>
+                <th style="padding:5px 2px">Un</th>
+                <th style="padding:5px 2px">Peso</th>
+                <th style="padding:5px 2px">Preço</th>
+                <th style="padding:5px 2px">Subtot.</th>
+                <th style="padding:5px 2px;text-align:left">Produto</th>
               </tr>
             </thead>
             <tbody id="orc-itens-body">${itensHtml}</tbody>
@@ -2466,13 +2467,13 @@ function addOrcRow(){
   const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
   const tr=document.createElement('tr');
   tr.className='orc-item-row';
-  tr.innerHTML=`<td style="text-align:center;padding:4px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:4px 6px">🗑️</button></td>
-    <td style="padding:4px"><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:50px"></td>
-    <td style="padding:4px;text-align:center" class="orc-un-cell"><span class="tag">—</span></td>
-    <td style="padding:4px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px" placeholder="kg"></td>
-    <td style="padding:4px"><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:75px"></td>
-    <td style="padding:4px;font-weight:700;color:var(--a);white-space:nowrap" class="orc-sub">R$ 0,00</td>
-    <td style="padding:4px;min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>`;
+  tr.innerHTML=`<td style="text-align:center;padding:2px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:2px 4px;font-size:11px">🗑️</button></td>
+    <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:36px;padding:2px"></td>
+    <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">—</span></td>
+    <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:40px;padding:2px" placeholder="kg"></td>
+    <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:50px;padding:2px"></td>
+    <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden" class="orc-sub">R$ 0,00</td>
+    <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>`;
   tbody.appendChild(tr);
 }
 function orcProdChange(sel){
