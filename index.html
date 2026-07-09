@@ -2387,7 +2387,7 @@ function openFormOrc(id){
   function buildRow(it,i){
     const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
     return `<tr class="orc-item-row">
-      <td style="width:45%;min-width:160px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+      <td style="min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
       <td><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:65px"></td>
       <td class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
       <td><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:65px" placeholder="kg" value="${it?.peso||0}"></td>
@@ -2454,7 +2454,7 @@ function addOrcRow(){
   const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
   const tr=document.createElement('tr');
   tr.className='orc-item-row';
-  tr.innerHTML=`<td style="width:45%;min-width:160px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
+  tr.innerHTML=`<td style="min-width:200px"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
     <td><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:65px"></td>
     <td class="orc-un-cell"><span class="tag">—</span></td>
     <td><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:65px" placeholder="kg"></td>
