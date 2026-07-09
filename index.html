@@ -135,6 +135,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 .mbox::-webkit-scrollbar{width:4px}
 .mbox::-webkit-scrollbar-thumb{background:var(--border)}
 .mbox .tag{color:#a61b1b;background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.35)}
+.mbox.wide{max-width:760px}
 .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .mtitle{font-size:17px;font-weight:900;letter-spacing:-.2px}
 .mclose{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:20px;color:var(--sub);width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
@@ -481,7 +482,7 @@ let tab='dashboard',editId=null,pSearch='',npEditId=null,_selReps=new Set();
 let np={cliId:'',repId:'',itens:[],obs:''};
 
 // ══ MODAL ══
-function openModal(title,html){closeMPed();document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
+function openModal(title,html){closeMPed();document.querySelector('#modal .mbox').classList.remove('wide');document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open');editId=null}
 function closeMPed(){document.getElementById('mpedido').classList.remove('open')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
@@ -2457,7 +2458,7 @@ function openFormOrc(id){
       <button onclick="closeModal()">✖ Cancelar</button>
     </div>
   </div>`;
-  openModal(o?`✏️ Orçamento #${o.num}`:'📋 Novo Orçamento',h);
+  openModal(o?`✏️ Orçamento #${o.num}`:'📋 Novo Orçamento',h);document.querySelector('#modal .mbox').classList.add('wide');
   if(!id)addOrcRow();
   else calcOrcTotal();
 }
