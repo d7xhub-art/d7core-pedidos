@@ -2661,10 +2661,10 @@ function imprimirOrc(id){
     </div>
   </div>
   <h2>Itens do Orçamento</h2>
-  <table><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Un</th><th>Peso</th><th>Preço</th><th>Total</th></tr>
-  ${(o.itens||[]).map((it,i)=>`<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.un}</td><td>${it.peso||0} kg</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.total!=null?it.total:(it.qty*it.preco)).toFixed(2).replace('.',',')}</td></tr>`).join('')}
+  <table><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Un</th><th>Peso</th><th>Preço</th><th>Total</th><th>Frete</th><th>Total c/Frete</th></tr>
+  ${(o.itens||[]).map((it,i)=>{const itemTotal=Number(it.total!=null?it.total:(it.qty*it.preco));const freteAlloc=(o.freteUn||0)*it.qty*(it.peso||0);const totalCF=itemTotal+freteAlloc;return `<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.un}</td><td>${it.peso||0} kg</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${itemTotal.toFixed(2).replace('.',',')}</td><td>${freteAlloc>0?('R$ '+freteAlloc.toFixed(2).replace('.',',')):'—'}</td><td>R$ ${totalCF.toFixed(2).replace('.',',')}</td></tr>`;}).join('')}
   </table>
-  <div class="tot"><span>TOTAL DO ORÇAMENTO</span><span>R$ ${Number(o.total).toFixed(2).replace('.',',')}</span></div>
+  <div class="tot"><span>TOTAL DO ORÇAMENTO</span><span>R$ ${Number(o.total+(o.freteTotal||0)).toFixed(2).replace('.',',')}</span></div>
   ${o.obs?`<div style="margin-top:12px;padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px"><b>Observações:</b> ${o.obs}</div>`:''}
   <div style="margin-top:20px;text-align:center"><button onclick="window.print()" style="background:#dc2626;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700">🖨️ Imprimir</button></div>
   </body></html>`);w.document.close();
