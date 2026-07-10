@@ -2416,13 +2416,19 @@ function openFormOrc(id){
     </div>
     <div class="pd-block">
       <h4>🚚 Frete</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+        <div>Origem: <input class="dark-input" id="orcOrigem" value="${o?.freteOrigem||''}" placeholder="Cidade / UF"></div>
+        <div>Destino: <input class="dark-input" id="orcDestino" value="${o?.freteDestino||''}" placeholder="Cidade / UF"></div>
+        <button type="button" onclick="calcularRotaOrc()" style="white-space:nowrap">🗺️ Calcular Rota</button>
+      </div>
+      <div id="orcRotaStatus" style="font-size:11px;color:var(--sub);margin-top:4px"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
         <div>Distância (km): <input class="dark-input" id="orcDist" type="number" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
-        <div>Toneladas: <input class="dark-input" id="orcToneladas" type="number" step="0.01" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto"></div>
+        <div>Toneladas: <input class="dark-input" id="orcToneladas" type="number" step="0.01" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
         <div>Preço/Ton (R$): <input class="dark-input" id="orcPrecoTon" type="number" step="0.01" value="${o?.fretePrecoTon||''}" onchange="calcOrcTotal()"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div>Frete Total (R$): <input class="dark-input" id="orcFreteTotal" type="number" value="${o?.freteTotal||''}" onchange="calcOrcTotal()"></div>
+        <div>Frete Total (R$): <input class="dark-input" id="orcFreteTotal" type="number" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
         <div>Frete p/ kg: <input class="dark-input" id="orcFreteUn" readonly></div>
       </div>
     </div>
@@ -2511,10 +2517,10 @@ function calcOrcTotal(){
   const tonEl=document.getElementById('orcToneladas');
 const precoTonEl=document.getElementById('orcPrecoTon');
 const freteTotalEl=document.getElementById('orcFreteTotal');
-if(tonEl&&document.activeElement!==tonEl&&totalKg>0)tonEl.value=(totalKg/1000).toFixed(3);
+if(tonEl&&!tonEl.dataset.manual&&totalKg>0)tonEl.value=(totalKg/1000).toFixed(3);
 const toneladas=parseFloat(tonEl&&tonEl.value||'0');
 const precoTon=parseFloat(precoTonEl&&precoTonEl.value||'0');
-if(freteTotalEl&&document.activeElement!==freteTotalEl&&toneladas>0&&precoTon>0)freteTotalEl.value=(toneladas*precoTon).toFixed(2);
+if(freteTotalEl&&!freteTotalEl.dataset.manual&&toneladas>0&&precoTon>0)freteTotalEl.value=(toneladas*precoTon).toFixed(2);
 const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0');
   const freteUn=totalKg>0?(freteTotal/totalKg):0;
   const fuEl=document.getElementById('orcFreteUn');
@@ -2523,6 +2529,32 @@ const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0'
   const el=document.getElementById('orc-total-display');
   if(el)el.textContent=fmt(total);
   return total;
+}
+async function calcularRotaOrc(){
+  const origEl=document.getElementById("orcOrigem"),destEl=document.getElementById("orcDestino");
+  const origem=(origEl.value||"").trim(),destino=(destEl.value||"").trim();
+  const statusEl=document.getElementById("orcRotaStatus");
+  if(!origem||!destino){statusEl.textContent="⚠️ Informe origem e destino.";return;}
+  statusEl.textContent="🔎 Buscando coordenadas...";
+  try{
+    const geo=async(q)=>{
+      const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q="+encodeURIComponent(q));
+      const j=await r.json();
+      if(!j.length)throw new Error("Local não encontrado: "+q);
+      return{lat:parseFloat(j[0].lat),lon:parseFloat(j[0].lon)};
+    };
+    const[o1,o2]=await Promise.all([geo(origem),geo(destino)]);
+    statusEl.textContent="🛣️ Calculando rota...";
+    const rr=await fetch("https://router.project-osrm.org/route/v1/driving/"+o1.lon+","+o1.lat+";"+o2.lon+","+o2.lat+"?overview=false");
+    const rj=await rr.json();
+    if(!rj.routes||!rj.routes.length)throw new Error("Rota não encontrada.");
+    const km=rj.routes[0].distance/1000;
+    document.getElementById("orcDist").value=km.toFixed(1);
+    statusEl.textContent="✅ Distância: "+km.toFixed(1).replace(".",",")+" km";
+    calcOrcTotal();
+  }catch(e){
+    statusEl.textContent="❌ "+e.message;
+  }
 }
 function saveOrc(id){
   const nome=(document.getElementById('orcNome')?.value||'').trim();
@@ -2545,10 +2577,10 @@ function saveOrc(id){
   const orcs=DB.get('orcamentos')||[];
   if(id){
     const idx=orcs.findIndex(o=>o.id===id);
-    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0')};
+    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0'),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
   }else{
     const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
-    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0')});
+    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0'),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
   }
   DB.set('orcamentos',orcs);
   closeModal();
@@ -2568,6 +2600,7 @@ function shareOrcWpp(id){
   lines.push('Data: '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
   (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
   lines.push('','*TOTAL: '+fmt(o.total)+'*');
+  if(o.freteOrigem&&o.freteDestino)lines.push('Rota: '+o.freteOrigem+' → '+o.freteDestino);
   if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t':''));
   if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
@@ -2597,6 +2630,7 @@ function imprimirOrc(id){
     <div class="box"><div class="lbl">Comprador</div><b>${o.comprador||'—'}</b>${o.cpf?`<br><span style="color:#64748b;font-size:12px">CPF: ${o.cpf}</span>`:''}${o.tel?`<br><span style="color:#64748b;font-size:12px">${o.tel}</span>`:''}</div>
     <div class="box"><div class="lbl">Frete</div>
       ${o.freteTotal?`<b style="color:#f97316">${'R$ '+Number(o.freteTotal).toFixed(2).replace('.',',')}</b>`:'<span style="color:#64748b">Não informado</span>'}
+      ${o.freteOrigem&&o.freteDestino?`<br><span style="color:#64748b;font-size:12px">${o.freteOrigem} → ${o.freteDestino}</span>`:''}
       ${o.freteDist?`<br><span style="color:#64748b;font-size:12px">${o.freteDist} km</span>`:''}
       ${o.freteToneladas?`<br><span style="color:#64748b;font-size:12px">${o.freteToneladas} t x R$ ${Number(o.fretePrecoTon||0).toFixed(2).replace('.',',')}/t</span>`:''}
     </div>
