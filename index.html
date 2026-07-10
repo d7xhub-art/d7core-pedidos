@@ -1104,7 +1104,7 @@ function confirmarEnvioRepsSel(){
     msg+='\n';
   });
   msg+='_Pedidos pelo WhatsApp_';
-  window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
   closeModal();
 }
 function enviarCatalogoWpp(repId){
@@ -1156,7 +1156,7 @@ function confirmarEnvioWpp(repId){
     prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});
   }
   msg+='\n_Pedidos pelo WhatsApp_';
-  window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
+  window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
   closeModal();
 }
 
@@ -2561,7 +2561,7 @@ function shareOrcWpp(id){
   if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
-  window.open(tel?'https://wa.me/55'+tel+'?text='+msg:'https://wa.me/?text='+msg,'_blank');
+  window.open(tel?'https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg:'https://web.whatsapp.com/send?text='+msg,'_blank');
 }
 function imprimirOrc(id){
   const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);if(!o)return;
