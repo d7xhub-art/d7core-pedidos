@@ -1095,15 +1095,15 @@ function confirmarEnvioRepsSel(){
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
   let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
   if(intro)msg+=intro+'\n\n';
-  msg+='📒 *Catálogo Selecionado*\n'+'━━━━━━━━━━━━━━━━━\n\n';
+  msg+='*Catálogo Selecionado*\n'+'━━━━━━━━━━━━━━━━━\n\n';
   repsSelList.forEach(r=>{
     const prods=allProds.filter(p=>p.repId===r.id);
     if(!prods.length)return;
-    msg+='🏢 *'+(r.fantasia||r.razao)+'*\n';
+    msg+='*'+(r.fantasia||r.razao)+'*\n';
     prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});
     msg+='\n';
   });
-  msg+='_Pedidos pelo WhatsApp_ 📦';
+  msg+='_Pedidos pelo WhatsApp_';
   window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
   closeModal();
 }
@@ -1145,17 +1145,17 @@ function confirmarEnvioWpp(repId){
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
   let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
   if(intro)msg+=intro+'\n\n';
-  msg+='📒 *'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
+  msg+='*'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
   if(!repId){
     const groups={};
     allReps.forEach(r=>{const items=prods.filter(p=>p.repId===r.id);if(items.length)groups[r.id]={nome:r.fantasia||r.razao,items};});
     const semRep=prods.filter(p=>!p.repId);
     if(semRep.length)groups['__']={nome:'Outros',items:semRep};
-    Object.values(groups).forEach(g=>{msg+='🏢 *'+g.nome+'*\n';g.items.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});msg+='\n';});
+    Object.values(groups).forEach(g=>{msg+='*'+g.nome+'*\n';g.items.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});msg+='\n';});
   }else{
     prods.forEach(p=>{msg+='• *'+p.cod+'* — '+p.desc+'\n  '+fmt(p.preco)+'/'+p.un+'\n';});
   }
-  msg+='\n_Pedidos pelo WhatsApp_ 📦';
+  msg+='\n_Pedidos pelo WhatsApp_';
   window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
   closeModal();
 }
@@ -2370,6 +2370,7 @@ function pgOrcamento(){
       <td>
         <button onclick="openFormOrc('${o.id}')">✏️ Editar</button>
         <button onclick="shareOrcWpp('${o.id}')">📲 WPP</button>
+        <button onclick="imprimirOrc('${o.id}')">🖨️ Imprimir</button>
         <button onclick="delOrc('${o.id}')">🗑️</button>
       </td>
     </tr>`;
@@ -2551,16 +2552,51 @@ function delOrc(id){
 function shareOrcWpp(id){
   const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);
   if(!o)return;
-  const lines=['📋 *ORÇAMENTO #'+o.num+'*','👤 *'+o.comprador+'*'];
+  const lines=['*ORÇAMENTO #'+o.num+'*','*'+o.comprador+'*'];
   if(o.cpf)lines.push('CPF: '+o.cpf);
-  lines.push('📅 '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
+  lines.push('Data: '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
   (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
   lines.push('','*TOTAL: '+fmt(o.total)+'*');
-  if(o.freteTotal)lines.push('🚚 Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg');
-  if(o.obs)lines.push('📝 '+o.obs);
+  if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg');
+  if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
   window.open(tel?'https://wa.me/55'+tel+'?text='+msg:'https://wa.me/?text='+msg,'_blank');
+}
+function imprimirOrc(id){
+  const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);if(!o)return;
+  const w=window.open('','_blank','width=800,height=600');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orçamento #${o.num}</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
+  h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;font-weight:700;margin:16px 0 6px;color:#dc2626}
+  .head{border-bottom:2px solid #dc2626;padding-bottom:12px;margin-bottom:16px}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  .box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px}
+  .lbl{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  table{width:100%;border-collapse:collapse;margin:10px 0}
+  th{background:#dc2626;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase}
+  td{padding:8px 10px;border-bottom:1px solid #e2e8f0}tr:last-child td{border:none}
+  .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
+  @media print{button{display:none}}</style></head><body>
+  <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
+    <div><h1>D7 Core Pedidos</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
+    <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${o.num}</div><div style="color:#64748b;font-size:12px">${new Date(o.data).toLocaleDateString('pt-BR')}</div></div>
+  </div></div>
+  <div class="info">
+    <div class="box"><div class="lbl">Comprador</div><b>${o.comprador||'—'}</b>${o.cpf?`<br><span style="color:#64748b;font-size:12px">CPF: ${o.cpf}</span>`:''}${o.tel?`<br><span style="color:#64748b;font-size:12px">${o.tel}</span>`:''}</div>
+    <div class="box"><div class="lbl">Frete</div>
+      ${o.freteTotal?`<b style="color:#f97316">${'R$ '+Number(o.freteTotal).toFixed(2).replace('.',',')}</b>`:'<span style="color:#64748b">Não informado</span>'}
+      ${o.freteDist?`<br><span style="color:#64748b;font-size:12px">${o.freteDist} km</span>`:''}
+    </div>
+  </div>
+  <h2>Itens do Orçamento</h2>
+  <table><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Un</th><th>Peso</th><th>Preço</th><th>Total</th></tr>
+  ${(o.itens||[]).map((it,i)=>`<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.un}</td><td>${it.peso||0} kg</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${Number(it.total!=null?it.total:(it.qty*it.preco)).toFixed(2).replace('.',',')}</td></tr>`).join('')}
+  </table>
+  <div class="tot"><span>TOTAL DO ORÇAMENTO</span><span>R$ ${Number(o.total).toFixed(2).replace('.',',')}</span></div>
+  ${o.obs?`<div style="margin-top:12px;padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px"><b>Observações:</b> ${o.obs}</div>`:''}
+  <div style="margin-top:20px;text-align:center"><button onclick="window.print()" style="background:#dc2626;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700">🖨️ Imprimir</button></div>
+  </body></html>`);w.document.close();
 }
 </script>
 </body>
