@@ -2382,6 +2382,37 @@ function pgOrcamento(){
       <th>#</th><th>Comprador</th><th>CPF</th><th>Tel/WPP</th><th>Itens</th><th>Total</th><th>Data</th><th>Ações</th>
     </tr></thead><tbody>${rows}</tbody></table>`}`;
 }
+function attachCidadeAutocomplete(inputId,listId){
+  const input=document.getElementById(inputId);
+  const list=document.getElementById(listId);
+  if(!input||!list||input.dataset.acBound)return;
+  input.dataset.acBound="1";
+  let timer=null;
+  input.addEventListener("input",()=>{
+    clearTimeout(timer);
+    const q=input.value.trim();
+    if(q.length<3){list.style.display="none";list.innerHTML="";return;}
+    timer=setTimeout(async()=>{
+      try{
+        const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&addressdetails=1&limit=6&q="+encodeURIComponent(q));
+        const j=await r.json();
+        if(!j.length){list.style.display="none";list.innerHTML="";return;}
+        const labels=j.map(item=>{
+          const a=item.address||{};
+          const city=a.city||a.town||a.village||a.municipality||a.county||"";
+          const uf=a["ISO3166-2-lvl4"]?a["ISO3166-2-lvl4"].split("-")[1]:(a.state||"");
+          return (city?city+", ":"")+uf;
+        });
+        list.innerHTML=labels.map((label,idx)=>'<div class="ac-item" data-idx="'+idx+'" style="padding:6px 10px;cursor:pointer;font-size:13px">'+label+'</div>').join("");
+        list.style.display="block";
+        Array.from(list.children).forEach((el,idx)=>{
+          el.onmousedown=(e)=>{e.preventDefault();input.value=labels[idx];list.style.display="none";list.innerHTML="";};
+        });
+      }catch(e){list.style.display="none";}
+    },350);
+  });
+  input.addEventListener("blur",()=>{setTimeout(()=>{list.style.display="none";},250);});
+}
 function openFormOrc(id){
   const orcs=DB.get('orcamentos')||[];
   const o=id?orcs.find(x=>x.id===id):null;
@@ -2394,7 +2425,7 @@ function openFormOrc(id){
       <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:54px;padding:2px"></td>
       <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
       <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px;padding:2px" placeholder="kg" value="${it?.peso||0}"></td>
-      <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div></td>
+      <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div><div class="orc-frete-item" style="font-size:9px;color:#f97316;white-space:nowrap;overflow:hidden">Frete: —</div></td>
       <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden;font-size:11px" class="orc-sub">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</td>
       <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
     </tr>`;
@@ -2417,21 +2448,21 @@ function openFormOrc(id){
     <div class="pd-block">
       <h4>🚚 Frete</h4>
             <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
-        <div>Origem: <input class="dark-input" id="orcOrigem" value="${o?.freteOrigem||''}" placeholder="Cidade / UF"></div>
-        <div>Destino: <input class="dark-input" id="orcDestino" value="${o?.freteDestino||''}" placeholder="Cidade / UF"></div>
+        <div style="position:relative">Origem: <input class="dark-input" id="orcOrigem" value="${o?.freteOrigem||''}" placeholder="Cidade / UF" autocomplete="off"><div id="orcOrigemList" style="position:absolute;z-index:50;left:0;right:0;background:#1e1e1e;border:1px solid #444;border-radius:6px;max-height:180px;overflow-y:auto;display:none"></div></div>
+        <div style="position:relative">Destino: <input class="dark-input" id="orcDestino" value="${o?.freteDestino||''}" placeholder="Cidade / UF" autocomplete="off"><div id="orcDestinoList" style="position:absolute;z-index:50;left:0;right:0;background:#1e1e1e;border:1px solid #444;border-radius:6px;max-height:180px;overflow-y:auto;display:none"></div></div>
         <button type="button" onclick="calcularRotaOrc()" style="white-space:nowrap">🗺️ Calcular Rota</button>
       </div>
       <div id="orcRotaStatus" style="font-size:11px;color:var(--sub);margin-top:4px"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div>Frete Total (R$): <input class="dark-input" id="orcFreteTotal" type="number" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
+        <div>Frete p/ kg: <input class="dark-input" id="orcFreteUn" readonly></div>
+      </div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
         <div>Distância (km): <input class="dark-input" id="orcDist" type="number" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
         <div>Toneladas: <input class="dark-input" id="orcToneladas" type="number" step="0.01" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
         <div>Preço/Ton (R$): <input class="dark-input" id="orcPrecoTon" type="number" step="0.01" value="${o?.fretePrecoTon||''}" onchange="calcOrcTotal()"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div>Frete Total (R$): <input class="dark-input" id="orcFreteTotal" type="number" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
-        <div>Frete p/ kg: <input class="dark-input" id="orcFreteUn" readonly></div>
-      </div>
-    </div>
+          </div>
     <div class="pd-block">
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
       <div style="border:1px solid var(--border,rgba(0,0,0,.12));border-radius:8px;overflow:hidden">
@@ -2472,6 +2503,8 @@ function openFormOrc(id){
   openModal(o?`✏️ Orçamento #${o.num}`:'📋 Novo Orçamento',h);document.querySelector('#modal .mbox').classList.add('wide');
   if(!id)addOrcRow();
   else calcOrcTotal();
+  attachCidadeAutocomplete('orcOrigem','orcOrigemList');
+  attachCidadeAutocomplete('orcDestino','orcDestinoList');
 }
 function addOrcRow(){
   const prods=DB.get('produtos')||[];
@@ -2484,7 +2517,7 @@ function addOrcRow(){
     <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:54px;padding:2px"></td>
     <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">—</span></td>
     <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px;padding:2px" placeholder="kg"></td>
-    <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div></td>
+    <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div><div class="orc-frete-item" style="font-size:9px;color:#f97316;white-space:nowrap;overflow:hidden">Frete: —</div></td>
     <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden;font-size:11px" class="orc-sub">R$ 0,00</td>
     <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>`;
   tbody.appendChild(tr);
@@ -2525,6 +2558,7 @@ const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0'
   const freteUn=totalKg>0?(freteTotal/totalKg):0;
   const fuEl=document.getElementById('orcFreteUn');
   if(fuEl)fuEl.value=freteUn.toFixed(2);
+  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{const qty2=parseFloat(row.querySelector('.orc-qty')?.value||'0');const peso2=parseFloat(row.querySelector('.orc-peso')?.value||'0');const fi=row.querySelector('.orc-frete-item');if(fi)fi.textContent=(freteUn>0&&peso2>0)?('Frete: R$ '+(freteUn*qty2*peso2).toFixed(2).replace('.',',')):'Frete: —';});
   const total=subProd+freteTotal;
   const el=document.getElementById('orc-total-display');
   if(el)el.textContent=fmt(total);
