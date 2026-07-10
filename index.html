@@ -2454,14 +2454,14 @@ function openFormOrc(id){
         <button type="button" onclick="calcularRotaOrc()" style="white-space:nowrap">🗺️ Calcular Rota</button>
       </div>
       <div id="orcRotaStatus" style="font-size:11px;color:var(--sub);margin-top:4px"></div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><label style="white-space:nowrap;font-size:13px">Distância (km):</label><input class="dark-input" id="orcDist" type="number" style="flex:1;min-width:0;width:auto" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><label style="white-space:nowrap;font-size:13px">Distância (km):</label><input class="dark-input" id="orcDist" type="number" style="flex:1;min-width:0;width:auto" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Toneladas:</label><input class="dark-input" id="orcToneladas" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Preço/Ton (R$):</label><input class="dark-input" id="orcPrecoTon" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.fretePrecoTon||''}" onchange="calcOrcTotal()"></div>
         <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete Total (R$):</label><input class="dark-input" id="orcFreteTotal" type="number" style="flex:1;min-width:0;width:auto" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
         <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete p/ kg:</label><input class="dark-input" id="orcFreteUn" readonly style="flex:1;min-width:0;width:auto"></div>
-      </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Toneladas:</label><input class="dark-input" id="orcToneladas" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Preço/Ton (R$):</label><input class="dark-input" id="orcPrecoTon" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.fretePrecoTon||''}" onchange="calcOrcTotal()"></div>
       </div>
           </div>
     <div class="pd-block">
