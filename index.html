@@ -2420,15 +2420,16 @@ function openFormOrc(id){
   const itens=o?.itens||[];
   function buildRow(it,i){
     const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
-    return `<tr class="orc-item-row">
-      <td style="text-align:center;padding:2px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:2px 4px;font-size:11px">🗑️</button></td>
-      <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:54px;padding:2px"></td>
-      <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></td>
-      <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px;padding:2px" placeholder="kg" value="${it?.peso||0}"></td>
-      <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div><div class="orc-frete-item" style="font-size:9px;color:#f97316;white-space:nowrap;overflow:hidden">Frete: —</div></td>
-      <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden;font-size:11px" class="orc-sub">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</td>
-      <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>
-    </tr>`;
+    return `<div class="orc-item-row" style="display:flex;align-items:flex-end;gap:10px;background:var(--card,#f4f4f4);border:1px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:8px 10px">
+      <div style="width:54px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Qtd</label><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:100%"></div>
+      <div style="flex:2;min-width:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Produto</label><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></div>
+      <div style="width:48px;flex-shrink:0;text-align:center"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Und</label><div class="orc-un-cell"><span class="tag">${it?.un||'—'}</span></div></div>
+      <div style="width:62px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Peso (kg)</label><input class="dark-input orc-peso" type="number" step="0.01" min="0" value="${it?.peso||0}" onchange="calcOrcTotal()" placeholder="kg" style="width:100%"></div>
+      <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Frete</label><div class="orc-frete-item" style="height:32px;display:flex;align-items:center;font-size:12px;color:#f97316;font-weight:600;overflow:hidden">—</div></div>
+      <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Vlt. unt.</label><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:100%"></div>
+      <div style="width:82px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Vlt. total</label><div class="orc-sub" style="height:32px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--a);overflow:hidden">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</div></div>
+      <button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="width:32px;height:32px;padding:0;flex-shrink:0">🗑️</button>
+    </div>`;
   }
   const itensHtml=itens.map((it,i)=>buildRow(it,i)).join('');
   const h=`<div style="padding:4px">
@@ -2465,25 +2466,9 @@ function openFormOrc(id){
           </div>
     <div class="pd-block">
       <h4 style="margin-bottom:8px">🛒 Produtos</h4>
-      <div style="border:1px solid var(--border,rgba(0,0,0,.12));border-radius:8px;overflow:hidden">
-        <div style="max-height:320px;overflow-y:auto">
-          <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:11.5px">
-            <colgroup><col style="width:22px"><col style="width:64px"><col style="width:38px"><col style="width:70px"><col style="width:58px"><col style="width:72px"><col></colgroup>
-            <thead style="position:sticky;top:0;background:var(--card,#e9e9e9);z-index:1">
-              <tr style="font-size:10.5px;color:var(--sub)">
-                <th style="padding:5px 2px"></th>
-                <th style="padding:5px 2px">Qtd</th>
-                <th style="padding:5px 2px">Un</th>
-                <th style="padding:5px 2px">Peso</th>
-                <th style="padding:5px 2px">Preço</th>
-                <th style="padding:5px 2px">Subtot.</th>
-                <th style="padding:5px 2px;text-align:left">Produto</th>
-              </tr>
-            </thead>
-            <tbody id="orc-itens-body">${itensHtml}</tbody>
-          </table>
+      <div style="max-height:420px;overflow-y:auto;padding:2px">
+          <div id="orc-itens-body" style="display:flex;flex-direction:column;gap:8px">${itensHtml}</div>
         </div>
-      </div>
       <button onclick="addOrcRow()" style="margin-top:8px;width:100%">＋ Adicionar Produto</button>
     </div>
     <div class="pd-block" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
@@ -2511,15 +2496,17 @@ function addOrcRow(){
   const tbody=document.getElementById('orc-itens-body');
   if(!tbody)return;
   const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
-  const tr=document.createElement('tr');
+  const tr=document.createElement('div');
   tr.className='orc-item-row';
-  tr.innerHTML=`<td style="text-align:center;padding:2px"><button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="padding:2px 4px;font-size:11px">🗑️</button></td>
-    <td style="padding:2px"><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:54px;padding:2px"></td>
-    <td style="padding:2px;text-align:center" class="orc-un-cell"><span class="tag">—</span></td>
-    <td style="padding:2px"><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" style="width:60px;padding:2px" placeholder="kg"></td>
-    <td style="padding:2px"><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:46px;padding:2px"><div class="orc-preco-kg" style="font-size:9px;color:var(--sub);white-space:nowrap;overflow:hidden">R$/kg —</div><div class="orc-frete-item" style="font-size:9px;color:#f97316;white-space:nowrap;overflow:hidden">Frete: —</div></td>
-    <td style="padding:2px;font-weight:700;color:var(--a);white-space:nowrap;overflow:hidden;font-size:11px" class="orc-sub">R$ 0,00</td>
-    <td style="padding:2px 4px;overflow:hidden"><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></td>`;
+  tr.style.cssText='display:flex;align-items:flex-end;gap:10px;background:var(--card,#f4f4f4);border:1px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:8px 10px';
+  tr.innerHTML=`<div style="width:54px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Qtd</label><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:100%"></div>
+    <div style="flex:2;min-width:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Produto</label><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></div>
+    <div style="width:48px;flex-shrink:0;text-align:center"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Und</label><div class="orc-un-cell"><span class="tag">—</span></div></div>
+    <div style="width:62px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Peso (kg)</label><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" placeholder="kg" style="width:100%"></div>
+    <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Frete</label><div class="orc-frete-item" style="height:32px;display:flex;align-items:center;font-size:12px;color:#f97316;font-weight:600;overflow:hidden">—</div></div>
+    <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Vlt. unt.</label><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:100%"></div>
+    <div style="width:82px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px">Vlt. total</label><div class="orc-sub" style="height:32px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--a);overflow:hidden">R$ 0,00</div></div>
+    <button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="width:32px;height:32px;padding:0;flex-shrink:0">🗑️</button>`;
   tbody.appendChild(tr);
 }
 function orcProdChange(sel){
@@ -2559,7 +2546,7 @@ const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0'
   const freteUn=kgBasis>0?(freteTotal/kgBasis):0;
   const fuEl=document.getElementById('orcFreteUn');
   if(fuEl)fuEl.value=freteUn.toFixed(2);
-  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{const qty2=parseFloat(row.querySelector('.orc-qty')?.value||'0');const peso2=parseFloat(row.querySelector('.orc-peso')?.value||'0');const fi=row.querySelector('.orc-frete-item');if(fi)fi.textContent=(freteUn>0&&peso2>0)?('Frete: R$ '+(freteUn*qty2*peso2).toFixed(2).replace('.',',')):'Frete: —';});
+  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{const qty2=parseFloat(row.querySelector('.orc-qty')?.value||'0');const peso2=parseFloat(row.querySelector('.orc-peso')?.value||'0');const fi=row.querySelector('.orc-frete-item');if(fi)fi.textContent=(freteUn>0&&peso2>0)?('R$ '+(freteUn*qty2*peso2).toFixed(2).replace('.',',')):'—';});
   const total=subProd+freteTotal;
   const el=document.getElementById('orc-total-display');
   if(el)el.textContent=fmt(total);
