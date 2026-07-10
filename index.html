@@ -2657,7 +2657,7 @@ function imprimirOrc(id){
       ${o.freteTotal?`<b style="color:#f97316">${'R$ '+Number(o.freteTotal).toFixed(2).replace('.',',')}</b>`:'<span style="color:#64748b">Não informado</span>'}
       ${o.freteOrigem&&o.freteDestino?`<br><span style="color:#64748b;font-size:12px">${o.freteOrigem} → ${o.freteDestino}</span>`:''}
       ${o.freteDist?`<br><span style="color:#64748b;font-size:12px">${o.freteDist} km</span>`:''}
-      ${o.freteToneladas?`<br><span style="color:#64748b;font-size:12px">${o.freteToneladas} t x R$ ${Number(o.fretePrecoTon||0).toFixed(2).replace('.',',')}/t</span>`:''}
+      ${o.freteToneladas?`<br><span style="color:#64748b;font-size:12px">${o.freteToneladas} t x R$ ${Number(o.fretePrecoTon||0).toFixed(2).replace('.',',')}/t = R$ ${Number(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))).toFixed(2).replace('.',',')}</span>`:''}
     </div>
   </div>
   <h2>Itens do Orçamento</h2>
