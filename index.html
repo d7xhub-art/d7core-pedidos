@@ -2420,7 +2420,7 @@ function openFormOrc(id){
   const itens=o?.itens||[];
   function buildRow(it,i){
     const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}" ${it&&p.id===it.pid?'selected':''}>${p.desc} — ${fmt(p.preco)}</option>`).join('');
-    return `<div class="orc-item-row" style="display:flex;align-items:flex-start;gap:10px;background:var(--card,#f4f4f4);border:1px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:8px 10px">
+    return `<div class="orc-item-row" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 10px;background:var(--card,#f4f4f4);border:1px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:8px 10px">
       <div style="width:64px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Qtd</label><input class="dark-input orc-qty" type="number" min="1" value="${it?.qty||1}" onchange="calcOrcTotal()" style="width:100%"></div>
       <div style="flex:5;min-width:160px;overflow:hidden"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Produto</label><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></div>
       <div style="width:56px;flex-shrink:0;text-align:center;border-left:1px solid var(--border,rgba(0,0,0,.12));padding-left:8px"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Und</label><div class="orc-un-cell" style="height:32px;display:flex;align-items:center;justify-content:center"><span class="tag">${it?.un||'—'}</span></div></div>
@@ -2456,17 +2456,17 @@ function openFormOrc(id){
       </div>
       <div id="orcRotaStatus" style="font-size:11px;color:var(--sub);margin-top:4px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><label style="white-space:nowrap;font-size:13px">Distância (km):</label><input class="dark-input" id="orcDist" type="number" style="flex:1;min-width:0;width:auto" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Toneladas:</label><input class="dark-input" id="orcToneladas" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><label style="white-space:nowrap;font-size:13px">Distância (km):</label><input class="dark-input" id="orcDist" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Toneladas:</label><input class="dark-input" id="orcToneladas" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Preço/Ton (R$):</label><input class="dark-input" id="orcPrecoTon" type="number" step="0.01" style="flex:1;min-width:0;width:auto" value="${o?.fretePrecoTon||''}" data-manual="${o?.fretePrecoTon?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete Total (R$):</label><input class="dark-input" id="orcFreteTotal" type="number" style="flex:1;min-width:0;width:auto" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Preço/Ton (R$):</label><input class="dark-input" id="orcPrecoTon" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.fretePrecoTon||''}" data-manual="${o?.fretePrecoTon?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete Total (R$):</label><input class="dark-input" id="orcFreteTotal" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
         <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete p/ kg:</label><input class="dark-input" id="orcFreteUn" readonly style="flex:1;min-width:0;width:auto"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">ICMS (%):</label><input class="dark-input" id="orcIcms" type="number" step="0.01" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteIcmsPct||''}" onchange="calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Financeiro (%):</label><input class="dark-input" id="orcFinanceiro" type="number" step="0.01" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteFinanceiroPct||''}" onchange="calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">ICMS (%):</label><input class="dark-input" id="orcIcms" type="text" inputmode="decimal" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteIcmsPct||''}" onchange="calcOrcTotal()"></div>
+        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Financeiro (%):</label><input class="dark-input" id="orcFinanceiro" type="text" inputmode="decimal" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteFinanceiroPct||''}" onchange="calcOrcTotal()"></div>
         <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Total Frete (R$):</label><input class="dark-input" id="orcFreteTotalGeral" readonly style="flex:1;min-width:0;width:auto"></div>
       </div>
           </div>
@@ -2528,6 +2528,7 @@ function orcProdChange(sel){
   if(uc)uc.innerHTML=`<span class="tag">${un||'—'}</span>`;
   calcOrcTotal();
 }
+function pf(v){return parseFloat(String(v==null?'':v).replace(',','.'))||0;}
 function calcOrcTotal(){
   let subProd=0,totalQty=0,totalKg=0;
   document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{
@@ -2545,18 +2546,18 @@ function calcOrcTotal(){
 const precoTonEl=document.getElementById('orcPrecoTon');
 const freteTotalEl=document.getElementById('orcFreteTotal');
 if(tonEl&&!tonEl.dataset.manual&&totalKg>0)tonEl.value=(totalKg/1000).toFixed(3);
-const toneladas=parseFloat(tonEl&&tonEl.value||'0');
-const precoTon=parseFloat(precoTonEl&&precoTonEl.value||'0');
+const toneladas=pf(tonEl&&tonEl.value);
+const precoTon=pf(precoTonEl&&precoTonEl.value);
 if(freteTotalEl&&!freteTotalEl.dataset.manual&&toneladas>0&&precoTon>0)freteTotalEl.value=(toneladas*precoTon).toFixed(2);
-const freteTotal=parseFloat(document.getElementById('orcFreteTotal')?.value||'0');
+const freteTotal=pf(document.getElementById('orcFreteTotal')?.value);
 if(precoTonEl&&!precoTonEl.dataset.manual&&toneladas>0&&freteTotal>0)precoTonEl.value=(freteTotal/toneladas).toFixed(2);
   const kgBasis=toneladas>0?(toneladas*1000):totalKg;
   const freteUn=kgBasis>0?(freteTotal/kgBasis):0;
   const fuEl=document.getElementById('orcFreteUn');
   if(fuEl)fuEl.value=freteUn.toFixed(2);
   document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{const qty2=parseFloat(row.querySelector('.orc-qty')?.value||'0');const peso2=parseFloat(row.querySelector('.orc-peso')?.value||'0');const preco2=parseFloat(row.querySelector('.orc-preco')?.value||'0');const freteAlloc=(freteUn>0&&peso2>0)?(freteUn*qty2*peso2):0;const fi=row.querySelector('.orc-frete-item');if(fi)fi.textContent=freteAlloc>0?('R$ '+freteAlloc.toFixed(2).replace('.',',')):'—';const tf=row.querySelector('.orc-total-frete');if(tf)tf.textContent='R$ '+(qty2*preco2+freteAlloc).toFixed(2).replace('.',',');});
-  const icmsPct=parseFloat(document.getElementById('orcIcms')?.value||'0');
-const financeiroPct=parseFloat(document.getElementById('orcFinanceiro')?.value||'0');
+  const icmsPct=pf(document.getElementById('orcIcms')?.value);
+const financeiroPct=pf(document.getElementById('orcFinanceiro')?.value);
 const icms=freteTotal*(icmsPct/100);
 const financeiro=freteTotal*(financeiroPct/100);
 const freteTotalGeral=freteTotal+icms+financeiro;
@@ -2614,10 +2615,10 @@ function saveOrc(id){
   const orcs=DB.get('orcamentos')||[];
   if(id){
     const idx=orcs.findIndex(o=>o.id===id);
-    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0'),freteIcmsPct:parseFloat(document.getElementById('orcIcms')?.value||'0'),freteFinanceiroPct:parseFloat(document.getElementById('orcFinanceiro')?.value||'0'),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
+    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
   }else{
     const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
-    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:parseFloat(document.getElementById('orcDist')?.value||'0'),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:parseFloat(document.getElementById('orcToneladas')?.value||'0'),fretePrecoTon:parseFloat(document.getElementById('orcPrecoTon')?.value||'0'),freteIcmsPct:parseFloat(document.getElementById('orcIcms')?.value||'0'),freteFinanceiroPct:parseFloat(document.getElementById('orcFinanceiro')?.value||'0'),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
+    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
   }
   DB.set('orcamentos',orcs);
   closeModal();
