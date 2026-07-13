@@ -2676,13 +2676,23 @@ function shareOrcWpp(id){
   if(!o)return;
   const lines=['*ORÇAMENTO #'+o.num+'*','*'+o.comprador+'*'];
   if(o.cpf)lines.push('CPF: '+o.cpf);
-  lines.push('Data: '+new Date(o.data).toLocaleDateString('pt-BR'),'','*PRODUTOS:*');
-  (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
-  lines.push('','*TOTAL: '+fmt(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
-  if(o.freteOrigem&&o.freteDestino)lines.push('Rota: '+o.freteOrigem+' → '+o.freteDestino);
-  if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t = '+fmt(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))):''));
-  if(o.freteIcmsPct)lines.push('ICMS ('+o.freteIcmsPct+'%): '+fmt((o.freteTotal||0)*(o.freteIcmsPct/100)));
-  if(o.freteFinanceiroPct)lines.push('Financeiro ('+o.freteFinanceiroPct+'%): '+fmt((o.freteTotal||0)*(o.freteFinanceiroPct/100)));
+  lines.push('Data: '+new Date(o.data).toLocaleDateString('pt-BR'));
+  if(o.freteOrigem&&o.freteDestino){
+    lines.push('','Rota: '+o.freteOrigem+' → '+o.freteDestino);
+    if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t = '+fmt(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))):''));
+    if(o.freteIcmsPct)lines.push('ICMS ('+o.freteIcmsPct+'%): '+fmt((o.freteTotal||0)*(o.freteIcmsPct/100)));
+    if(o.freteFinanceiroPct)lines.push('Financeiro ('+o.freteFinanceiroPct+'%): '+fmt((o.freteTotal||0)*(o.freteFinanceiroPct/100)));
+    if(o.freteIcmsPct||o.freteFinanceiroPct)lines.push('*Total Frete: '+fmt((o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
+  }
+  lines.push('','*ITENS DO ORÇAMENTO:*');
+  (o.itens||[]).forEach((it,i)=>{
+    const itemTotal=Number(it.total!=null?it.total:(it.qty*it.preco));
+    const freteAlloc=(o.freteUn||0)*it.qty*(it.peso||0);
+    const totalCF=itemTotal+freteAlloc;
+    lines.push((i+1)+'. '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = '+fmt(itemTotal));
+    if(freteAlloc>0)lines.push('   Frete: '+fmt(freteAlloc)+' | Total c/Frete: *'+fmt(totalCF)+'*');
+  });
+  lines.push('','*TOTAL DO ORÇAMENTO: '+fmt(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
   if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
