@@ -2638,7 +2638,7 @@ function shareOrcWpp(id){
   (o.itens||[]).forEach(it=>lines.push('• '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = *'+fmt(it.total)+'*'));
   lines.push('','*TOTAL: '+fmt(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
   if(o.freteOrigem&&o.freteDestino)lines.push('Rota: '+o.freteOrigem+' → '+o.freteDestino);
-  if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t':''));
+  if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t = '+fmt(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))):''));
   if(o.freteIcmsPct)lines.push('ICMS ('+o.freteIcmsPct+'%): '+fmt((o.freteTotal||0)*(o.freteIcmsPct/100)));
   if(o.freteFinanceiroPct)lines.push('Financeiro ('+o.freteFinanceiroPct+'%): '+fmt((o.freteTotal||0)*(o.freteFinanceiroPct/100)));
   if(o.obs)lines.push('Obs: '+o.obs);
