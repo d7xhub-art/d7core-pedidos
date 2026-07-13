@@ -2487,7 +2487,7 @@ function openFormOrc(id){
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
       <button class="btn-primary" onclick="saveOrc('${id||''}')">💾 Salvar Orçamento</button>
-      ${id?`<button onclick="shareOrcWpp('${id}')">📲 Enviar WhatsApp</button>`:''}
+      ${id?`<button onclick="syncOrcData('${id}');shareOrcWpp('${id}')">📲 Enviar WhatsApp</button>`:''}
       <button onclick="closeModal()">✖ Cancelar</button>
     </div>
   </div>`;
@@ -2594,6 +2594,47 @@ async function calcularRotaOrc(){
     statusEl.textContent="❌ "+e.message;
   }
 }
+function syncOrcData(id){
+  if(!id)return false;
+  const orcs=DB.get('orcamentos')||[];
+  const idx=orcs.findIndex(o=>o.id===id);
+  if(idx<0)return false;
+  const nome=(document.getElementById('orcNome')?.value||'').trim();
+  const itens=[];
+  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{
+    const sel=row.querySelector('.orc-prod-sel');
+    const pid=sel?.value;
+    if(!pid)return;
+    const opt=sel.options[sel.selectedIndex];
+    const desc=opt.getAttribute('data-desc')||opt.textContent.split('—')[0].trim();
+    const un=opt.getAttribute('data-un')||'—';
+    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
+    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
+    const peso=parseFloat(row.querySelector('.orc-peso')?.value||'0');
+    itens.push({pid,desc,un,qty,peso,preco,total:qty*preco});
+  });
+  const total=itens.length?itens.reduce((s,it)=>s+(it.total||0),0):orcs[idx].total;
+  orcs[idx]={...orcs[idx],
+    comprador:nome||orcs[idx].comprador,
+    cpf:document.getElementById('orcCpf')?.value||orcs[idx].cpf||'',
+    tel:document.getElementById('orcTel')?.value||orcs[idx].tel||'',
+    email:document.getElementById('orcEmail')?.value||orcs[idx].email||'',
+    itens:itens.length?itens:orcs[idx].itens,
+    total,
+    obs:document.getElementById('orcObs')?.value||'',
+    freteTotal:pf(document.getElementById('orcFreteTotal')?.value),
+    freteDist:pf(document.getElementById('orcDist')?.value),
+    freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),
+    freteToneladas:pf(document.getElementById('orcToneladas')?.value),
+    fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),
+    freteIcmsPct:pf(document.getElementById('orcIcms')?.value),
+    freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),
+    freteOrigem:document.getElementById('orcOrigem')?.value||orcs[idx].freteOrigem||'',
+    freteDestino:document.getElementById('orcDestino')?.value||orcs[idx].freteDestino||''
+  };
+  DB.set('orcamentos',orcs);
+  return true;
+}
 function saveOrc(id){
   const nome=(document.getElementById('orcNome')?.value||'').trim();
   if(!nome){alert('⚠️ Informe o nome do comprador');return;}
@@ -2615,10 +2656,10 @@ function saveOrc(id){
   const orcs=DB.get('orcamentos')||[];
   if(id){
     const idx=orcs.findIndex(o=>o.id===id);
-    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
+    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:pf(document.getElementById('orcFreteTotal')?.value),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
   }else{
     const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
-    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:parseFloat(document.getElementById('orcFreteTotal')?.value||'0'),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
+    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:pf(document.getElementById('orcFreteTotal')?.value),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
   }
   DB.set('orcamentos',orcs);
   closeModal();
