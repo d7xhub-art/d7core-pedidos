@@ -2698,7 +2698,12 @@ function shareOrcWpp(id){
   if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
-  window.open(tel?'https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg:'https://web.whatsapp.com/send?text='+msg,'_blank');
+  if(tel){
+    window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg,'_blank');
+  }else{
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lines.join('\n')).catch(()=>{});
+    alert('⚠️ Este orçamento não tem telefone do cliente cadastrado.\n\nO texto foi copiado. Abra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara enviar direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP do comprador.');
+  }
 }
 function orcPrintHtml(o){
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orçamento #${o.num}</title>
