@@ -290,7 +290,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 <div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1746</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1747</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
   </div>
 </div>
 
@@ -2765,14 +2765,32 @@ async function shareOrcImage(id){
   const canvas=await html2canvas(doc2.body,{backgroundColor:'#ffffff',scale:2});
   document.body.removeChild(iframe);
   canvas.toBlob(async(blob)=>{
-    const file=new File([blob],'orcamento-'+o.num+'.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:'Orçamento #'+o.num,text:'Orçamento #'+o.num+' - '+o.comprador});return;}catch(e){}
+    const tel=(o.tel||'').replace(/\D/g,'');
+    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if(isMobile){
+      const file=new File([blob],'orcamento-'+o.num+'.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:'Orçamento #'+o.num,text:'Orçamento #'+o.num+' - '+o.comprador});return;}catch(e){}
+      }
     }
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='orcamento-'+o.num+'.png';document.body.appendChild(a);a.click();a.remove();
-    URL.revokeObjectURL(url);
-    alert('📷 Imagem do orçamento salva! Anexe no WhatsApp para enviar ao cliente.');
+    let copied=false;
+    try{
+      if(navigator.clipboard&&window.ClipboardItem){
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        copied=true;
+      }
+    }catch(e){}
+    if(tel){
+      window.open('https://web.whatsapp.com/send?phone=55'+tel,'_blank');
+    }
+    if(copied){
+      alert(tel?'📷 Imagem copiada!\n\nO WhatsApp do cliente foi aberto — cole (Ctrl+V) e envie.':'📷 Imagem copiada!\n\nAbra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara abrir a conversa direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP.');
+    }else{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='orcamento-'+o.num+'.png';document.body.appendChild(a);a.click();a.remove();
+      URL.revokeObjectURL(url);
+      alert(tel?'📷 Imagem salva! O WhatsApp do cliente foi aberto — anexe o arquivo baixado e envie.':'📷 Imagem salva! Anexe no WhatsApp para enviar ao cliente.');
+    }
   },'image/png');
 }
 </script>
