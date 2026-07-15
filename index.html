@@ -290,7 +290,7 @@ tr:hover td{background:rgba(255,255,255,.018)}
 <div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1747</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1748</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
   </div>
 </div>
 
@@ -2698,7 +2698,7 @@ function shareOrcWpp(id){
   const tel=(o.tel||'').replace(/\D/g,'');
   const msg=encodeURIComponent(lines.join('\n'));
   if(tel){
-    window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg,'_blank');
+    window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg,'d7wpp');
   }else{
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lines.join('\n')).catch(()=>{});
     alert('⚠️ Este orçamento não tem telefone do cliente cadastrado.\n\nO texto foi copiado. Abra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara enviar direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP do comprador.');
@@ -2781,7 +2781,7 @@ async function shareOrcImage(id){
       }
     }catch(e){}
     if(tel){
-      window.open('https://web.whatsapp.com/send?phone=55'+tel,'_blank');
+      window.open('https://web.whatsapp.com/send?phone=55'+tel,'d7wpp');
     }
     if(copied){
       alert(tel?'📷 Imagem copiada!\n\nO WhatsApp do cliente foi aberto — cole (Ctrl+V) e envie.':'📷 Imagem copiada!\n\nAbra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara abrir a conversa direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP.');
