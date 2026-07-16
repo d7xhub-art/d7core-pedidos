@@ -291,7 +291,7 @@ select option{color:#111!important;background:#fff!important}
 <div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1752</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1753</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
   </div>
 </div>
 
@@ -481,7 +481,7 @@ function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/
 function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
 
 let tab='dashboard',editId=null,pSearch='',npEditId=null,_selReps=new Set();
-let np={cliId:'',repId:'',itens:[],obs:''};
+let np={cliId:'',repId:'',itens:[],obs:'',data:''};
 
 // ══ MODAL ══
 function openModal(title,html){closeMPed();document.querySelector('#modal .mbox').classList.remove('wide');document.getElementById('mtitle').textContent=title;document.getElementById('mbody').innerHTML=html;document.getElementById('modal').classList.add('open')}
@@ -1185,6 +1185,8 @@ function pgNovoPedido(){
             ${reps.map(r=>`<option value="${r.id}" ${np.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}
           </select></div>
       </div>
+      <div class="fld" style="margin-top:12px;max-width:220px"><label>Data do Pedido</label>
+        <input type="date" id="npData" value="${np.data||new Date().toISOString().slice(0,10)}" onchange="np.data=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"></div>
     </div>
 
     <div class="pd-block">
@@ -1262,6 +1264,7 @@ function confirmar(){
   np.freteKm=parseFloat(document.getElementById('npFreteKm').value)||0;
   np.freteValor=parseFloat(document.getElementById('npFreteValor').value)||0;
   np.freteResp=document.getElementById('npFreteResp').value||'';
+  np.data=document.getElementById('npData').value;
   if(!np.cliId)return alert('Selecione o cliente.');
   if(!np.repId)return alert('Selecione a representada.');
   if(!np.itens.length)return alert('Adicione ao menos um produto.');
@@ -1273,23 +1276,23 @@ function confirmar(){
     const idx=peds.findIndex(p=>p.id==npEditId);
     if(idx>=0){
       const existing=peds[idx];
-      peds[idx]={...existing,cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp};
+      peds[idx]={...existing,cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,data:np.data?new Date(np.data+'T12:00:00').toISOString():existing.data};
       DB.set('pedidos',peds);
       const num=existing.num;
-      np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;
+      np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:'',data:''};pSearch='';npEditId=null;
       alert(`✅ Pedido #${num} atualizado!\nTotal: ${fmt(total)}`);
     }
   } else {
     const num=(peds.length?Math.max(...peds.map(p=>p.num)):0)+1;
-    peds.push({id:uuid(),num,data:new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,status:'aberto'});
+    peds.push({id:uuid(),num,data:np.data?new Date(np.data+'T12:00:00').toISOString():new Date().toISOString(),cliId:np.cliId,cliNome:cli.razao||cli.fantasia||'',cliFan:cli.fantasia||'',cliCid:cli.cidade||'',cliUF:cli.uf||'',cliCnpj:cli.cnpj||'',cliCond:cli.condPag||'',repId:np.repId,repNome:rep.razao||rep.fantasia||'',repWpp:rep.wpp||'',itens:[...np.itens],total,obs:np.obs,fretePeso:np.fretePeso,freteKm:np.freteKm,freteValor:np.freteValor,freteResp:np.freteResp,status:'aberto'});
     DB.set('pedidos',peds);
     const saved=JSON.parse(JSON.stringify(np));
-    np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;
+    np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:'',data:''};pSearch='';npEditId=null;
     alert(`✅ Pedido #${num} emitido!\nCliente: ${saved.cliId?((DB.get('clientes').find(c=>c.id==saved.cliId)||{}).razao||''):''}\nTotal: ${fmt(total)}`);
   }
   goto('pedidos');updateBadges();
 }
-function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:''};pSearch='';npEditId=null;render()}
+function limpar(){if(!confirm('Limpar pedido?'))return;np={cliId:'',repId:'',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:'',data:''};pSearch='';npEditId=null;render()}
 
 /* ══════════════════════ PEDIDOS ══════════════════════ */
 function pgPedidos(){
@@ -1416,7 +1419,7 @@ function verPedido(id){
 }
 function setStatus(id,s){const peds=DB.get('pedidos');const p=peds.find(x=>x.id==id);if(p){p.status=s;DB.set('pedidos',peds);render();verPedido(id)}}
 function delPed(id){if(!confirm('Excluir pedido?'))return;DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
-function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;npEditId=id;np={cliId:p.cliId,repId:p.repId,itens:p.itens.map(i=>({...i})),obs:p.obs||'',fretePeso:p.fretePeso||0,freteKm:p.freteKm||0,freteValor:p.freteValor||0,freteResp:p.freteResp||''};pSearch='';closeMPed();goto('novo-pedido')}
+function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;npEditId=id;np={cliId:p.cliId,repId:p.repId,itens:p.itens.map(i=>({...i})),obs:p.obs||'',fretePeso:p.fretePeso||0,freteKm:p.freteKm||0,freteValor:p.freteValor||0,freteResp:p.freteResp||'',data:p.data?p.data.slice(0,10):''};pSearch='';closeMPed();goto('novo-pedido')}
 
 function exportWpp(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
