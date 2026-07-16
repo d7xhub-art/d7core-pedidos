@@ -7,13 +7,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="D7 Core">
+<meta name="apple-mobile-web-app-title" content="D7 Representação Ltda">
 <meta name="theme-color" content="#dc2626">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>D7 Core Pedidos</title>
+<title>D7 Representação Ltda Pedidos</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -291,7 +291,7 @@ select option{color:#111!important;background:#fff!important}
 <div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Core Pedidos v2.0 <b style="color:#dc2626">build 1754</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Representação Ltda Pedidos v2.0 <b style="color:#dc2626">build 1755</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
   </div>
 </div>
 
@@ -1004,7 +1004,7 @@ function imprimirCatalogoRep(repId){
     :`<table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
     ${prods.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b>${p.obs?`<br><span style="color:#64748b;font-size:11px">${p.obs}</span>`:''}</td><td style="color:#64748b">${p.refFab||'—'}</td><td style="color:#475569">${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
     </tbody></table>`}
-  <div class="foot">D7 Core Pedidos · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
+  <div class="foot">D7 Representação Ltda Pedidos · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   w.document.close();
   setTimeout(()=>w.print(),300);
@@ -1055,7 +1055,7 @@ function imprimirCatalogo(){
       ${items.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b></td><td style="color:#64748b">${p.refFab||'—'}</td><td>${p.un}</td><td class="preco-td">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
       </tbody></table>`}`;
   }).join('')}
-  <div class="foot">D7 Core Pedidos · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
+  <div class="foot">D7 Representação Ltda Pedidos · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   w.document.close();
   setTimeout(()=>w.print(),300);
@@ -1423,7 +1423,7 @@ function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)retu
 
 function exportWpp(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
-  let t=`*D7 Core Pedidos* 📋\n`;
+  let t=`*D7 Representação Ltda Pedidos* 📋\n`;
   t+=`━━━━━━━━━━━━━━━━━━\n`;
   t+=`*Pedido #${p.num}* — ${fmtDate(p.data)}\n\n`;
   t+=`👥 *Cliente:* ${p.cliNome}\n`;
@@ -1459,7 +1459,7 @@ function imprimirPedido(id){
   .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
   @media print{button{display:none}}</style></head><body>
   <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1>D7 Core Pedidos</h1><div style="color:#64748b;font-size:12px">Representação Comercial</div></div>
+    <div><h1>D7 Representação Ltda Pedidos</h1><div style="color:#64748b;font-size:12px">Representação Comercial</div></div>
     <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${p.num}</div><div style="color:#64748b;font-size:12px">${fmtDate(p.data)}</div></div>
   </div></div>
   <div class="info">
@@ -1638,7 +1638,7 @@ function delFU(id){if(!confirm('Excluir follow-up?'))return;DB.set('followups',D
 
 function fuWpp(id){
   const f=DB.get('followups').find(x=>x.id==id);if(!f)return;
-  let t=`🔔 *D7 Core — Follow-up*\n━━━━━━━━━━━━━━\n`;
+  let t=`🔔 *D7 Representação Ltda — Follow-up*\n━━━━━━━━━━━━━━\n`;
   if(f.cliNome)t+=`👥 *Cliente:* ${f.cliNome}\n`;
   t+=`📌 *Tipo:* ${f.tipo}\n`;
   t+=`📅 *Data:* ${fmtDate(f.data)}\n`;
@@ -1653,7 +1653,7 @@ function fuWppLista(){
   const hoje=new Date();hoje.setHours(0,0,0,0);
   const list=DB.get('followups').filter(f=>f.status==='pendente').sort((a,b)=>new Date(a.data)-new Date(b.data));
   if(!list.length)return alert('Nenhum follow-up pendente.');
-  let t=`📋 *D7 Core — Follow-ups Pendentes*\n`;
+  let t=`📋 *D7 Representação Ltda — Follow-ups Pendentes*\n`;
   t+=`_${new Date().toLocaleDateString('pt-BR')}_\n━━━━━━━━━━━━━━\n`;
   list.forEach((f,i)=>{
     const fd=new Date(f.data);fd.setHours(0,0,0,0);
@@ -1788,7 +1788,7 @@ function salvarMakeWebhook(){
 async function testarWebhook(){
   const url=getMakeWebhook();
   if(!url)return alert('Configure a URL primeiro.');
-  const testData={evento:'teste',timestamp:new Date().toISOString(),prospect:{empresa:'Empresa Teste',contato:'Contato Teste',fone:'(11) 99999-9999',email:'teste@exemplo.com',segmento:'Varejo',origem:'WhatsApp',etapa:'contato',etapaLabel:'Contato Inicial',proxAcao:'Ligar amanhã',dataProxAcao:'',representada:'',obs:'Teste de integração D7 Core'}};
+  const testData={evento:'teste',timestamp:new Date().toISOString(),prospect:{empresa:'Empresa Teste',contato:'Contato Teste',fone:'(11) 99999-9999',email:'teste@exemplo.com',segmento:'Varejo',origem:'WhatsApp',etapa:'contato',etapaLabel:'Contato Inicial',proxAcao:'Ligar amanhã',dataProxAcao:'',representada:'',obs:'Teste de integração D7 Representação Ltda'}};
   try{
     await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(testData)});
     alert('✅ Webhook de teste disparado!\nVerifique no Make.com se chegou.');
@@ -2098,7 +2098,7 @@ function pgBackup(){
 }
 
 function exportarBackup(){
-  const data={versao:'2.2',app:'D7 Core Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
+  const data={versao:'2.2',app:'D7 Representação Ltda Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   const d=new Date();
@@ -2133,7 +2133,7 @@ function importarBackup(e){
       if(data.prospectos)localStorage.setItem('d7_prospectos',JSON.stringify(data.prospectos));
       updateStatus();updateBadges();render();
       alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups\n${(data.prospectos||[]).length} prospects`);
-    }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 Core Pedidos.')}
+    }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 Representação Ltda Pedidos.')}
   };
   reader.readAsText(file);e.target.value='';
 }
@@ -2219,7 +2219,7 @@ function agendarGCal(id){
   const fmt=dt=>`${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}T${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}00`;
   const end=new Date(d);end.setHours(d.getHours()+1);
   const title=encodeURIComponent(`Follow-up: ${fu.cliNome||'Cliente'} — ${fu.tipo}`);
-  const details=encodeURIComponent(`Assunto: ${fu.assunto||''}\nObs: ${fu.obs||''}\nD7 Core Pedidos`);
+  const details=encodeURIComponent(`Assunto: ${fu.assunto||''}\nObs: ${fu.obs||''}\nD7 Representação Ltda Pedidos`);
   const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${details}`;
   window.open(url,'_blank');
 }
@@ -2725,7 +2725,7 @@ function orcPrintHtml(o){
   .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
   @media print{button{display:none}}</style></head><body>
   <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1>D7 Core Pedidos</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
+    <div><h1>D7 Representação Ltda Pedidos</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
     <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${o.num}</div><div style="color:#64748b;font-size:12px">${new Date(o.data).toLocaleDateString('pt-BR')}</div></div>
   </div></div>
   <div class="info">
