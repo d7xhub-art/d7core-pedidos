@@ -12,9 +12,14 @@ assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
 for (const item of ['Clientes','Produtos com Ficha','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
   assert.ok(html.includes(item), `menu obrigatório ausente: ${item}`);
 }
-for (const removed of ['D7 HUB','Prospecção','Follow-up','Relatórios']) {
-  assert.ok(!html.includes(`>${removed}<`), `módulo removido reapareceu: ${removed}`);
+
+// Módulos removidos não podem reaparecer na navegação/rotas visíveis.
+for (const route of ['prospectos','followups','relatorios','agenda','backup','config']) {
+  assert.ok(!html.includes(`id="si-${route}"`), `atalho removido reapareceu: ${route}`);
+  assert.ok(!html.includes(`goto('${route}')`), `rota removida reapareceu: ${route}`);
 }
+assert.ok(!/<button[^>]*>[^<]*📌\s*Follow-up<\/button>/i.test(html), 'ação visível de Follow-up reapareceu em Pedido');
+assert.ok(!/>D7 HUB</.test(html), 'marca antiga D7 HUB reapareceu');
 
 // Segurança de dados e falha de nuvem.
 assert.ok(!html.includes("method:'DELETE'"), 'sincronização não pode apagar dados remotos a partir de lista vazia');
