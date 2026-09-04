@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v1.4.1 -->
+<!-- D7COMERCIAL v2.1 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -7,13 +7,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="D7 Representação Ltda">
+<meta name="apple-mobile-web-app-title" content="D7COMERCIAL">
 <meta name="theme-color" content="#dc2626">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>D7 Representação Ltda Pedidos</title>
+<title>D7COMERCIAL</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -253,45 +253,25 @@ select option{color:#111!important;background:#fff!important}
   <div class="sb-logo">
     <div class="sb-logo-icon">D7</div>
     <div>
-      <div class="sb-logo-t">D7 HUB</div>
-      <div class="sb-logo-s">Representação Comercial</div>
+      <div class="sb-logo-t">D7COMERCIAL</div>
+      <div class="sb-logo-s">Gestão comercial</div>
     </div>
   </div>
 
   <div style="flex:1;padding-bottom:12px">
-    <div class="sb-section">Principal</div>
-    <div class="sb-item" id="si-dashboard" onclick="goto('dashboard')"><span class="ico">📊</span>Dashboard</div>
+    <div class="sb-section">Menu</div>
+    <div class="sb-item" id="si-dashboard" onclick="goto('dashboard')"><span class="ico">🏠</span>Início</div>
     <div class="sb-item" id="si-clientes" onclick="goto('clientes')"><span class="ico">👥</span>Clientes<span class="sb-badge zero" id="badge-cli">0</span></div>
-    <div class="sb-item" id="si-pedidos" onclick="goto('pedidos')"><span class="ico">📋</span>Pedidos<span class="sb-badge zero" id="badge-ped">0</span></div>
-
-    <div class="sb-section">Catálogo</div>
-    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">📦</span>Produtos<span class="sb-badge zero" id="badge-prod">0</span></div>
-    <div class="sb-item" id="si-catalogo" onclick="goto('catalogo')"><span class="ico">📒</span>Catálogo</div>
-
-    <div class="sb-section">Empresas</div>
+    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">🧾</span>Produtos com Ficha Técnica<span class="sb-badge zero" id="badge-prod">0</span></div>
     <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
-
-    <div class="sb-section">Prospecção</div>
-    <div class="sb-item" id="si-prospeccao" onclick="goto('prospeccao')"><span class="ico">🎯</span>Prospecção<span class="sb-badge zero" id="badge-pros">0</span></div>
-
-    <div class="sb-section">Vendas</div>
+    <div class="sb-item" id="si-orcamento" onclick="openFormOrc()"><span class="ico">🧮</span>Novo Orçamento</div>
     <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
-    <div class="sb-item" id="si-followup" onclick="goto('followup')"><span class="ico">🔔</span>Follow-up<span class="sb-badge zero" id="badge-fu">0</span></div>
-    <div class="sb-item" id="si-agenda" onclick="goto('agenda')"><span class="ico">📅</span>Agenda</div>
-
-    <div class="sb-section">Gestão</div>
-    <div class="sb-item" id="si-relatorios" onclick="goto('relatorios')"><span class="ico">📈</span>Relatórios</div>
-
-    <div class="sb-divider"></div>
-
-    <div class="sb-section">Dados</div>
-    <div class="sb-item" id="si-backup" onclick="goto('backup')"><span class="ico">💾</span>Backup & Restore</div>
-  
-    <div class="sb-item" id="si-config" onclick="goto('config')"><span class="ico">⚙️</span>Configurações</div>
-<div class="sb-item" id="si-orcamento" onclick="goto('orcamento')"><span class="ico">📋</span>Orçamento</div></div>
+    <div class="sb-item" id="si-pedidos" onclick="goto('pedidos')"><span class="ico">📋</span>Pedidos<span class="sb-badge zero" id="badge-ped">0</span></div>
+    <div class="sb-item" id="si-catalogo" onclick="goto('catalogo')"><span class="ico">📒</span>Catálogo</div>
+  </div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
-    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7 Representação Ltda Pedidos v2.0 <b style="color:#dc2626">build 1756</b><br><span style="color:#253350">© 2025 • Todos os direitos</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Forçar Atualização</a></div>
+    <div style="font-size:11px;color:var(--sub2);text-align:center;line-height:1.6">D7COMERCIAL v2.1<br><span>Dados locais e nuvem preservados</span><br><a href="#" onclick="location.href=location.pathname+'?_v='+Date.now();return false;" style="color:#dc2626;font-weight:800;text-decoration:underline">🔄 Atualizar aplicativo</a></div>
   </div>
 </div>
 
@@ -302,18 +282,15 @@ select option{color:#111!important;background:#fff!important}
       <button class="ham" id="hambtn" onclick="toggleSidebar()">
         <span></span><span></span><span></span>
       </button>
-      <div class="tb-title" id="tb-title">Dashboard</div>
+      <div class="tb-title" id="tb-title">Início</div>
     </div>
     <div class="tb-center">
       <div class="tb-brand">
-        <span class="tb-d7">D7</span><span class="tb-gem">🔴</span><span class="tb-pedidos">PEDIDOS</span>
+        <span class="tb-pedidos">D7COMERCIAL</span>
       </div>
       <div class="tb-line"></div>
     </div>
     <div class="tb-right">
-      <button class="tb-mic" id="voiceBtn" onclick="toggleVoice(this)" title="Clique em um campo, depois aqui para falar">🎤 Falar</button>
-      <button class="tb-btn btn-imp" onclick="triggerImport()">📥 Importar</button>
-      <button class="tb-btn btn-bk" onclick="exportarBackup()">💾 Backup</button>
       <button class="tb-btn btn-add" onclick="goto('novo-pedido')">+ Novo Pedido</button>
     </div>
   </div>
@@ -512,7 +489,7 @@ function updateBadges(){
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Dashboard',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',followup:'Follow-up',prospeccao:'Prospecção',relatorios:'Relatórios',backup:'Backup & Restore',config:'Configurações',orcamento:'Orçamento'};
+const titles={dashboard:'Início',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos com Ficha Técnica',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',orcamento:'Novo Orçamento'};
 function goto(t){
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -524,7 +501,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,followup:pgFollowup,prospeccao:pgProspeccao,relatorios:pgRelatorios,backup:pgBackup,agenda:pgAgenda,config:pgConfig,orcamento:pgOrcamento};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,orcamento:pgOrcamento};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -545,30 +522,6 @@ function pgDash(){
     <div class="stat green"><div class="stat-ico">✔</div><div class="stat-label">Enviados</div><div class="stat-val">${fmt(totEn)}</div><div class="stat-sub">${enviados.length} confirmado(s)</div></div>
     <div class="stat purple"><div class="stat-ico">👥</div><div class="stat-label">Cadastros</div><div class="stat-val">${clis.length}</div><div class="stat-sub">${prods.length} produtos · ${reps.length} empresas</div></div>
   </div>
-  ${(()=>{
-    const hoje=new Date();hoje.setHours(0,0,0,0);
-    const fus=DB.get('followups').filter(f=>f.status==='pendente').sort((a,b)=>new Date(a.data)-new Date(b.data)).slice(0,5);
-    if(!fus.length)return '';
-    const venc=fus.filter(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);return d<hoje}).length;
-    return `<div class="tbl-wrap" style="margin-bottom:16px;${venc>0?'border-color:rgba(239,68,68,.3)':''}">
-      <div class="tbl-head" style="${venc>0?'background:rgba(239,68,68,.05)':''}">
-        <div class="tbl-head-t">🔔 Follow-ups Pendentes${venc>0?` <span style="color:var(--red);font-size:12px">(${venc} vencido${venc>1?'s':''})</span>`:''}</div>
-        <button class="btn btn-ghost btn-sm" onclick="goto('followup')">Ver todos →</button>
-      </div>
-      <table><thead><tr><th>Cliente</th><th>Tipo</th><th>Assunto</th><th>Data</th><th>Ação</th></tr></thead><tbody>
-      ${fus.map(f=>{const d=new Date(f.data);d.setHours(0,0,0,0);const venc=d<hoje,hj=d.getTime()===hoje.getTime();return`<tr>
-        <td style="font-weight:600">${f.cliNome||'—'}</td>
-        <td><span class="tag ${f.tipo==='ligação'?'':'tag-a'}" style="font-size:11px">${f.tipo}</span></td>
-        <td style="color:var(--sub);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.assunto||'—'}</td>
-        <td><span style="font-size:12px;font-weight:700;color:${venc?'var(--red)':hj?'var(--yellow)':'var(--sub)'}">${venc?'⚠️ ':hj?'📅 ':''}${fmtDate(f.data)}</span></td>
-        <td><div style="display:flex;gap:5px">
-          <button class="icon-btn icon-btn-g btn-sm" onclick="concluirFU('${f.id}')">✔</button>
-          <button class="icon-btn btn-sm" onclick="verFU('${f.id}')">👁️</button>
-        </div></td>
-      </tr>`}).join('')}
-      </tbody></table>
-    </div>`;
-  })()}
   <div class="tbl-wrap">
     <div class="tbl-head">
       <div class="tbl-head-t">📋 Pedidos Recentes</div>
@@ -725,13 +678,14 @@ function pgProdutos(){
       <td style="font-weight:800;color:var(--a)">${fmt(p.preco)}</td>
       <td style="color:var(--sub)">${p.precoMin?fmt(p.precoMin):'—'}</td>
       <td><div style="display:flex;gap:6px">
+        <button class="icon-btn btn-sm" onclick="verFichaProd('${p.id}')">🧾 Ficha</button>
         <button class="icon-btn btn-sm" onclick="openFormProd('${p.id}')">✏️ Editar</button>
         <button class="icon-btn icon-btn-red btn-sm" onclick="delProd('${p.id}')">🗑️</button>
       </div></td>
     </tr>`).join('')}`).join('');
   return `
   <div class="pg-head">
-    <div><div class="pg-title">Produtos</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
+    <div><div class="pg-title">Produtos com Ficha Técnica</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
     <button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button>
   </div>
   <div class="filter-row">
@@ -782,6 +736,8 @@ const reps=DB.get('representadas');
       <div class="fld"><label>Unidade</label><select id="pUn">${['un','cx','kg','lt','frd','pc','bd','sc','pct','par','rolo','m','m²'].map(u=>`<option ${(c.un||'un')===u?'selected':''}>${u}</option>`).join('')}</select></div>
     </div>
     <div class="fld"><label>Observações</label><textarea id="pObs">${c.obs||''}</textarea></div>
+    <div class="sec">🧾 Ficha Técnica</div>
+    <div class="fld"><label>Especificações, composição e aplicação</label><textarea id="pFicha" rows="6" placeholder="Características técnicas, dimensões, materiais, aplicação e cuidados">${c.fichaTecnica||''}</textarea></div>
     <div class="fld"><label>⚖️ Peso / Qtd por Fardo</label><input id="pPeso" type="text" value="${c.pesoPorFardo||''}" placeholder="Ex: 12kg, 24un, 10x1kg"></div>
     <button class="btn btn-p btn-full" onclick="saveProd()">💾 Salvar Produto</button>
   </div>`);
@@ -794,11 +750,15 @@ function saveProd(){
   const rep=DB.get('representadas').find(r=>r.id==repId)||{};
   const fotoAtual=editId?(DB.get('produtos').find(x=>x.id==editId)||{}).foto||'':'';
   const foto=_prodFoto==='__remover__'?'':(_prodFoto||fotoAtual);
-  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
+  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),fichaTecnica:document.getElementById('pFicha').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
 function delProd(id){if(!confirm('Excluir produto?'))return;DB.set('produtos',DB.get('produtos').filter(x=>x.id!=id));render();updateBadges()}
+function verFichaProd(id){
+  const p=DB.get('produtos').find(x=>x.id==id);if(!p)return;
+  openModal('🧾 Ficha Técnica',`<div class="pd-block"><div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${p.foto?`<img src="${p.foto}" alt="${p.desc}" style="width:90px;height:90px;object-fit:cover;border-radius:10px">`:''}<div><span class="tag">${p.cod}</span><h3 style="margin-top:8px">${p.desc}</h3><div style="color:var(--sub);margin-top:4px">${p.repNome||'Sem representada'}</div></div></div><div class="sec">Especificações</div><div style="white-space:pre-wrap;line-height:1.6">${p.fichaTecnica||p.obs||'Ficha técnica ainda não informada.'}</div><div class="sec">Dados comerciais</div><div><b>Unidade:</b> ${p.un||'—'} &nbsp; <b>Peso / fardo:</b> ${p.pesoPorFardo||'—'} &nbsp; <b>Referência:</b> ${p.refFab||'—'}</div></div>`);
+}
 
 /* ══════════════════════ REPRESENTADAS ══════════════════════ */
 function pgRepresentadas(){
@@ -1004,7 +964,7 @@ function imprimirCatalogoRep(repId){
     :`<table><thead><tr><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th></tr></thead><tbody>
     ${prods.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b>${p.obs?`<br><span style="color:#64748b;font-size:11px">${p.obs}</span>`:''}</td><td style="color:#64748b">${p.refFab||'—'}</td><td style="color:#475569">${p.un}</td><td class="preco">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
     </tbody></table>`}
-  <div class="foot">D7 Representação Ltda Pedidos · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
+  <div class="foot">D7COMERCIAL · ${nome} · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   w.document.close();
   setTimeout(()=>w.print(),300);
@@ -1055,7 +1015,7 @@ function imprimirCatalogo(){
       ${items.map(p=>`<tr><td><span class="cod">${p.cod}</span></td><td><b>${p.desc}</b></td><td style="color:#64748b">${p.refFab||'—'}</td><td>${p.un}</td><td class="preco-td">R$ ${(p.preco||0).toFixed(2).replace('.',',')}</td><td style="color:#64748b">${p.precoMin?'R$ '+(p.precoMin).toFixed(2).replace('.',','):'—'}</td></tr>`).join('')}
       </tbody></table>`}`;
   }).join('')}
-  <div class="foot">D7 Representação Ltda Pedidos · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
+  <div class="foot">D7COMERCIAL · Catálogo Completo · ${new Date().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   w.document.close();
   setTimeout(()=>w.print(),300);
@@ -1424,7 +1384,7 @@ function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)retu
 
 function exportWpp(id){
   const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
-  let t=`*D7 Representação Ltda Pedidos* 📋\n`;
+  let t=`*D7COMERCIAL* 📋\n`;
   t+=`━━━━━━━━━━━━━━━━━━\n`;
   t+=`*Pedido #${p.num}* — ${fmtDate(p.data)}\n\n`;
   t+=`👥 *Cliente:* ${p.cliNome}\n`;
@@ -1460,7 +1420,7 @@ function imprimirPedido(id){
   .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
   @media print{button{display:none}}</style></head><body>
   <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1>D7 Representação Ltda Pedidos</h1><div style="color:#64748b;font-size:12px">Representação Comercial</div></div>
+    <div><h1>D7COMERCIAL</h1><div style="color:#64748b;font-size:12px">Representação Comercial</div></div>
     <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${p.num}</div><div style="color:#64748b;font-size:12px">${fmtDate(p.data)}</div></div>
   </div></div>
   <div class="info">
@@ -1639,7 +1599,7 @@ function delFU(id){if(!confirm('Excluir follow-up?'))return;DB.set('followups',D
 
 function fuWpp(id){
   const f=DB.get('followups').find(x=>x.id==id);if(!f)return;
-  let t=`🔔 *D7 Representação Ltda — Follow-up*\n━━━━━━━━━━━━━━\n`;
+  let t=`🔔 *D7COMERCIAL — Follow-up*\n━━━━━━━━━━━━━━\n`;
   if(f.cliNome)t+=`👥 *Cliente:* ${f.cliNome}\n`;
   t+=`📌 *Tipo:* ${f.tipo}\n`;
   t+=`📅 *Data:* ${fmtDate(f.data)}\n`;
@@ -1654,7 +1614,7 @@ function fuWppLista(){
   const hoje=new Date();hoje.setHours(0,0,0,0);
   const list=DB.get('followups').filter(f=>f.status==='pendente').sort((a,b)=>new Date(a.data)-new Date(b.data));
   if(!list.length)return alert('Nenhum follow-up pendente.');
-  let t=`📋 *D7 Representação Ltda — Follow-ups Pendentes*\n`;
+  let t=`📋 *D7COMERCIAL — Follow-ups Pendentes*\n`;
   t+=`_${new Date().toLocaleDateString('pt-BR')}_\n━━━━━━━━━━━━━━\n`;
   list.forEach((f,i)=>{
     const fd=new Date(f.data);fd.setHours(0,0,0,0);
@@ -2099,7 +2059,7 @@ function pgBackup(){
 }
 
 function exportarBackup(){
-  const data={versao:'2.2',app:'D7 Representação Ltda Pedidos',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
+  const data={versao:'2.2',app:'D7COMERCIAL',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   const d=new Date();
@@ -2134,7 +2094,7 @@ function importarBackup(e){
       if(data.prospectos)localStorage.setItem('d7_prospectos',JSON.stringify(data.prospectos));
       updateStatus();updateBadges();render();
       alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups\n${(data.prospectos||[]).length} prospects`);
-    }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 Representação Ltda Pedidos.')}
+    }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7COMERCIAL.')}
   };
   reader.readAsText(file);e.target.value='';
 }
@@ -2220,7 +2180,7 @@ function agendarGCal(id){
   const fmt=dt=>`${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}T${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}00`;
   const end=new Date(d);end.setHours(d.getHours()+1);
   const title=encodeURIComponent(`Follow-up: ${fu.cliNome||'Cliente'} — ${fu.tipo}`);
-  const details=encodeURIComponent(`Assunto: ${fu.assunto||''}\nObs: ${fu.obs||''}\nD7 Representação Ltda Pedidos`);
+  const details=encodeURIComponent(`Assunto: ${fu.assunto||''}\nObs: ${fu.obs||''}\nD7COMERCIAL`);
   const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(d)}/${fmt(end)}&details=${details}`;
   window.open(url,'_blank');
 }
@@ -2726,7 +2686,7 @@ function orcPrintHtml(o){
   .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
   @media print{button{display:none}}</style></head><body>
   <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1>D7 Representação Ltda Pedidos</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
+    <div><h1>D7COMERCIAL</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
     <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${o.num}</div><div style="color:#64748b;font-size:12px">${new Date(o.data).toLocaleDateString('pt-BR')}</div></div>
   </div></div>
   <div class="info">
@@ -2801,9 +2761,9 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Service worker:',e)));}
 </script>
 </body>
 </html>
 
  
-
