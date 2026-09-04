@@ -1,0 +1,35 @@
+name: Correção final única da interface
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.event.head_commit.message == 'Executa correção final de interface'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remover ação visível de Follow-up preservando dados legados
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='''        <button class="btn btn-sm" style="background:rgba(0,0,0,.08);color:var(--txt);border:1px solid var(--bdr)" onclick="closeMPed();openFormFU(null,{cliId:'${p.cliId}',cliNome:'${p.cliNome}',repId:'${p.repId}',repNome:'${p.repNome}',pedNum:${p.num},assunto:'Pedido #${p.num}'})">📌 Follow-up</button>\n'''
+          if old not in s:
+              raise SystemExit('alvo Follow-up não encontrado; nenhuma alteração feita')
+          s=s.replace(old,'',1)
+          p.write_text(s,encoding='utf-8')
+          print('FOLLOWUP_VISIBLE_REMOVED')
+          PY
+      - name: Commit da correção
+        run: |
+          git config user.name "d7xhub-art"
+          git config user.email "d7xhub@gmail.com"
+          git add index.html
+          git commit -m "Remove ação visível de Follow-up do pedido"
+          git push
