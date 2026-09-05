@@ -33,13 +33,13 @@ jobs:
           if '<script src="./auth-guard.js?v=1.0"></script>' not in s:
               if marker not in s: raise SystemExit('sync guard marker not found')
               s=s.replace(marker,auth,1)
+          for table in ['clientes','prospectos','representadas','produtos','pedidos','followups']:
+              s=s.replace(f'create policy "anon_all" on {table} for all to anon using(true) with check(true);\n','')
           if "'Authorization':'Bearer '+SUPA_KEY" in s:
               raise SystemExit('unsafe anon bearer remains in index')
+          if 'create policy "anon_all"' in s:
+              raise SystemExit('unsafe anon_all instructions remain in index')
           p.write_text(s,encoding='utf-8')
-
-          t=Path('tests/smoke.mjs')
-          ts=t.read_text(encoding='utf-8').replace("assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');","assert.ok(sw.includes('d7comercial-v2.3-auth'), 'service worker deve usar cache da versão autenticada');")
-          t.write_text(ts,encoding='utf-8')
           PY
       - name: Validar antes do commit
         run: |
@@ -51,7 +51,7 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html tests/smoke.mjs
+          git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m "feat: exigir login para acesso à nuvem"
+          git commit -m "security: remover instruções anon_all"
           git push origin HEAD:fix/auth-segura-d7comercial
