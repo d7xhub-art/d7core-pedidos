@@ -8,6 +8,15 @@
     document.head.appendChild(ui);
   }
 
+  // Produtividade isolada: atalhos e foco do Novo Pedido, sem tocar nas regras comerciais.
+  if(!document.querySelector('script[data-d7-productivity]')){
+    const productivity=document.createElement('script');
+    productivity.src='./productivity.js?v=1.0';
+    productivity.defer=true;
+    productivity.dataset.d7Productivity='1';
+    document.head.appendChild(productivity);
+  }
+
   const TABLES=['clientes','produtos','representadas','pedidos','orcamentos','followups','prospectos'];
   const OPTIONAL=new Set(['orcamentos']);
   const timers=new Map();
