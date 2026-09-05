@@ -244,23 +244,32 @@ select option{color:#111!important;background:#fff!important}
 
 /* ══ NOVO PEDIDO PROFISSIONAL ══ */
 .pedido-profissional{max-width:1380px;margin:0 auto}
+.pedido-profissional{--text:#172033;--sub:#718096;--sub2:#a0aec0;--card:#fff;--card2:#fff;--border:#e5e9f0;--border2:#cfd6e2;color:var(--text);background:#f6f7f9;border-radius:14px;padding:18px}
+.pedido-profissional .pd-block{background:#fff;border:1px solid #e3e7ed;box-shadow:0 2px 9px rgba(23,32,51,.045);border-radius:10px}
+.pedido-breadcrumb{font-size:11px;color:#8a94a6;margin-bottom:7px}.pedido-page-head{align-items:center!important}.pedido-head-actions{display:flex;gap:8px}.pedido-profissional .btn-ghost{background:#fff;color:#475569;border:1px solid #d9dee7}.pedido-profissional .btn-a{background:#df2428;color:#fff;border-color:#df2428}
+.pedido-section-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:850;margin-bottom:12px}.pedido-section-title span{width:22px;height:22px;border-radius:6px;background:#e2252a;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+.pedido-profissional .fld label{color:#64748b;font-size:10.5px;font-weight:750}.pedido-profissional .fld select,.pedido-profissional .fld input,.pedido-profissional .dark-input{background:#fff!important;color:#172033!important;border:1px solid #d8dee8!important;box-shadow:none}.pedido-profissional textarea.dark-input{background:#fff!important}.pedido-profissional .fld input:focus,.pedido-profissional .dark-input:focus{border-color:#e2252a!important;box-shadow:0 0 0 3px rgba(226,37,42,.08)!important}
 .pedido-profissional .pg-head{margin-bottom:14px}
 .pedido-dados-compactos{padding:14px 16px!important}
 .pedido-dados-grid{display:grid;grid-template-columns:minmax(260px,1.4fr) minmax(240px,1.1fr) minmax(150px,.55fr);gap:12px;align-items:end}
 .pedido-dados-grid .fld{margin:0}.pedido-dados-grid .fld label{margin-bottom:2px}
 .pedido-workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(320px,.75fr);gap:16px;align-items:start}
-.pedido-catalogo{min-width:0}.pedido-catalogo .dark-input#bProd{height:46px;font-size:14px;border-color:var(--border2);background:#151515}
+.pedido-catalogo{min-width:0}.pedido-catalogo .dark-input#bProd{height:42px;font-size:13px;border-color:var(--border2);background:#fff}
+.pedido-busca-acao{display:grid;grid-template-columns:1fr auto;gap:8px}.pedido-busca-acao .btn{min-width:88px}
+.pedido-tabs{display:flex;gap:20px;border-bottom:1px solid #e7eaf0;margin:0 -16px 12px;padding:0 16px}.pedido-tabs button{border:0;background:transparent;color:#64748b;padding:0 0 10px;font-size:11px;cursor:pointer}.pedido-tabs button.active{color:#df2428;font-weight:750;border-bottom:2px solid #df2428}
+.pedido-filtros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.pedido-filtros select{height:34px;border:1px solid #d8dee8;border-radius:6px;background:#fff;color:#475569;padding:0 9px;font-size:11px}
+.pedido-prod-head,.pedido-catalogo .prod-row{display:grid;grid-template-columns:minmax(260px,1fr) 90px 90px 70px 84px;gap:8px;align-items:center}.pedido-prod-head{background:#f7f8fa;border:1px solid #e3e7ed;border-radius:7px 7px 0 0;padding:8px 12px;color:#7a8496;font-size:9px;font-weight:800;text-transform:uppercase}.pedido-produto-ident{display:flex;align-items:center;gap:9px;min-width:0}.pedido-produto-ident strong{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pedido-produto-un,.pedido-produto-preco,.pedido-produto-estoque{font-size:10.5px;color:#64748b}.pedido-produto-preco{font-weight:750;color:#172033}.pedido-catalogo .add-ico{width:auto;height:27px;border-radius:5px;background:#fff;color:#e2252a;border:1px solid #f3a5a7;box-shadow:none;font-size:0}.pedido-catalogo .add-ico:before{content:'Adicionar';font-size:10px}
 .pedido-catalogo .dark-input#bProd:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(220,38,38,.08)}
-.pedido-catalogo .prod-result{max-height:520px;overflow:auto;margin-top:10px;border:1px solid var(--border);border-radius:10px;background:#151515}
-.pedido-catalogo .prod-row{min-height:58px;padding:10px 12px;border-bottom:1px solid var(--border);transition:.15s;background:transparent}
-.pedido-catalogo .prod-row:last-child{border-bottom:none}.pedido-catalogo .prod-row:hover{background:rgba(255,255,255,.035)}
+.pedido-catalogo .prod-result{max-height:520px;overflow:auto;margin-top:0;border:1px solid var(--border);border-top:0;border-radius:0 0 8px 8px;background:#fff}
+.pedido-catalogo .prod-row{min-height:45px;padding:8px 12px;border-bottom:1px solid var(--border);transition:.15s;background:transparent}
+.pedido-catalogo .prod-row:last-child{border-bottom:none}.pedido-catalogo .prod-row:hover{background:#fff7f7}
 .pedido-catalogo .prod-row.preco-indisponivel{opacity:.55;cursor:not-allowed}.pedido-catalogo .prod-row.preco-indisponivel:hover{background:transparent}
 .preco-nao-cadastrado{color:#fca5a5;font-weight:800;font-size:11.5px}.pedido-catalogo .prod-row.preco-indisponivel .add-ico{background:#333;color:#777;box-shadow:none}
 .pedido-resumo{position:sticky;top:0;padding:0!important;overflow:hidden}.pedido-resumo-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px}
 .pedido-resumo-lista{max-height:450px;overflow:auto}.pedido-resumo-vazio{padding:34px 18px;text-align:center;color:var(--sub);line-height:1.5}
 .pedido-resumo-item{padding:12px 14px;border-bottom:1px solid var(--border)}.pedido-resumo-item-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.pedido-resumo-item-nome{font-weight:750;font-size:12.5px;line-height:1.3}
 .pedido-resumo-controls{display:grid;grid-template-columns:68px 90px 1fr 26px;gap:7px;align-items:center;margin-top:9px}.pedido-resumo-controls .num-inp{width:100%;height:32px;padding:4px 6px;font-size:12px}
-.pedido-resumo-subtotal{text-align:right;font-weight:850;color:var(--a);font-size:12px;white-space:nowrap}.pedido-resumo-total{padding:14px 16px;background:linear-gradient(135deg,rgba(220,38,38,.14),rgba(249,115,22,.08));border-top:1px solid rgba(220,38,38,.25);display:flex;justify-content:space-between;align-items:end;gap:12px}.pedido-resumo-total strong{font-size:23px;color:#fff}
+.pedido-resumo-subtotal{text-align:right;font-weight:850;color:#df2428;font-size:12px;white-space:nowrap}.pedido-totais{padding:12px 16px;border-top:1px solid #e7eaf0}.pedido-totais>div{display:flex;justify-content:space-between;padding:4px 0;color:#64748b;font-size:11px}.pedido-totais b{color:#172033}.pedido-resumo-total{padding:14px 16px;background:#fff5f5;border-top:1px solid #ffd8d9;display:flex;justify-content:space-between;align-items:end;gap:12px}.pedido-resumo-total strong{font-size:23px;color:#df2428}.pedido-resumo-acoes{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.pedido-resumo-acoes .btn:last-of-type{grid-column:1/-1}.pedido-sync-ok{margin:0 16px 14px;padding:10px;border-radius:7px;background:#eff6ff;color:#3973b9;font-size:10px;line-height:1.35}
 .pedido-acoes{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}.pedido-extra{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
 @media(max-width:1050px){.pedido-workspace{grid-template-columns:1fr}.pedido-resumo{position:static}.pedido-resumo-lista{max-height:none}.pedido-dados-grid{grid-template-columns:1fr 1fr}.pedido-dados-grid .fld:last-child{grid-column:1/-1;max-width:220px}}
 @media(max-width:700px){.pedido-dados-grid,.pedido-extra{grid-template-columns:1fr}.pedido-dados-grid .fld:last-child{max-width:none}.pedido-resumo-controls{grid-template-columns:64px 82px 1fr 26px}.pedido-acoes{grid-template-columns:1fr}.pedido-profissional .pd-block{padding:14px}.pedido-catalogo .prod-result{max-height:430px}}
@@ -1172,7 +1181,7 @@ function pgNovoPedido(){
       <div class="pd-block pedido-catalogo">
         <div class="pedido-section-title"><span>2</span> Adicionar Produtos</div>
         <div class="pedido-tabs"><button class="active">Buscar Produto</button><button title="Use a busca por código">Adicionar por Código</button><button title="Disponível conforme histórico">Produtos Recentes</button><button title="Disponível conforme cadastro">Favoritos</button></div>
-        <input class="dark-input" id="bProd" type="search" placeholder="Digite código, referência ou nome do produto..." value="${q}" oninput="pSearch=this.value;render()" autocomplete="off">
+        <div class="pedido-busca-acao"><input class="dark-input" id="bProd" type="search" placeholder="Digite código, nome ou descrição do produto..." value="${q}" oninput="pSearch=this.value;render()" autocomplete="off"><button class="btn btn-a" onclick="document.getElementById('bProd').focus()">⌕ Buscar</button></div>
         <div class="pedido-filtros"><select aria-label="Categoria"><option>Todas as categorias</option></select><select aria-label="Embalagem"><option>Todas as embalagens</option></select><select aria-label="Status"><option>Produtos ativos</option></select></div>
         <div class="pedido-prod-head"><span>Código / Produto</span><span>Embalagem</span><span>Preço</span><span>Estoque</span><span></span></div>
         ${fp.length>0?`<div class="prod-result">${fp.slice(0,30).map(p=>{const ok=Number(p.preco)>0;return `<div class="prod-row ${ok?'':'preco-indisponivel'}" ${ok?`onclick="addItem('${p.id}')"`:''}><div class="pedido-produto-ident"><span class="tag">${p.cod}</span><strong>${p.desc}</strong></div><span class="pedido-produto-un">${p.un||'—'}</span><span class="pedido-produto-preco">${ok?fmt(p.preco):`<span class="preco-nao-cadastrado">Sem preço</span>`}</span><span class="pedido-produto-estoque">${p.estoque??'—'}</span><div class="add-ico" title="${ok?'Adicionar ao pedido':'Cadastre um preço para liberar'}">${ok?'+':'×'}</div></div>`}).join('')}</div>`:`<div class="pedido-resumo-vazio">Nenhum produto encontrado para essa busca.</div>`}
@@ -1180,10 +1189,10 @@ function pgNovoPedido(){
       <div class="pd-block pedido-resumo">
         <div class="pedido-resumo-head"><div><div style="font-weight:900;font-size:14px">Resumo do Pedido</div><div style="font-size:11px;color:var(--sub);margin-top:2px">${np.itens.length} item(ns)</div></div><span class="tag">${np.itens.length}</span></div>
         <div class="pedido-resumo-lista">${np.itens.length?np.itens.map((it,i)=>`<div class="pedido-resumo-item"><div class="pedido-resumo-item-top"><div style="min-width:0"><div class="pedido-resumo-item-nome">${it.desc}</div><div style="font-size:10.5px;color:var(--sub);margin-top:3px">${it.cod} · ${it.un}</div></div></div><input class="dark-input" style="margin-top:8px;padding:6px 8px;font-size:11.5px" type="text" placeholder="Observação do item..." value="${it.disc||''}" oninput="updItemDisc(${i},this.value)"><div class="pedido-resumo-controls"><input class="num-inp" title="Quantidade" type="number" min="0.001" step="0.001" value="${it.qty}" onchange="updItem(${i},'qty',this.value)"><input class="num-inp" title="Preço" type="number" min="0.01" step="0.01" value="${it.preco}" onchange="updItem(${i},'preco',this.value)"><div class="pedido-resumo-subtotal">${fmt(it.qty*it.preco)}</div><button title="Remover" onclick="remItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:20px">×</button></div></div>`).join(''):`<div class="pedido-resumo-vazio"><div style="font-size:24px;margin-bottom:8px">🛒</div>Seu pedido ainda está vazio.<br>Use o botão <b>+</b> na lista de produtos.</div>`}</div>
-        <div class="pedido-totais"><div><span>Subtotal</span><b>${fmt(total)}</b></div><div><span>Frete</span><b>${fmt(frete)}</b></div></div>
+        <div class="pedido-totais"><div><span>Subtotal</span><b>${fmt(total)}</b></div><div><span>Desconto</span><b>0,00 %</b></div><div><span>Frete</span><b>${fmt(frete)}</b></div></div>
         <div class="pedido-resumo-total"><div><div style="font-size:10px;color:var(--sub);font-weight:800;text-transform:uppercase;letter-spacing:.6px">Total do Pedido</div><div style="font-size:11px;color:var(--sub);margin-top:3px">${np.itens.length} item(ns)</div></div><strong>${fmt(total)}</strong></div>
-        <div class="pedido-resumo-acoes"><button class="btn btn-ghost" onclick="document.getElementById('npObs').focus()">Inserir Observação</button><button class="btn btn-a" onclick="confirmar()">Finalizar Pedido</button></div>
-        <div class="pedido-sync-ok">● Dados locais e nuvem sincronizados</div>
+        <div class="pedido-resumo-acoes"><button class="btn btn-ghost" onclick="document.getElementById('npObs').focus()">Inserir Observação</button><button class="btn btn-ghost" onclick="document.getElementById('npObs').focus()">Aplicar Desconto</button><button class="btn btn-a" onclick="confirmar()">✓ Finalizar Pedido</button></div>
+        <div class="pedido-sync-ok"><b>ⓘ Preços e estoques</b><br>Os preços e estoques são sincronizados com o cadastro da representada selecionada.</div>
       </div>
     </div>
   </div>`;
@@ -2343,374 +2352,3 @@ function openFormOrc(id){
       <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Vlt. unt.</label><input class="dark-input orc-preco" type="number" step="0.01" value="${it?.preco||0}" onchange="calcOrcTotal()" style="width:100%"></div>
       <div style="width:82px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Vlt. total</label><div class="orc-sub" style="height:32px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--a);overflow:hidden">R$ ${it?((it.qty||1)*(it.preco||0)).toFixed(2).replace('.',','):'0,00'}</div></div>
       <div style="width:92px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Total c/ frete</label><div class="orc-total-frete" style="height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#f97316;background:rgba(249,115,22,.12);border-radius:6px;overflow:hidden">R$ 0,00</div></div>
-      <button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="width:32px;height:32px;padding:0;flex-shrink:0">🗑️</button>
-    </div>`;
-  }
-  const itensHtml=itens.map((it,i)=>buildRow(it,i)).join('');
-  const h=`<div style="padding:4px">
-    <div class="pd-block">
-      <h4 style="margin-bottom:10px">👤 Comprador (Pessoa Física — sem cadastro)</h4>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div><label style="font-size:11px;color:var(--sub)">Nome completo *</label>
-          <input class="dark-input" id="orcNome" value="${o?.comprador||''}" placeholder="Nome completo" style="width:100%"></div>
-        <div><label style="font-size:11px;color:var(--sub)">CPF (opcional)</label>
-          <input class="dark-input" id="orcCpf" value="${o?.cpf||''}" placeholder="000.000.000-00" style="width:100%"></div>
-        <div><label style="font-size:11px;color:var(--sub)">WhatsApp</label>
-          <input class="dark-input" id="orcTel" value="${o?.tel||''}" placeholder="(62) 9 0000-0000" style="width:100%"></div>
-        <div><label style="font-size:11px;color:var(--sub)">Email</label>
-          <input class="dark-input" id="orcEmail" value="${o?.email||''}" placeholder="email@..." style="width:100%"></div>
-      </div>
-    </div>
-    <div class="pd-block">
-      <h4>🚚 Frete</h4>
-            <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
-        <div style="position:relative;display:flex;align-items:center;gap:6px;min-width:0;overflow:visible"><label style="white-space:nowrap;font-size:13px">Origem:</label><input class="dark-input" id="orcOrigem" style="flex:1;min-width:0;width:auto" value="${o?.freteOrigem||''}" placeholder="Cidade / UF" autocomplete="off"><div id="orcOrigemList" style="position:absolute;z-index:50;left:0;right:0;top:100%;margin-top:2px;background:#fff;color:#1a1a1a;border:1px solid rgba(0,0,0,.15);border-radius:6px;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 10px rgba(0,0,0,.15)"></div></div>
-        <div style="position:relative;display:flex;align-items:center;gap:6px;min-width:0;overflow:visible"><label style="white-space:nowrap;font-size:13px">Destino:</label><input class="dark-input" id="orcDestino" style="flex:1;min-width:0;width:auto" value="${o?.freteDestino||''}" placeholder="Cidade / UF" autocomplete="off"><div id="orcDestinoList" style="position:absolute;z-index:50;left:0;right:0;top:100%;margin-top:2px;background:#fff;color:#1a1a1a;border:1px solid rgba(0,0,0,.15);border-radius:6px;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 10px rgba(0,0,0,.15)"></div></div>
-        <button type="button" onclick="calcularRotaOrc()" style="white-space:nowrap">🗺️ Calcular Rota</button>
-      </div>
-      <div id="orcRotaStatus" style="font-size:11px;color:var(--sub);margin-top:4px"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;margin-top:8px"><label style="white-space:nowrap;font-size:13px">Distância (km):</label><input class="dark-input" id="orcDist" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteDist||''}" onchange="calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Toneladas:</label><input class="dark-input" id="orcToneladas" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteToneladas||''}" onchange="calcOrcTotal()" placeholder="auto" data-manual="${o?.freteToneladas?'1':''}" oninput="this.dataset.manual=this.value?'1':''"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Preço/Ton (R$):</label><input class="dark-input" id="orcPrecoTon" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.fretePrecoTon||''}" data-manual="${o?.fretePrecoTon?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete Total (R$):</label><input class="dark-input" id="orcFreteTotal" type="text" inputmode="decimal" style="flex:1;min-width:0;width:auto" value="${o?.freteTotal||''}" onchange="calcOrcTotal()" data-manual="${o?.freteTotal?'1':''}" oninput="this.dataset.manual=this.value?'1':'';calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Frete p/ kg:</label><input class="dark-input" id="orcFreteUn" readonly style="flex:1;min-width:0;width:auto"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">ICMS (%):</label><input class="dark-input" id="orcIcms" type="text" inputmode="decimal" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteIcmsPct||''}" onchange="calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Financeiro (%):</label><input class="dark-input" id="orcFinanceiro" type="text" inputmode="decimal" placeholder="opcional" style="flex:1;min-width:0;width:auto" value="${o?.freteFinanceiroPct||''}" onchange="calcOrcTotal()"></div>
-        <div style="display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden"><label style="white-space:nowrap;font-size:13px">Total Frete (R$):</label><input class="dark-input" id="orcFreteTotalGeral" readonly style="flex:1;min-width:0;width:auto"></div>
-      </div>
-          </div>
-    <div class="pd-block">
-      <h4 style="margin-bottom:8px">🛒 Produtos</h4>
-      <div style="max-height:420px;overflow-y:auto;overflow-x:auto;padding:2px">
-          <div id="orc-itens-body" style="display:flex;flex-direction:column;gap:8px">${itensHtml}</div>
-        </div>
-      <button onclick="addOrcRow()" style="margin-top:8px;width:100%">＋ Adicionar Produto</button>
-    </div>
-    <div class="pd-block" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-      <div style="flex:1"><label style="font-size:11px;color:var(--sub)">Observação</label>
-        <textarea class="dark-input" id="orcObs" rows="2" style="width:100%">${o?.obs||''}</textarea></div>
-      <div style="text-align:right;min-width:150px;padding-top:16px">
-        <div style="font-size:12px;color:var(--sub)">TOTAL</div>
-        <div style="font-size:22px;font-weight:900;color:var(--a)" id="orc-total-display">${fmt(o?.total||0)}</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-      <button class="btn-primary" onclick="saveOrc('${id||''}')">💾 Salvar Orçamento</button>
-      ${id?`<button onclick="syncOrcData('${id}');shareOrcImage('${id}')">📲 Enviar WhatsApp</button>`:''}
-      <button onclick="closeModal()">✖ Cancelar</button>
-    </div>
-  </div>`;
-  openModal(o?`✏️ Orçamento #${o.num}`:'📋 Novo Orçamento',h);document.querySelector('#modal .mbox').classList.add('wide');
-  if(!id)addOrcRow();
-  else calcOrcTotal();
-  attachCidadeAutocomplete('orcOrigem','orcOrigemList');
-  attachCidadeAutocomplete('orcDestino','orcDestinoList');
-}
-function addOrcRow(){
-  const prods=DB.get('produtos')||[];
-  const tbody=document.getElementById('orc-itens-body');
-  if(!tbody)return;
-  const opts=prods.map(p=>`<option value="${p.id}" data-preco="${p.preco}" data-un="${(p.un||'').replace(/"/g,'')}" data-desc="${p.desc.replace(/"/g,'&quot;')}">${p.desc} — ${fmt(p.preco)}</option>`).join('');
-  const tr=document.createElement('div');
-  tr.className='orc-item-row';
-  tr.style.cssText='display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 10px;background:var(--card,#f4f4f4);border:1px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:8px 10px';
-  tr.innerHTML=`<div style="width:64px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Qtd</label><input class="dark-input orc-qty" type="number" min="1" value="1" onchange="calcOrcTotal()" style="width:100%"></div>
-    <div style="flex:5;min-width:160px;overflow:hidden"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Produto</label><select class="dark-input orc-prod-sel" onchange="orcProdChange(this)" style="width:100%"><option value="">— Produto —</option>${opts}</select></div>
-    <div style="width:56px;flex-shrink:0;text-align:center;border-left:1px solid var(--border,rgba(0,0,0,.12));padding-left:8px"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Und</label><div class="orc-un-cell" style="height:32px;display:flex;align-items:center;justify-content:center"><span class="tag">—</span></div></div>
-    <div style="width:62px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Peso (kg)</label><input class="dark-input orc-peso" type="number" step="0.01" min="0" onchange="calcOrcTotal()" placeholder="kg" style="width:100%"></div>
-    <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Frete</label><div class="orc-frete-item" style="height:32px;display:flex;align-items:center;font-size:12px;color:#f97316;font-weight:600;overflow:hidden">—</div></div>
-    <div style="width:78px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Vlt. unt.</label><input class="dark-input orc-preco" type="number" step="0.01" value="0" onchange="calcOrcTotal()" style="width:100%"></div>
-    <div style="width:82px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Vlt. total</label><div class="orc-sub" style="height:32px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--a);overflow:hidden">R$ 0,00</div></div>
-    <div style="width:92px;flex-shrink:0"><label style="display:block;font-size:10px;color:var(--sub);margin-bottom:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">Total c/ frete</label><div class="orc-total-frete" style="height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#f97316;background:rgba(249,115,22,.12);border-radius:6px;overflow:hidden">R$ 0,00</div></div>
-      <button onclick="this.closest('.orc-item-row').remove();calcOrcTotal()" style="width:32px;height:32px;padding:0;flex-shrink:0">🗑️</button>`;
-  tbody.appendChild(tr);
-}
-function orcProdChange(sel){
-  const opt=sel.options[sel.selectedIndex];
-  const preco=parseFloat(opt.getAttribute('data-preco')||'0');
-  const un=opt.getAttribute('data-un')||'—';
-  const row=sel.closest('.orc-item-row');
-  if(!row)return;
-  const pi=row.querySelector('.orc-preco');
-  const uc=row.querySelector('.orc-un-cell');
-  if(pi)pi.value=preco;
-  if(uc)uc.innerHTML=`<span class="tag">${un||'—'}</span>`;
-  calcOrcTotal();
-}
-function pf(v){return parseFloat(String(v==null?'':v).replace(',','.'))||0;}
-function calcOrcTotal(){
-  let subProd=0,totalQty=0,totalKg=0;
-  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{
-    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
-    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
-    const peso=parseFloat(row.querySelector('.orc-peso')?.value||'0');
-    const sub=qty*preco;
-    subProd+=sub;totalQty+=qty;totalKg+=qty*peso;
-    const s=row.querySelector('.orc-sub');
-    if(s)s.textContent='R$ '+sub.toFixed(2).replace('.',',');
-    const pk=row.querySelector('.orc-preco-kg');
-    if(pk)pk.textContent=peso>0?('R$/kg '+(preco/peso).toFixed(2).replace('.',',')):'R$/kg —';
-  });
-  const tonEl=document.getElementById('orcToneladas');
-const precoTonEl=document.getElementById('orcPrecoTon');
-const freteTotalEl=document.getElementById('orcFreteTotal');
-if(tonEl&&!tonEl.dataset.manual&&totalKg>0)tonEl.value=(totalKg/1000).toFixed(3);
-const toneladas=pf(tonEl&&tonEl.value);
-const precoTon=pf(precoTonEl&&precoTonEl.value);
-if(freteTotalEl&&!freteTotalEl.dataset.manual&&toneladas>0&&precoTon>0)freteTotalEl.value=(toneladas*precoTon).toFixed(2);
-const freteTotal=pf(document.getElementById('orcFreteTotal')?.value);
-if(precoTonEl&&!precoTonEl.dataset.manual&&toneladas>0&&freteTotal>0)precoTonEl.value=(freteTotal/toneladas).toFixed(2);
-  const kgBasis=toneladas>0?(toneladas*1000):totalKg;
-  const freteUn=kgBasis>0?(freteTotal/kgBasis):0;
-  const fuEl=document.getElementById('orcFreteUn');
-  if(fuEl)fuEl.value=freteUn.toFixed(2);
-  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{const qty2=parseFloat(row.querySelector('.orc-qty')?.value||'0');const peso2=parseFloat(row.querySelector('.orc-peso')?.value||'0');const preco2=parseFloat(row.querySelector('.orc-preco')?.value||'0');const freteAlloc=(freteUn>0&&peso2>0)?(freteUn*qty2*peso2):0;const fi=row.querySelector('.orc-frete-item');if(fi)fi.textContent=freteAlloc>0?('R$ '+freteAlloc.toFixed(2).replace('.',',')):'—';const tf=row.querySelector('.orc-total-frete');if(tf)tf.textContent='R$ '+(qty2*preco2+freteAlloc).toFixed(2).replace('.',',');});
-  const icmsPct=pf(document.getElementById('orcIcms')?.value);
-const financeiroPct=pf(document.getElementById('orcFinanceiro')?.value);
-const icms=freteTotal*(icmsPct/100);
-const financeiro=freteTotal*(financeiroPct/100);
-const freteTotalGeral=freteTotal+icms+financeiro;
-const ftgEl=document.getElementById('orcFreteTotalGeral');
-if(ftgEl)ftgEl.value=freteTotalGeral.toFixed(2);
-const total=subProd+freteTotalGeral;
-  const el=document.getElementById('orc-total-display');
-  if(el)el.textContent=fmt(total);
-  return total;
-}
-async function calcularRotaOrc(){
-  const origEl=document.getElementById("orcOrigem"),destEl=document.getElementById("orcDestino");
-  const origem=(origEl.value||"").trim(),destino=(destEl.value||"").trim();
-  const statusEl=document.getElementById("orcRotaStatus");
-  if(!origem||!destino){statusEl.textContent="⚠️ Informe origem e destino.";return;}
-  statusEl.textContent="🔎 Buscando coordenadas...";
-  try{
-    const geo=async(q)=>{
-      const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q="+encodeURIComponent(q));
-      const j=await r.json();
-      if(!j.length)throw new Error("Local não encontrado: "+q);
-      return{lat:parseFloat(j[0].lat),lon:parseFloat(j[0].lon)};
-    };
-    const[o1,o2]=await Promise.all([geo(origem),geo(destino)]);
-    statusEl.textContent="🛣️ Calculando rota...";
-    const rr=await fetch("https://router.project-osrm.org/route/v1/driving/"+o1.lon+","+o1.lat+";"+o2.lon+","+o2.lat+"?overview=false");
-    const rj=await rr.json();
-    if(!rj.routes||!rj.routes.length)throw new Error("Rota não encontrada.");
-    const km=rj.routes[0].distance/1000;
-    document.getElementById("orcDist").value=km.toFixed(1);
-    statusEl.textContent="✅ Distância: "+km.toFixed(1).replace(".",",")+" km";
-    calcOrcTotal();
-  }catch(e){
-    statusEl.textContent="❌ "+e.message;
-  }
-}
-function syncOrcData(id){
-  if(!id)return false;
-  const orcs=DB.get('orcamentos')||[];
-  const idx=orcs.findIndex(o=>o.id===id);
-  if(idx<0)return false;
-  const nome=(document.getElementById('orcNome')?.value||'').trim();
-  const itens=[];
-  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{
-    const sel=row.querySelector('.orc-prod-sel');
-    const pid=sel?.value;
-    if(!pid)return;
-    const opt=sel.options[sel.selectedIndex];
-    const desc=opt.getAttribute('data-desc')||opt.textContent.split('—')[0].trim();
-    const un=opt.getAttribute('data-un')||'—';
-    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
-    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
-    const peso=parseFloat(row.querySelector('.orc-peso')?.value||'0');
-    itens.push({pid,desc,un,qty,peso,preco,total:qty*preco});
-  });
-  const total=itens.length?itens.reduce((s,it)=>s+(it.total||0),0):orcs[idx].total;
-  orcs[idx]={...orcs[idx],
-    comprador:nome||orcs[idx].comprador,
-    cpf:document.getElementById('orcCpf')?.value||orcs[idx].cpf||'',
-    tel:document.getElementById('orcTel')?.value||orcs[idx].tel||'',
-    email:document.getElementById('orcEmail')?.value||orcs[idx].email||'',
-    itens:itens.length?itens:orcs[idx].itens,
-    total,
-    obs:document.getElementById('orcObs')?.value||'',
-    freteTotal:pf(document.getElementById('orcFreteTotal')?.value),
-    freteDist:pf(document.getElementById('orcDist')?.value),
-    freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),
-    freteToneladas:pf(document.getElementById('orcToneladas')?.value),
-    fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),
-    freteIcmsPct:pf(document.getElementById('orcIcms')?.value),
-    freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),
-    freteOrigem:document.getElementById('orcOrigem')?.value||orcs[idx].freteOrigem||'',
-    freteDestino:document.getElementById('orcDestino')?.value||orcs[idx].freteDestino||''
-  };
-  DB.set('orcamentos',orcs);
-  return true;
-}
-function saveOrc(id){
-  const nome=(document.getElementById('orcNome')?.value||'').trim();
-  if(!nome){alert('⚠️ Informe o nome do comprador');return;}
-  const itens=[];
-  document.querySelectorAll('#orc-itens-body .orc-item-row').forEach(row=>{
-    const sel=row.querySelector('.orc-prod-sel');
-    const pid=sel?.value;
-    if(!pid)return;
-    const opt=sel.options[sel.selectedIndex];
-    const desc=opt.getAttribute('data-desc')||opt.textContent.split('—')[0].trim();
-    const un=opt.getAttribute('data-un')||'—';
-    const qty=parseFloat(row.querySelector('.orc-qty')?.value||'0');
-    const preco=parseFloat(row.querySelector('.orc-preco')?.value||'0');
-    const peso=parseFloat(row.querySelector('.orc-peso')?.value||'0');
-    itens.push({pid,desc,un,qty,peso,preco,total:qty*preco});
-  });
-  if(!itens.length){alert('⚠️ Adicione pelo menos 1 produto');return;}
-  const total=itens.reduce((s,it)=>s+(it.total||0),0);
-  const orcs=DB.get('orcamentos')||[];
-  if(id){
-    const idx=orcs.findIndex(o=>o.id===id);
-    if(idx>=0)orcs[idx]={...orcs[idx],comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:pf(document.getElementById('orcFreteTotal')?.value),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''};
-  }else{
-    const maxNum=orcs.reduce((m,o)=>Math.max(m,o.num||0),0);
-    orcs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),num:maxNum+1,data:new Date().toISOString(),comprador:nome,cpf:document.getElementById('orcCpf')?.value||'',tel:document.getElementById('orcTel')?.value||'',email:document.getElementById('orcEmail')?.value||'',itens,total,obs:document.getElementById('orcObs')?.value||'',freteTotal:pf(document.getElementById('orcFreteTotal')?.value),freteDist:pf(document.getElementById('orcDist')?.value),freteUn:parseFloat(document.getElementById('orcFreteUn')?.value||'0'),freteToneladas:pf(document.getElementById('orcToneladas')?.value),fretePrecoTon:pf(document.getElementById('orcPrecoTon')?.value),freteIcmsPct:pf(document.getElementById('orcIcms')?.value),freteFinanceiroPct:pf(document.getElementById('orcFinanceiro')?.value),freteOrigem:document.getElementById('orcOrigem')?.value||'',freteDestino:document.getElementById('orcDestino')?.value||''});
-  }
-  DB.set('orcamentos',orcs);
-  closeModal();
-  goto('orcamento');
-  alert('✅ Orçamento salvo!');
-}
-function delOrc(id){
-  if(!confirm('Excluir este orçamento?'))return;
-  DB.set('orcamentos',(DB.get('orcamentos')||[]).filter(o=>o.id!==id));
-  goto('orcamento');
-}
-function shareOrcWpp(id){
-  const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);
-  if(!o)return;
-  const lines=['*ORÇAMENTO #'+o.num+'*','*'+o.comprador+'*'];
-  if(o.cpf)lines.push('CPF: '+o.cpf);
-  lines.push('Data: '+new Date(o.data).toLocaleDateString('pt-BR'));
-  if(o.freteOrigem&&o.freteDestino){
-    lines.push('','Rota: '+o.freteOrigem+' → '+o.freteDestino);
-    if(o.freteTotal)lines.push('Frete: '+fmt(o.freteTotal)+(o.freteDist?' ('+o.freteDist+' km)':'')+' | '+fmt(o.freteUn||0)+'/kg'+(o.freteToneladas?' · '+o.freteToneladas+'t x '+fmt(o.fretePrecoTon||0)+'/t = '+fmt(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))):''));
-    if(o.freteIcmsPct)lines.push('ICMS ('+o.freteIcmsPct+'%): '+fmt((o.freteTotal||0)*(o.freteIcmsPct/100)));
-    if(o.freteFinanceiroPct)lines.push('Financeiro ('+o.freteFinanceiroPct+'%): '+fmt((o.freteTotal||0)*(o.freteFinanceiroPct/100)));
-    if(o.freteIcmsPct||o.freteFinanceiroPct)lines.push('*Total Frete: '+fmt((o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
-  }
-  lines.push('','*ITENS DO ORÇAMENTO:*');
-  (o.itens||[]).forEach((it,i)=>{
-    const itemTotal=Number(it.total!=null?it.total:(it.qty*it.preco));
-    const freteAlloc=(o.freteUn||0)*it.qty*(it.peso||0);
-    const totalCF=itemTotal+freteAlloc;
-    lines.push((i+1)+'. '+it.desc+' — '+it.qty+' '+it.un+' x '+fmt(it.preco)+' = '+fmt(itemTotal));
-    if(freteAlloc>0)lines.push('   Frete: '+fmt(freteAlloc)+' | Total c/Frete: *'+fmt(totalCF)+'*');
-  });
-  lines.push('','*TOTAL DO ORÇAMENTO: '+fmt(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
-  if(o.obs)lines.push('Obs: '+o.obs);
-  const tel=(o.tel||'').replace(/\D/g,'');
-  const msg=encodeURIComponent(lines.join('\n'));
-  if(tel){
-    window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg,'d7wpp');
-  }else{
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lines.join('\n')).catch(()=>{});
-    alert('⚠️ Este orçamento não tem telefone do cliente cadastrado.\n\nO texto foi copiado. Abra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara enviar direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP do comprador.');
-  }
-}
-function orcPrintHtml(o){
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Orçamento #${o.num}</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
-  h1{font-size:22px;margin-bottom:4px}h2{font-size:14px;font-weight:700;margin:16px 0 6px;color:#dc2626}
-  .head{border-bottom:2px solid #dc2626;padding-bottom:12px;margin-bottom:16px}
-  .info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-  .box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px}
-  .lbl{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-  table{width:100%;border-collapse:collapse;margin:10px 0}
-  th{background:#dc2626;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase}
-  td{padding:8px 10px;border-bottom:1px solid #e2e8f0}tr:last-child td{border:none}
-  .tot{background:#f97316;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;border-radius:6px;margin-top:10px;font-weight:800}
-  @media print{button{display:none}}</style></head><body>
-  <div class="head"><div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1>D7COMERCIAL</h1><div style="color:#64748b;font-size:12px">Orçamento</div></div>
-    <div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#dc2626">#${o.num}</div><div style="color:#64748b;font-size:12px">${new Date(o.data).toLocaleDateString('pt-BR')}</div></div>
-  </div></div>
-  <div class="info">
-    <div class="box"><div class="lbl">Comprador</div><b>${o.comprador||'—'}</b>${o.cpf?`<br><span style="color:#64748b;font-size:12px">CPF: ${o.cpf}</span>`:''}${o.tel?`<br><span style="color:#64748b;font-size:12px">${o.tel}</span>`:''}</div>
-    <div class="box"><div class="lbl">Frete</div>
-      ${o.freteTotal?`<b style="color:#f97316">${'R$ '+Number(o.freteTotal).toFixed(2).replace('.',',')}</b>`:'<span style="color:#64748b">Não informado</span>'}
-      ${o.freteOrigem&&o.freteDestino?`<br><span style="color:#64748b;font-size:12px">${o.freteOrigem} → ${o.freteDestino}</span>`:''}
-      ${o.freteDist?`<br><span style="color:#64748b;font-size:12px">${o.freteDist} km</span>`:''}
-      ${o.freteToneladas?`<br><span style="color:#64748b;font-size:12px">${o.freteToneladas} t x R$ ${Number(o.fretePrecoTon||0).toFixed(2).replace('.',',')}/t = R$ ${Number(o.freteTotal||(o.freteToneladas*(o.fretePrecoTon||0))).toFixed(2).replace('.',',')}</span>`:''}
-      ${o.freteIcmsPct?`<br><span style="color:#64748b;font-size:12px">ICMS (${o.freteIcmsPct}%): R$ ${((o.freteTotal||0)*(o.freteIcmsPct/100)).toFixed(2).replace('.',',')}</span>`:''}
-      ${o.freteFinanceiroPct?`<br><span style="color:#64748b;font-size:12px">Financeiro (${o.freteFinanceiroPct}%): R$ ${((o.freteTotal||0)*(o.freteFinanceiroPct/100)).toFixed(2).replace('.',',')}</span>`:''}
-      ${(o.freteIcmsPct||o.freteFinanceiroPct)?`<br><b style="color:#f97316">Total Frete: R$ ${Number((o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100)).toFixed(2).replace('.',',')}</b>`:''}
-    </div>
-  </div>
-  <h2>Itens do Orçamento</h2>
-  <table><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Un</th><th>Peso</th><th>Preço</th><th>Total</th><th>Frete</th><th>Total c/Frete</th></tr>
-  ${(o.itens||[]).map((it,i)=>{const itemTotal=Number(it.total!=null?it.total:(it.qty*it.preco));const freteAlloc=(o.freteUn||0)*it.qty*(it.peso||0);const totalCF=itemTotal+freteAlloc;return `<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.un}</td><td>${it.peso||0} kg</td><td>R$ ${Number(it.preco).toFixed(2).replace('.',',')}</td><td>R$ ${itemTotal.toFixed(2).replace('.',',')}</td><td>${freteAlloc>0?('R$ '+freteAlloc.toFixed(2).replace('.',',')):'—'}</td><td>R$ ${totalCF.toFixed(2).replace('.',',')}</td></tr>`;}).join('')}
-  </table>
-  <div class="tot"><span>TOTAL DO ORÇAMENTO</span><span>R$ ${Number(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100)).toFixed(2).replace('.',',')}</span></div>
-  ${o.obs?`<div style="margin-top:12px;padding:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px"><b>Observações:</b> ${o.obs}</div>`:''}
-  <div style="margin-top:20px;text-align:center"><button onclick="window.print()" style="background:#dc2626;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700">🖨️ Imprimir</button></div>
-  </body></html>`;
-}
-function imprimirOrc(id){
-  const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);if(!o)return;
-  const w=window.open('','_blank','width=800,height=600');
-  w.document.write(orcPrintHtml(o));w.document.close();
-}
-async function shareOrcImage(id){
-  const o=(DB.get('orcamentos')||[]).find(x=>x.id===id);
-  if(!o)return;
-  if(typeof html2canvas==='undefined'){shareOrcWpp(id);return;}
-  const iframe=document.createElement('iframe');
-  iframe.style.cssText='position:fixed;left:-9999px;top:0;width:860px;height:10px;border:none';
-  document.body.appendChild(iframe);
-  await new Promise(res=>{
-    iframe.onload=res;
-    iframe.srcdoc=orcPrintHtml(o);
-  });
-  await new Promise(res=>setTimeout(res,200));
-  const doc2=iframe.contentDocument;
-  const printBtn=doc2.querySelector('button[onclick="window.print()"]');
-  if(printBtn&&printBtn.parentElement)printBtn.parentElement.style.display='none';
-  const canvas=await html2canvas(doc2.body,{backgroundColor:'#ffffff',scale:2});
-  document.body.removeChild(iframe);
-  canvas.toBlob(async(blob)=>{
-    const tel=(o.tel||'').replace(/\D/g,'');
-    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if(isMobile){
-      const file=new File([blob],'orcamento-'+o.num+'.png',{type:'image/png'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:'Orçamento #'+o.num,text:'Orçamento #'+o.num+' - '+o.comprador});return;}catch(e){}
-      }
-    }
-    let copied=false;
-    try{
-      if(navigator.clipboard&&window.ClipboardItem){
-        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-        copied=true;
-      }
-    }catch(e){}
-    if(tel){
-      window.open('https://web.whatsapp.com/send?phone=55'+tel,'d7wpp');
-    }
-    if(copied){
-      alert(tel?'📷 Imagem copiada!\n\nO WhatsApp do cliente foi aberto — cole (Ctrl+V) e envie.':'📷 Imagem copiada!\n\nAbra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara abrir a conversa direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP.');
-    }else{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');a.href=url;a.download='orcamento-'+o.num+'.png';document.body.appendChild(a);a.click();a.remove();
-      URL.revokeObjectURL(url);
-      alert(tel?'📷 Imagem salva! O WhatsApp do cliente foi aberto — anexe o arquivo baixado e envie.':'📷 Imagem salva! Anexe no WhatsApp para enviar ao cliente.');
-    }
-  },'image/png');
-}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Service worker:',e)));}
-</script>
-<script src="./auth-guard.js?v=1.2-enter"></script>
-<script src="./sync-guard.js?v=2.4-config"></script>
-</body>
-</html>
-
- 

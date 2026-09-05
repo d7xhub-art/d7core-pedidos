@@ -39,12 +39,15 @@ assert.match(html,/2\s*<\/span>\s*Adicionar Produtos/,'deve numerar a segunda et
 assert.match(html,/Condição de Pagamento/,'deve mostrar a condição comercial do cliente');
 assert.match(html,/Observações opcionais/,'deve manter observações dentro dos dados do pedido');
 assert.match(html,/Buscar Produto/,'deve oferecer a aba principal do catálogo');
+assert.match(html,/pedido-busca-acao/,'deve exibir busca com ação destacada');
 assert.match(html,/Adicionar por Código/,'deve oferecer inclusão rápida por código');
 assert.match(html,/Produtos Recentes/,'deve mostrar a navegação profissional de produtos');
 assert.match(html,/Favoritos/,'deve mostrar a navegação profissional de produtos');
 assert.match(html,/Resumo do Pedido/,'deve manter o resumo lateral');
 assert.match(html,/Subtotal/,'deve discriminar subtotal antes do total');
+assert.match(html,/Desconto/,'deve exibir o controle de desconto do mockup aprovado');
+assert.match(html,/Aplicar Desconto/,'deve oferecer a ação complementar de desconto');
 assert.match(html,/Finalizar Pedido/,'deve usar a ação final aprovada');
-assert.match(html,/Dados locais e nuvem sincronizados/,'deve preservar o indicador de sincronização');
+assert.match(html,/Preços e estoques/,'deve orientar sobre a sincronização comercial');
 
 console.log('PEDIDO_UI_OK');
