@@ -24,21 +24,27 @@ jobs:
         run: node tests/smoke.mjs
       - name: Validar JavaScript de arquivos auxiliares
         run: |
+          node --check auth-guard.js
           node --check sync-guard.js
           node --check sw.js
       - name: Validar manifest e arquivos PWA
         run: |
-          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('manifest.json','utf8'));if(m.name!=='D7COMERCIAL')process.exit(1);for(const f of ['index.html','manifest.json','sw.js','sync-guard.js','migrar.html','icon-192.png','icon-512.png'])if(!fs.existsSync(f)){console.error('Falta '+f);process.exit(1)};console.log('PWA_OK')"
-      - name: Validar Supabase restaurado
+          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('manifest.json','utf8'));if(m.name!=='D7COMERCIAL')process.exit(1);for(const f of ['index.html','manifest.json','sw.js','auth-guard.js','sync-guard.js','migrar.html','icon-192.png','icon-512.png'])if(!fs.existsSync(f)){console.error('Falta '+f);process.exit(1)};console.log('PWA_OK')"
+      - name: Confirmar que acesso anônimo aos dados está bloqueado
         run: |
           python - <<'PY'
-          import re, urllib.request
+          import re, urllib.request, urllib.error
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
           url=re.search(r"const SUPA_URL='([^']+)'",s).group(1)
           key=re.search(r"const SUPA_KEY='([^']+)'",s).group(1)
           req=urllib.request.Request(url+'/rest/v1/clientes?select=id&limit=1',headers={'apikey':key,'Authorization':'Bearer '+key})
-          with urllib.request.urlopen(req,timeout=20) as r:
-              if r.status!=200: raise SystemExit('Supabase HTTP '+str(r.status))
-              print('SUPABASE_OK')
+          try:
+              with urllib.request.urlopen(req,timeout=20) as r:
+                  body=r.read()
+                  raise SystemExit('FALHA: acesso anônimo ainda permitido HTTP '+str(r.status)+' body='+body[:120].decode('utf-8','ignore'))
+          except urllib.error.HTTPError as e:
+              if e.code not in (401,403):
+                  raise
+              print('ANON_BLOCKED',e.code)
           PY
