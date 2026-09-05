@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 51788)
+Total output lines: 2715
+
 <!DOCTYPE html>
 <!-- D7COMERCIAL v2.1 -->
 <html lang="pt-BR">
@@ -1146,38 +1149,45 @@ function confirmarEnvioWpp(repId){
 function pgNovoPedido(){
   const clis=DB.get('clientes'),reps=DB.get('representadas'),prods=DB.get('produtos');
   const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
+  const cliSel=clis.find(c=>c.id==np.cliId)||{};
+  const frete=Number(np.freteValor)||0;
   const q=pSearch;
   const norm=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
   const fp=q?prods.filter(p=>{const hay=norm(p.desc+' '+p.cod+' '+(p.refFab||''));return norm(q).split(' ').filter(Boolean).every(w=>hay.includes(w));}):prods;
   return `
   <div class="pedido-profissional">
-    <div class="pg-head"><div><div class="pg-title">${npEditId?'✏️ Editar Pedido':'Novo Pedido'}</div><div class="pg-sub">Monte o pedido com rapidez e confira o resumo antes de confirmar</div></div></div>
+    <div class="pedido-breadcrumb">Início &gt; Novo Pedido</div>
+    <div class="pg-head pedido-page-head"><div><div class="pg-title">${npEditId?'Editar Pedido':'Novo Pedido'}</div><div class="pg-sub">Crie um novo pedido de venda</div></div><div class="pedido-head-actions"><button class="btn btn-ghost btn-sm" onclick="goto('orcamento')">↗ Importar de Orçamento</button><button class="btn btn-ghost btn-sm" onclick="limpar()">Limpar</button><button class="btn btn-a btn-sm" onclick="confirmar()">Salvar Pedido</button></div></div>
     <div class="pd-block pedido-dados-compactos">
-      <div class="sec" style="padding-top:0">📋 Dados do Pedido</div>
+      <div class="pedido-section-title"><span>1</span> Dados do Pedido</div>
       <div class="pedido-dados-grid">
-        <div class="fld"><label>Cliente *</label><select id="npCli" onchange="np.cliId=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"><option value="">— Selecione o cliente —</option>${clis.map(c=>`<option value="${c.id}" ${np.cliId==c.id?'selected':''}>${c.razao||c.fantasia}${c.cidade?' · '+c.cidade+'/'+c.uf:''}</option>`).join('')}</select></div>
+        <div class="fld"><label>Cliente *</label><select id="npCli" onchange="np.cliId=this.value;render()"><option value="">— Selecione o cliente —</option>${clis.map(c=>`<option value="${c.id}" ${np.cliId==c.id?'selected':''}>${c.razao||c.fantasia}${c.cidade?' · '+c.cidade+'/'+c.uf:''}</option>`).join('')}</select></div>
         <div class="fld"><label>Representada *</label><select id="npRep" onchange="np.repId=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"><option value="">— Selecione a empresa —</option>${reps.map(r=>`<option value="${r.id}" ${np.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}</select></div>
         <div class="fld"><label>Data do Pedido</label><input type="date" id="npData" value="${np.data||new Date().toISOString().slice(0,10)}" onchange="np.data=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"></div>
+        <div class="fld"><label>Condição de Pagamento</label><input class="dark-input" value="${cliSel.condPag||'Conforme cadastro do cliente'}" readonly></div>
+        <div class="fld"><label>Frete</label><select class="dark-input" id="npFreteResp" oninput="np.freteResp=this.value"><option value="CIF" ${(np.freteResp||'CIF')==='CIF'?'selected':''}>CIF — por nossa conta</option><option value="FOB" ${(np.freteResp||'')==='FOB'?'selected':''}>FOB — por conta do cliente</option></select></div>
+        <div class="fld pedido-obs"><label>Observações opcionais <span>${(np.obs||'').length}/500</span></label><textarea class="dark-input" id="npObs" rows="2" maxlength="500" placeholder="Inclua informações importantes para este pedido" oninput="np.obs=this.value">${np.obs||''}</textarea></div>
       </div>
+      <details class="pedido-frete-detalhes"><summary>Detalhar frete</summary><div class="pedido-frete-grid"><div class="fld"><label>Peso Total (kg)</label><input class="dark-input" id="npFretePeso" type="number" min="0" step="0.1" value="${np.fretePeso||''}" oninput="np.fretePeso=this.value"></div><div class="fld"><label>Distância (km)</label><input class="dark-input" id="npFreteKm" type="number" min="0" step="1" value="${np.freteKm||''}" oninput="np.freteKm=this.value"></div><div class="fld"><label>Valor do Frete (R$)</label><input class="dark-input" id="npFreteValor" type="number" min="0" step="0.01" value="${np.freteValor||''}" oninput="np.freteValor=this.value"></div></div></details>
     </div>
     <div class="pedido-workspace">
       <div class="pd-block pedido-catalogo">
-        <div class="sec" style="padding-top:0">🔍 Adicionar Produto</div>
+        <div class="pedido-section-title"><span>2</span> Adicionar Produtos</div>
+        <div class="pedido-tabs"><button class="active">Buscar Produto</button><button title="Use a busca por código">Adicionar por Código</button><button title="Disponível conforme histórico">Produtos Recentes</button><button title="Disponível conforme cadastro">Favoritos</button></div>
         <input class="dark-input" id="bProd" type="search" placeholder="Digite código, referência ou nome do produto..." value="${q}" oninput="pSearch=this.value;render()" autocomplete="off">
-        <div style="font-size:11px;color:var(--sub);margin:8px 1px 0">${fp.length} produto(s) encontrado(s) · produtos sem preço ficam bloqueados</div>
-        ${fp.length>0?`<div class="prod-result">${fp.slice(0,30).map(p=>{const ok=Number(p.preco)>0;return `<div class="prod-row ${ok?'':'preco-indisponivel'}" ${ok?`onclick="addItem('${p.id}')"`:''}><div style="min-width:0"><div style="font-weight:750;font-size:13px;white-space:normal">${p.desc}</div><div style="font-size:11.5px;color:var(--sub);margin-top:4px"><span class="tag" style="margin-right:6px">${p.cod}</span>${ok?`${fmt(p.preco)} / ${p.un}`:`<span class="preco-nao-cadastrado">Preço não cadastrado</span>`}</div></div><div class="add-ico" title="${ok?'Adicionar ao pedido':'Cadastre um preço para liberar'}">${ok?'+':'×'}</div></div>`}).join('')}</div>`:`<div class="pedido-resumo-vazio">Nenhum produto encontrado para essa busca.</div>`}
+        <div class="pedido-filtros"><select aria-label="Categoria"><option>Todas as categorias</option></select><select aria-label="Embalagem"><option>Todas as embalagens</option></select><select aria-label="Status"><option>Produtos ativos</option></select></div>
+        <div class="pedido-prod-head"><span>Código / Produto</span><span>Embalagem</span><span>Preço</span><span>Estoque</span><span></span></div>
+        ${fp.length>0?`<div class="prod-result">${fp.slice(0,30).map(p=>{const ok=Number(p.preco)>0;return `<div class="prod-row ${ok?'':'preco-indisponivel'}" ${ok?`onclick="addItem('${p.id}')"`:''}><div class="pedido-produto-ident"><span class="tag">${p.cod}</span><strong>${p.desc}</strong></div><span class="pedido-produto-un">${p.un||'—'}</span><span class="pedido-produto-preco">${ok?fmt(p.preco):`<span class="preco-nao-cadastrado">Sem preço</span>`}</span><span class="pedido-produto-estoque">${p.estoque??'—'}</span><div class="add-ico" title="${ok?'Adicionar ao pedido':'Cadastre um preço para liberar'}">${ok?'+':'×'}</div></div>`}).join('')}</div>`:`<div class="pedido-resumo-vazio">Nenhum produto encontrado para essa busca.</div>`}
       </div>
       <div class="pd-block pedido-resumo">
-        <div class="pedido-resumo-head"><div><div style="font-weight:900;font-size:14px">🛒 Resumo do Pedido</div><div style="font-size:11px;color:var(--sub);margin-top:2px">${np.itens.length} item(ns)</div></div><span class="tag">${np.itens.length}</span></div>
+        <div class="pedido-resumo-head"><div><div style="font-weight:900;font-size:14px">Resumo do Pedido</div><div style="font-size:11px;color:var(--sub);margin-top:2px">${np.itens.length} item(ns)</div></div><span class="tag">${np.itens.length}</span></div>
         <div class="pedido-resumo-lista">${np.itens.length?np.itens.map((it,i)=>`<div class="pedido-resumo-item"><div class="pedido-resumo-item-top"><div style="min-width:0"><div class="pedido-resumo-item-nome">${it.desc}</div><div style="font-size:10.5px;color:var(--sub);margin-top:3px">${it.cod} · ${it.un}</div></div></div><input class="dark-input" style="margin-top:8px;padding:6px 8px;font-size:11.5px" type="text" placeholder="Observação do item..." value="${it.disc||''}" oninput="updItemDisc(${i},this.value)"><div class="pedido-resumo-controls"><input class="num-inp" title="Quantidade" type="number" min="0.001" step="0.001" value="${it.qty}" onchange="updItem(${i},'qty',this.value)"><input class="num-inp" title="Preço" type="number" min="0.01" step="0.01" value="${it.preco}" onchange="updItem(${i},'preco',this.value)"><div class="pedido-resumo-subtotal">${fmt(it.qty*it.preco)}</div><button title="Remover" onclick="remItem(${i})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:20px">×</button></div></div>`).join(''):`<div class="pedido-resumo-vazio"><div style="font-size:24px;margin-bottom:8px">🛒</div>Seu pedido ainda está vazio.<br>Use o botão <b>+</b> na lista de produtos.</div>`}</div>
+        <div class="pedido-totais"><div><span>Subtotal</span><b>${fmt(total)}</b></div><div><span>Frete</span><b>${fmt(frete)}</b></div></div>
         <div class="pedido-resumo-total"><div><div style="font-size:10px;color:var(--sub);font-weight:800;text-transform:uppercase;letter-spacing:.6px">Total do Pedido</div><div style="font-size:11px;color:var(--sub);margin-top:3px">${np.itens.length} item(ns)</div></div><strong>${fmt(total)}</strong></div>
+        <div class="pedido-resumo-acoes"><button class="btn btn-ghost" onclick="document.getElementById('npObs').focus()">Inserir Observação</button><button class="btn btn-a" onclick="confirmar()">Finalizar Pedido</button></div>
+        <div class="pedido-sync-ok">● Dados locais e nuvem sincronizados</div>
       </div>
     </div>
-    <div class="pedido-extra">
-      <div class="pd-block"><div class="sec" style="padding-top:0">🚚 Frete <span style="font-size:11px;color:var(--sub);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></div><div class="row2"><div class="fld"><label>Peso Total (kg)</label><input class="dark-input" id="npFretePeso" type="number" min="0" step="0.1" placeholder="0,00" value="${np.fretePeso||''}" oninput="np.fretePeso=this.value"></div><div class="fld"><label>Distância (km)</label><input class="dark-input" id="npFreteKm" type="number" min="0" step="1" placeholder="0" value="${np.freteKm||''}" oninput="np.freteKm=this.value"></div></div><div class="row2"><div class="fld"><label>Valor do Frete (R$)</label><input class="dark-input" id="npFreteValor" type="number" min="0" step="0.01" placeholder="0,00" value="${np.freteValor||''}" oninput="np.freteValor=this.value"></div><div class="fld"><label>Responsável pelo Frete</label><select class="dark-input" id="npFreteResp" oninput="np.freteResp=this.value"><option value="">— Selecione —</option><option value="CIF" ${(np.freteResp||'')==='CIF'?'selected':''}>CIF (por conta do vendedor)</option><option value="FOB" ${(np.freteResp||'')==='FOB'?'selected':''}>FOB (por conta do comprador)</option></select></div></div></div>
-      <div class="pd-block"><div class="sec" style="padding-top:0">📝 Observações</div><textarea class="dark-input" id="npObs" rows="6" placeholder="Condições, instruções de entrega ou observações do pedido..." oninput="np.obs=this.value">${np.obs||''}</textarea></div>
-    </div>
-    <div class="pedido-acoes"><button class="btn btn-a" style="padding:14px" onclick="confirmar()">✅ ${npEditId?'Salvar Alterações':'Confirmar Pedido'} — ${fmt(total)}</button><button class="btn btn-ghost" onclick="limpar()" style="padding:14px 20px">🗑️ Limpar</button></div>
   </div>`;
 }
 
@@ -1249,81 +1259,7 @@ function pgPedidos(){
     :`<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Representada</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>
     ${list.map(p=>`<tr>
       <td><span style="font-weight:900;color:var(--p);font-size:13px">#${p.num}</span></td>
-      <td><div style="font-weight:600;white-space:nowrap">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub);white-space:nowrap">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
-      <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${p.repNome||'—'}</td>
-      <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${fmtDate(p.data)}</td>
-      <td style="color:var(--sub);text-align:center">${p.itens.length}</td>
-      <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.total)}</td>
-      <td><span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}">${p.status==='aberto'?'Aberto':p.status==='enviado'?'Enviado':'Cancelado'}</span></td>
-      <td><div style="display:flex;gap:5px">
-        <button class="icon-btn btn-sm" onclick="verPedido('${p.id}')">👁️ Ver</button>
-        <button class="icon-btn btn-sm" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)" onclick="editarPedido('${p.id}')">✏️</button>
-        <button class="icon-btn icon-btn-g btn-sm" onclick="exportWpp('${p.id}')">📲</button>
-        <button class="icon-btn icon-btn-red btn-sm" onclick="delPed('${p.id}')">🗑️</button>
-      </div></td>
-    </tr>`).join('')}
-    </tbody></table></div>`}`;
-}
-
-function verPedido(id){
-  const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
-  const rep=DB.get('representadas').find(r=>r.id==p.repId)||{};
-  const st=p.status||'aberto';
-  const sc={aberto:{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'},enviado:{bg:'rgba(34,197,94,.15)',cl:'#4ade80',bd:'rgba(34,197,94,.3)',lb:'✓ Enviado'},cancelado:{bg:'rgba(100,116,139,.15)',cl:'#94a3b8',bd:'rgba(100,116,139,.3)',lb:'✗ Cancelado'}}[st]||{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'};
-  document.getElementById('mpbody').innerHTML=`
-  <div style="display:flex;flex-direction:column;gap:12px">
-    <div style="padding:2px 0 12px;border-bottom:1px solid var(--bdr)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-        <div>
-          <div style="font-size:10px;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase">Pedido</div>
-          <div style="font-size:28px;font-weight:800;color:var(--txt);line-height:1;letter-spacing:-1px">#${p.num}</div>
-          <div style="font-size:12px;color:var(--sub);margin-top:4px">📅 ${fmtDate(p.data)}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-          <span style="background:${sc.bg};color:${sc.cl};border:1px solid ${sc.bd};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">${sc.lb}</span>
-          <div style="font-size:18px;font-weight:800;color:var(--txt)">${fmt(p.total)}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-sm" style="background:#25d366;border:none;color:#fff;font-weight:600" onclick="exportWpp('${p.id}')">💬 WhatsApp</button>
-        <button class="btn btn-sm btn-r" onclick="editarPedido('${p.id}')">✏️ Editar</button>
-        <button class="btn btn-sm" style="background:rgba(0,0,0,.08);color:var(--txt);border:1px solid var(--bdr)" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">👤 Cliente</div>
-        <div style="font-size:14px;font-weight:700;color:var(--txt);line-height:1.3">${p.cliNome}</div>
-        ${p.cliFan?'<div style="font-size:11px;color:var(--acc);margin-top:2px">'+p.cliFan+'</div>':''}
-        ${p.cliCnpj?'<div style="font-size:11px;color:var(--sub);margin-top:6px">'+p.cliCnpj+'</div>':''}
-        ${p.cliCid?'<div style="font-size:11px;color:var(--sub)">'+p.cliCid+(p.cliUF?'/'+p.cliUF:'')+'</div>':''}
-        <div style="margin-top:8px"><span class="tag-a">${p.cliCond||'—'}</span></div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
-        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🏢 Representada</div>
-        <div style="font-size:13px;color:var(--txt);font-weight:600;margin-bottom:2px">🏢 ${p.repNome}</div>
-        <div style="font-size:11px;color:var(--sub);margin-bottom:8px">${rep.cnpj||'CNPJ não informado'}</div>
-      </div>
-    </div>
-    <div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);border-radius:12px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">🚛 Frete</span>
-      <span style="font-size:13px;color:var(--txt);text-align:right">${p.frete?p.frete:'Não informado'} <span style="color:var(--sub);font-weight:400">· ${p.itens.length} item(s) · </span><span style="font-weight:700;color:#dc2626">${fmt(p.total)}</span></span>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:12px;font-weight:700;color:var(--txt)">Itens do Pedido</span>
-        <span style="font-size:11px;color:var(--sub)">${p.itens.length} produto(s)</span>
-      </div>
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr style="background:rgba(220,38,38,.05)">
-          <th style="padding:8px 14px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">#</th>
-          <th style="padding:8px 8px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Produto</th>
-          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Obs.</th>
-          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Qtd</th>
-          <th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Vl. Fardo</th>
-          <th style="padding:8px 14px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Total</th>
-        </tr></thead>
-        <tbody>${p.itens.map((it,i)=>'<tr style="border-top:1px solid var(--bdr)'+(i%2?';background:rgba(0,0,0,.04)':'')+'"><td style="padding:10px 14px;font-size:12px;color:var(--sub)">'+(i+1)+'</td><td style="padding:10px 8px"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">'+it.desc+'</div><span class="tag">'+it.cod+'</span></td><td style="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
+      <td><div style="font-weight:600;wh…1788 tokens truncated…e="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
         </tbody>
       </table>
     </div>
