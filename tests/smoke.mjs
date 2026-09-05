@@ -45,6 +45,13 @@ assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard nã
 assert.ok(!html.includes("'Authorization':'Bearer '+SUPA_KEY"), 'index não pode usar chave anon como bearer de dados');
 assert.ok(!html.includes('create policy "anon_all"'), 'interface não pode instruir recriação de política anon_all');
 
+// Novo Pedido profissional: layout compacto, resumo lateral e proteção de preço.
+assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
+assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
+assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
+assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
+assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
+
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');
 assert.ok(manifest.start_url.startsWith('/d7core-pedidos/'));
