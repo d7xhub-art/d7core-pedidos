@@ -1,4 +1,7 @@
 (()=>{
+  const config=window.D7_SUPABASE_CONFIG||{};
+  const supaUrl=config.url||'https://uewcjlfctumjvqsagnxg.supabase.co';
+  const supaKey=config.key||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVld2NqbGZjdHVtanZxc2FnbnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NTU5OTMsImV4cCI6MjA5ODMzMTk5M30.pobUbUe4QijHzYei3dPlZbXuZyw4M8EkqB4ohivphaY';
   const SESSION_KEY='d7_supa_session_v1';
   const RETURN_KEY='d7_auth_return';
 
@@ -14,7 +17,7 @@
   function getAccessToken(){return readSession()?.access_token||'';}
   function authHeaders(extra={}){
     const token=getAccessToken();
-    return {'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json',...extra};
+    return {'apikey':supaKey,'Authorization':'Bearer '+token,'Content-Type':'application/json',...extra};
   }
   function parseCallback(){
     const hash=new URLSearchParams(location.hash.replace(/^#/,''));
@@ -37,8 +40,8 @@
     const s=readSession();
     if(!s?.refresh_token)return false;
     try{
-      const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=refresh_token',{
-        method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+      const r=await fetch(supaUrl+'/auth/v1/token?grant_type=refresh_token',{
+        method:'POST',headers:{'apikey':supaKey,'Content-Type':'application/json'},
         body:JSON.stringify({refresh_token:s.refresh_token})
       });
       if(!r.ok)throw new Error('refresh '+r.status);
@@ -54,8 +57,8 @@
     return refreshSession();
   }
   async function signInWithPassword(email,password){
-    const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{
-      method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+    const r=await fetch(supaUrl+'/auth/v1/token?grant_type=password',{
+      method:'POST',headers:{'apikey':supaKey,'Content-Type':'application/json'},
       body:JSON.stringify({email,password})
     });
     const body=await r.json().catch(()=>({}));
@@ -67,8 +70,8 @@
   async function sendMagicLink(email){
     const redirect=location.origin+location.pathname;
     localStorage.setItem(RETURN_KEY,redirect);
-    const r=await fetch(SUPA_URL+'/auth/v1/otp',{
-      method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+    const r=await fetch(supaUrl+'/auth/v1/otp',{
+      method:'POST',headers:{'apikey':supaKey,'Content-Type':'application/json'},
       body:JSON.stringify({email,create_user:false,options:{email_redirect_to:redirect}})
     });
     const body=await r.json().catch(()=>({}));
@@ -77,7 +80,7 @@
   }
   async function signOut(){
     const token=getAccessToken();
-    try{if(token)await fetch(SUPA_URL+'/auth/v1/logout',{method:'POST',headers:authHeaders()});}catch{}
+    try{if(token)await fetch(supaUrl+'/auth/v1/logout',{method:'POST',headers:authHeaders()});}catch{}
     saveSession(null);
     location.reload();
   }
