@@ -32,12 +32,12 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.6-auth-config'), 'service worker deve renovar o cache após corrigir a autenticação');
+assert.ok(sw.includes('d7comercial-v2.7-login-submit'), 'service worker deve renovar o cache após corrigir o envio do login');
 
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.4-config"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
 
-assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.1-config"><\/script>/, 'index deve carregar o auth guard');
+assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.2-enter"><\/script>/, 'index deve carregar o auth guard');
 assert.match(auth, /signInWithPassword|\/auth\/v1\/token\?grant_type=password/, 'auth guard deve oferecer login autenticado');
 assert.match(auth, /access_token/, 'auth guard deve persistir token autenticado');
 assert.match(guard, /D7Auth\??\.getAccessToken/, 'sync guard deve usar token autenticado');
