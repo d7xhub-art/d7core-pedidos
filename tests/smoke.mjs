@@ -5,8 +5,11 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'));
 const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 const guardPath = new URL('../sync-guard.js', import.meta.url);
+const authPath = new URL('../auth-guard.js', import.meta.url);
 assert.ok(fs.existsSync(guardPath), 'sync-guard.js deve existir');
+assert.ok(fs.existsSync(authPath), 'auth-guard.js deve existir');
 const guard = fs.readFileSync(guardPath, 'utf8');
+const auth = fs.readFileSync(authPath, 'utf8');
 
 assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
 for (const item of ['Clientes','Produtos com Ficha','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
@@ -27,11 +30,20 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');
+assert.ok(sw.includes('d7comercial-v2.3-auth'), 'service worker deve usar cache da versão autenticada');
 
 // O guard deve estar presente já na primeira abertura, antes de qualquer sincronização automática.
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.3-safe"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
+
+// Acesso à nuvem deve exigir sessão autenticada, nunca usar o anon como bearer de dados.
+assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.0"><\/script>/, 'index deve carregar o auth guard');
+assert.match(auth, /signInWithPassword|\/auth\/v1\/token\?grant_type=password/, 'auth guard deve oferecer login autenticado');
+assert.match(auth, /access_token/, 'auth guard deve persistir token autenticado');
+assert.match(guard, /D7Auth\??\.getAccessToken/, 'sync guard deve usar token autenticado');
+assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard não pode usar chave anon como bearer');
+assert.ok(!html.includes("'Authorization':'Bearer '+SUPA_KEY"), 'index não pode usar chave anon como bearer de dados');
+assert.ok(!html.includes('create policy "anon_all"'), 'interface não pode instruir recriação de política anon_all');
 
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');

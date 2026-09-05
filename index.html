@@ -333,7 +333,8 @@ select option{color:#111!important;background:#fff!important}
 // ══ SUPABASE ══
 const SUPA_URL='https://uewcjlfctumjvqsagnxg.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVld2NqbGZjdHVtanZxc2FnbnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NTU5OTMsImV4cCI6MjA5ODMzMTk5M30.pobUbUe4QijHzYei3dPlZbXuZyw4M8EkqB4ohivphaY';
-const SUPA_H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+const SUPA_H={'apikey':SUPA_KEY,'Content-Type':'application/json'};
+function supaAuthHeaders(extra={}){const token=window.D7Auth?.getAccessToken?.()||'';return {...SUPA_H,'Authorization':'Bearer '+token,...extra};}
 
 async function supaSyncTable(tbl,rows){
   // Never push empty arrays — would wipe cloud data on a fresh device
@@ -341,7 +342,7 @@ async function supaSyncTable(tbl,rows){
   try{
     const payload=rows.map(r=>({id:String(r.id||r.num||Date.now()),data:r,updated_at:new Date().toISOString()}));
     await fetch(SUPA_URL+'/rest/v1/'+tbl,{
-      method:'POST',headers:{...SUPA_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      method:'POST',headers:supaAuthHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),
       body:JSON.stringify(payload)
     });
     setSyncDot('ok');
@@ -390,19 +391,14 @@ alter table representadas enable row level security;
 alter table produtos enable row level security;
 alter table pedidos enable row level security;
 alter table followups enable row level security;
-create policy "anon_all" on clientes for all to anon using(true) with check(true);
-create policy "anon_all" on prospectos for all to anon using(true) with check(true);
-create policy "anon_all" on representadas for all to anon using(true) with check(true);
-create policy "anon_all" on produtos for all to anon using(true) with check(true);
-create policy "anon_all" on pedidos for all to anon using(true) with check(true);
-create policy "anon_all" on followups for all to anon using(true) with check(true);</textarea>
+</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-p" onclick="navigator.clipboard.writeText(document.getElementById('sbSql').value).then(()=>alert('SQL copiado!'))">📋 Copiar SQL</button>
       <a href="https://supabase.com/dashboard/project/uewcjlfctumjvqsagnxg/sql/new" target="_blank" class="btn btn-p" style="text-decoration:none">🔗 Abrir SQL Editor</a>
       <button class="btn" onclick="supaFullSync().then(()=>openSupabaseSetup())">🔄 Sincronizar Agora</button>
     </div>
   `);  try{
-    const r=await fetch(SUPA_URL+'/rest/v1/clientes?limit=1',{headers:SUPA_H});
+    const r=await fetch(SUPA_URL+'/rest/v1/clientes?limit=1',{headers:supaAuthHeaders()});
     const el=document.getElementById('sbStatus');
     if(!el)return;
     if(r.ok){
@@ -427,7 +423,7 @@ async function supaPull(){
   let total=0;
   for(const t of tabs){
     try{
-      const r=await fetch(SUPA_URL+'/rest/v1/'+t+'?select=data&order=created_at',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+      const r=await fetch(SUPA_URL+'/rest/v1/'+t+'?select=data&order=created_at',{headers:supaAuthHeaders()});
       if(r.ok){const rows=await r.json();const d=rows.map(x=>x.data).filter(Boolean);if(d.length){localStorage.setItem('d7_'+t,JSON.stringify(d));total+=d.length;}}
     }catch(e){console.warn('Supa pull:',t,e)}
   }
@@ -1671,7 +1667,7 @@ function buscarNoMaps(){
 
 async function pullProspectosMaps(){
   try{
-    const r=await fetch(SUPA_URL+'/rest/v1/prospectos?select=data&order=created_at',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    const r=await fetch(SUPA_URL+'/rest/v1/prospectos?select=data&order=created_at',{headers:supaAuthHeaders()});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const rows=await r.json();
     const remote=rows.map(x=>x.data).filter(Boolean);
@@ -2732,6 +2728,7 @@ async function shareOrcImage(id){
 }
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Service worker:',e)));}
 </script>
+<script src="./auth-guard.js?v=1.0"></script>
 <script src="./sync-guard.js?v=2.3-safe"></script>
 </body>
 </html>
