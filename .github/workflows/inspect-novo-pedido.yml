@@ -1,32 +1,40 @@
-name: Inspecionar Novo Pedido
+name: Aplicar e Validar Novo Pedido
 
 on:
   push:
     branches: [feat/novo-pedido-profissional]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect:
+  apply:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: feat/novo-pedido-profissional
-      - name: Mostrar estrutura relevante
+      - name: Aplicar patch
+        run: python tools/apply_novo_pedido.py
+      - name: Rodar testes
         run: |
+          node tests/smoke.mjs
+          node --check auth-guard.js
+          node --check sync-guard.js
+          node --check sw.js
           python - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
-          needles=['function pgNovoPedido','Novo Pedido','ADICIONAR PRODUTO','Adicionar Produto','function addNP','function addProd','function np','np.itens','pedido-itens']
-          lines=s.splitlines()
-          for needle in needles:
-              print('\n###', needle)
-              hits=[i for i,l in enumerate(lines) if needle.lower() in l.lower()]
-              for i in hits[:8]:
-                  a=max(0,i-8); b=min(len(lines),i+35)
-                  print(f'--- lines {a+1}-{b} ---')
-                  for n in range(a,b): print(f'{n+1}: {lines[n]}')
+          for x in ['pedido-profissional','Resumo do Pedido','Preço não cadastrado','preco-indisponivel','pedido-dados-compactos',"if(!(Number(p.preco)>0))"]:
+              assert x in s, x
+          print('NOVO_PEDIDO_PRO_OK')
           PY
+      - name: Commit da implementação
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: profissionalizar tela de novo pedido"
+          git push origin HEAD:feat/novo-pedido-profissional
