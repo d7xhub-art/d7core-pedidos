@@ -6,10 +6,13 @@ const manifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', import.m
 const sw = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 const guardPath = new URL('../sync-guard.js', import.meta.url);
 const authPath = new URL('../auth-guard.js', import.meta.url);
+const uiPath = new URL('../saas-light.css', import.meta.url);
 assert.ok(fs.existsSync(guardPath), 'sync-guard.js deve existir');
 assert.ok(fs.existsSync(authPath), 'auth-guard.js deve existir');
+assert.ok(fs.existsSync(uiPath), 'saas-light.css deve existir');
 const guard = fs.readFileSync(guardPath, 'utf8');
 const auth = fs.readFileSync(authPath, 'utf8');
+const ui = fs.readFileSync(uiPath, 'utf8');
 
 assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
 for (const item of ['Clientes','Produtos com Ficha','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
@@ -51,6 +54,15 @@ assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral')
 assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
+
+// Camada visual SaaS: leve, acessível, responsiva e carregada desde a primeira abertura.
+assert.match(guard, /saas-light\.css\?v=1\.0/, 'sync guard deve carregar a camada visual SaaS');
+assert.match(ui, /D7 SaaS Light UI/, 'CSS deve identificar a camada SaaS');
+assert.match(ui, /:focus-visible/, 'interface deve ter foco visível para teclado');
+assert.match(ui, /text-transform:\s*none/, 'interface deve reduzir caixa alta');
+assert.match(ui, /font-weight:\s*600/, 'interface deve usar pesos tipográficos mais leves');
+assert.match(ui, /@media\s*\(max-width:\s*700px\)/, 'interface deve preservar responsividade no celular');
+assert.match(ui, /prefers-reduced-motion/, 'interface deve respeitar redução de movimento');
 
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');
