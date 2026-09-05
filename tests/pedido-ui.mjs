@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const ui=fs.readFileSync(new URL('../saas-light.css',import.meta.url),'utf8');
-assert.match(html,/pedido-busca-dropdown/,'busca deve abrir lista interna');
-assert.match(html,/q\s*&&\s*fp\.length/,'lista só aparece quando há busca');
-assert.match(html,/Itens do Pedido/,'itens escolhidos devem ter bloco principal');
-assert.match(html,/pedido-itens-tabela/,'itens escolhidos devem usar tabela ampla');
+const productivity=fs.readFileSync(new URL('../productivity.js',import.meta.url),'utf8');
+assert.match(productivity,/busca-ativa/,'busca deve controlar abertura da lista interna');
+assert.match(productivity,/Itens do Pedido/,'resumo deve virar área principal de itens');
+assert.match(productivity,/search\.value\.trim\(\)/,'lista só aparece quando há busca digitada');
 assert.match(ui,/\.pedido-itens-principal/,'CSS deve ampliar itens do pedido');
-assert.match(ui,/\.pedido-busca-dropdown/,'CSS deve tratar resultados como dropdown');
+assert.match(ui,/\.pedido-busca-dropdown/,'CSS deve tratar resultados como dropdown interno');
+assert.match(ui,/\.pedido-catalogo:not\(\.busca-ativa\) \.prod-result/,'catálogo deve ficar oculto sem busca');
 console.log('PEDIDO_UI_OK');
