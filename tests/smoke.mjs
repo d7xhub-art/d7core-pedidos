@@ -43,6 +43,7 @@ assert.match(auth, /access_token/, 'auth guard deve persistir token autenticado'
 assert.match(guard, /D7Auth\??\.getAccessToken/, 'sync guard deve usar token autenticado');
 assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard não pode usar chave anon como bearer');
 assert.ok(!html.includes("'Authorization':'Bearer '+SUPA_KEY"), 'index não pode usar chave anon como bearer de dados');
+assert.ok(!html.includes('create policy "anon_all"'), 'interface não pode instruir recriação de política anon_all');
 
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');
