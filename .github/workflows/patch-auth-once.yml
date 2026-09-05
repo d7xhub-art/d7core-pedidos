@@ -1,0 +1,57 @@
+name: Aplicar autenticação D7 uma vez
+
+on:
+  push:
+    branches: [fix/auth-segura-d7comercial]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/auth-segura-d7comercial
+      - name: Aplicar patch de autenticação
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="const SUPA_H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};"
+          new="const SUPA_H={'apikey':SUPA_KEY,'Content-Type':'application/json'};\nfunction supaAuthHeaders(extra={}){const token=window.D7Auth?.getAccessToken?.()||'';return {...SUPA_H,'Authorization':'Bearer '+token,...extra};}"
+          if old in s:
+              s=s.replace(old,new,1)
+          s=s.replace("headers:{...SUPA_H,'Prefer':'resolution=merge-duplicates,return=minimal'}", "headers:supaAuthHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'})")
+          s=s.replace("headers:SUPA_H", "headers:supaAuthHeaders()")
+          s=s.replace("headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}", "headers:supaAuthHeaders()")
+          marker='<script src="./sync-guard.js?v=2.3-safe"></script>'
+          auth='<script src="./auth-guard.js?v=1.0"></script>\n'+marker
+          if '<script src="./auth-guard.js?v=1.0"></script>' not in s:
+              if marker not in s: raise SystemExit('sync guard marker not found')
+              s=s.replace(marker,auth,1)
+          if "'Authorization':'Bearer '+SUPA_KEY" in s:
+              raise SystemExit('unsafe anon bearer remains in index')
+          p.write_text(s,encoding='utf-8')
+
+          t=Path('tests/smoke.mjs')
+          ts=t.read_text(encoding='utf-8').replace("assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');","assert.ok(sw.includes('d7comercial-v2.3-auth'), 'service worker deve usar cache da versão autenticada');")
+          t.write_text(ts,encoding='utf-8')
+          PY
+      - name: Validar antes do commit
+        run: |
+          node tests/smoke.mjs
+          node --check auth-guard.js
+          node --check sync-guard.js
+          node --check sw.js
+      - name: Commit do patch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html tests/smoke.mjs
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: exigir login para acesso à nuvem"
+          git push origin HEAD:fix/auth-segura-d7comercial
