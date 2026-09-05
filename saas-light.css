@@ -1,0 +1,190 @@
+/* D7 SaaS Light UI — camada visual sem alterar lógica do sistema */
+:root{
+  --bg:#101113;
+  --sidebar:#17181b;
+  --card:#1c1d21;
+  --card2:#23252a;
+  --border:#2c2e33;
+  --border2:#3a3d43;
+  --text:#f4f4f5;
+  --sub:#a1a1aa;
+  --sub2:#71717a;
+  --p:#e5484d;
+  --p2:#b91c1c;
+  --radius:12px;
+}
+
+html{font-size:100%;}
+body{
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:14px;
+  font-weight:400;
+  line-height:1.45;
+  letter-spacing:0;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Tipografia mais leve e humana */
+.sb-logo-t,.tb-title,.tbl-head-t,.m-title,.mtitle,.pg-title{font-weight:700!important;}
+.sb-section,.stat-label,th,.fld label,.sec{
+  text-transform:none!important;
+  letter-spacing:.1px!important;
+  font-weight:600!important;
+}
+.pg-title{font-size:19px!important;letter-spacing:-.2px!important;}
+.pg-sub,.tbl-head-s,.stat-sub{font-weight:400!important;line-height:1.5;}
+.stat-val{font-size:24px!important;font-weight:700!important;}
+
+/* Marca mais discreta */
+#topbar{
+  height:62px!important;
+  padding:0 18px!important;
+  border-bottom:1px solid var(--border)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.02);
+}
+#topbar::after{display:none!important;}
+.tb-center{gap:2px!important;}
+.tb-d7{font-size:11px!important;font-weight:600!important;letter-spacing:1.2px!important;text-transform:none!important;color:var(--sub)!important;}
+.tb-pedidos{
+  font-size:21px!important;
+  font-weight:700!important;
+  letter-spacing:.5px!important;
+  background:none!important;
+  -webkit-text-fill-color:var(--text)!important;
+  color:var(--text)!important;
+}
+.tb-line{width:52px!important;height:2px!important;background:var(--p)!important;opacity:.8!important;}
+
+/* Sidebar simples, sem peso visual */
+#sidebar{width:220px!important;min-width:220px!important;background:var(--sidebar)!important;}
+.sb-logo{padding:16px 14px!important;gap:10px!important;}
+.sb-logo-icon{
+  width:34px!important;height:34px!important;
+  border-radius:9px!important;
+  font-weight:700!important;
+  box-shadow:none!important;
+  background:var(--p)!important;
+}
+.sb-logo-s{font-size:10.5px!important;color:var(--sub2)!important;}
+.sb-section{padding:15px 14px 5px!important;font-size:11px!important;color:var(--sub2)!important;}
+.sb-item{
+  min-height:40px;
+  margin:2px 7px!important;
+  padding:9px 11px!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+  font-weight:500!important;
+  color:var(--sub)!important;
+}
+.sb-item:hover{background:rgba(255,255,255,.045)!important;color:var(--text)!important;}
+.sb-item.on{
+  background:rgba(229,72,77,.11)!important;
+  color:#fff!important;
+  font-weight:600!important;
+  border:1px solid rgba(229,72,77,.24)!important;
+  box-shadow:none!important;
+}
+.sb-badge{font-weight:600!important;box-shadow:none!important;}
+
+/* Conteúdo com mais respiro */
+#content{padding:22px!important;}
+.pg-head{margin-bottom:18px!important;}
+.stats{gap:12px!important;margin-bottom:18px!important;}
+.stat,.tbl-wrap,.pd-block{
+  border:1px solid var(--border)!important;
+  border-radius:var(--radius)!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.12);
+}
+.stat{padding:16px!important;}
+.stat::before{height:2px!important;opacity:.7;}
+.tbl-head{padding:14px 17px!important;}
+.tbl-head-t{font-size:13.5px!important;}
+
+/* Tabelas mais fáceis de ler */
+th{
+  padding:10px 14px!important;
+  font-size:11.5px!important;
+  color:var(--sub)!important;
+  background:rgba(255,255,255,.012);
+}
+td{padding:12px 14px!important;border-bottom-color:rgba(255,255,255,.055)!important;}
+tr:hover td{background:rgba(255,255,255,.025)!important;}
+
+/* Campos e botões com alvo de toque confortável */
+.search-bar,.filter-sel,.fld input,.fld select,.fld textarea,.dark-input,.num-inp{
+  min-height:42px;
+  border-width:1px!important;
+  border-color:var(--border)!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.025)!important;
+  font-size:13px!important;
+}
+.fld label{font-size:11.5px!important;color:var(--sub)!important;}
+.fld{gap:6px!important;}
+.tb-btn,.btn,.btn2,button{
+  font-family:inherit;
+  font-weight:600!important;
+  letter-spacing:0!important;
+}
+.tb-btn{min-height:38px;padding:8px 13px!important;border-radius:9px!important;}
+.btn-add{box-shadow:none!important;}
+.badge,.tag{font-weight:600!important;letter-spacing:0!important;}
+
+/* Modais suaves */
+.modal{backdrop-filter:blur(8px)!important;background:rgba(0,0,0,.62)!important;}
+.mbox{
+  border-radius:14px!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.28)!important;
+}
+.mtitle{font-size:16px!important;}
+
+/* Novo Pedido: mantém o layout profissional, só suaviza o peso */
+.pedido-profissional .sec{font-size:11.5px!important;}
+.pedido-resumo-item-nome{font-weight:600!important;}
+.pedido-resumo-subtotal{font-weight:700!important;}
+.pedido-resumo-total strong{font-size:21px!important;font-weight:700!important;}
+.pedido-catalogo .prod-row{transition:background .12s ease,border-color .12s ease!important;}
+
+/* Acessibilidade de teclado */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible,.sb-item:focus-visible{
+  outline:3px solid rgba(229,72,77,.65)!important;
+  outline-offset:2px!important;
+}
+button:disabled,[aria-disabled="true"]{opacity:.55;cursor:not-allowed!important;}
+
+/* Menos animação para quem prefere */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+}
+
+/* Tablet */
+@media (max-width:1050px){
+  #content{padding:18px!important;}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+
+/* Celular */
+@media (max-width:700px){
+  body{font-size:14px!important;}
+  #topbar{height:58px!important;padding:0 12px!important;}
+  .tb-center{display:none!important;}
+  #content{padding:14px!important;}
+  .pg-title{font-size:18px!important;}
+  .pg-sub{font-size:12px!important;}
+  .stats{grid-template-columns:1fr 1fr!important;gap:9px!important;}
+  .stat{padding:13px!important;}
+  .stat-val{font-size:21px!important;}
+  .tbl-wrap{overflow-x:auto!important;}
+  th,td{padding:10px 11px!important;}
+  .tb-btn{min-height:40px!important;}
+  .search-bar,.filter-sel,.fld input,.fld select,.dark-input{min-height:44px!important;font-size:16px!important;}
+}
+
+@media (max-width:430px){
+  .stats{grid-template-columns:1fr!important;}
+  .stat{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;}
+  .stat-ico{grid-row:1/4;margin:0!important;}
+}

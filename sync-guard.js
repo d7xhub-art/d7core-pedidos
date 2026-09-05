@@ -1,4 +1,13 @@
 (()=>{
+  // Camada visual SaaS carregada desde a primeira abertura, sem alterar a lógica de negócio.
+  if(!document.querySelector('link[data-d7-saas-ui]')){
+    const ui=document.createElement('link');
+    ui.rel='stylesheet';
+    ui.href='./saas-light.css?v=1.0';
+    ui.dataset.d7SaasUi='1';
+    document.head.appendChild(ui);
+  }
+
   const TABLES=['clientes','produtos','representadas','pedidos','orcamentos','followups','prospectos'];
   const OPTIONAL=new Set(['orcamentos']);
   const timers=new Map();
