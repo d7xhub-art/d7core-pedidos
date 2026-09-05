@@ -103,14 +103,21 @@
     </div>`;
     document.body.appendChild(gate);
     const msg=gate.querySelector('#d7AuthMsg');
-    gate.querySelector('#d7AuthLogin').onclick=async()=>{
-      const email=gate.querySelector('#d7AuthEmail').value.trim();
-      const pass=gate.querySelector('#d7AuthPass').value;
+    const emailInput=gate.querySelector('#d7AuthEmail');
+    const passInput=gate.querySelector('#d7AuthPass');
+    const loginButton=gate.querySelector('#d7AuthLogin');
+    const submitLogin=async()=>{
+      const email=emailInput.value.trim();
+      const pass=passInput.value;
       if(!email||!pass){msg.textContent='Informe e-mail e senha.';return;}
+      loginButton.disabled=true;
       msg.textContent='Entrando...';
       try{await signInWithPassword(email,pass);msg.style.color='#4ade80';msg.textContent='Acesso liberado.';gate.remove();window.dispatchEvent(new Event('d7-auth-ready'));}
       catch(e){msg.style.color='#f87171';msg.textContent=e.message;}
+      finally{loginButton.disabled=false;}
     };
+    loginButton.onclick=submitLogin;
+    passInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitLogin();}});
     gate.querySelector('#d7AuthMagic').onclick=async()=>{
       const email=gate.querySelector('#d7AuthEmail').value.trim();
       if(!email){msg.textContent='Informe o e-mail primeiro.';return;}
