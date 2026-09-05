@@ -32,7 +32,7 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.4-final'), 'service worker deve renovar o cache para publicar o visual final');
+assert.ok(sw.includes('d7comercial-v2.5-novo-pedido'), 'service worker deve renovar o cache para publicar o Novo Pedido');
 
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.3-safe"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
@@ -55,7 +55,8 @@ assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinali
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
 
-assert.match(guard, /saas-light\.css\?v=1\.1-final/, 'sync guard deve carregar a versão final da camada visual SaaS');
+assert.match(guard, /saas-light\.css\?v=1\.2-novo-pedido/, 'sync guard deve carregar a camada visual atualizada do Novo Pedido');
+assert.match(guard, /productivity\.js\?v=1\.1-novo-pedido/, 'sync guard deve renovar os atalhos do Novo Pedido');
 assert.match(ui, /D7 SaaS Light UI/, 'CSS deve identificar a camada SaaS');
 assert.match(ui, /:focus-visible/, 'interface deve ter foco visível para teclado');
 assert.match(ui, /text-transform:\s*none/, 'interface deve reduzir caixa alta');
