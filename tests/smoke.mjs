@@ -29,6 +29,10 @@ assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronizaç�
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
 assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');
 
+// O guard deve estar presente já na primeira abertura, antes de qualquer sincronização automática.
+assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.3-safe"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
+assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
+
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');
 assert.ok(manifest.start_url.startsWith('/d7core-pedidos/'));
