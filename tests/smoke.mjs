@@ -48,6 +48,11 @@ assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard nã
 assert.ok(!html.includes("'Authorization':'Bearer '+SUPA_KEY"), 'index não pode usar chave anon como bearer de dados');
 assert.ok(!html.includes('create policy "anon_all"'), 'interface não pode instruir recriação de política anon_all');
 
+// Magic Link: nunca cria usuário novo e nunca expõe erro técnico do Supabase ao usuário.
+assert.match(auth, /create_user\s*:\s*false/, 'magic link deve aceitar apenas usuário já existente');
+assert.match(auth, /E-mail não autorizado/, 'erro de OTP/signup deve ser traduzido para mensagem clara em português');
+assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o erro técnico retornado pelo Supabase');
+
 // Novo Pedido profissional: layout compacto, resumo lateral e proteção de preço.
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
