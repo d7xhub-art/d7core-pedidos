@@ -3,7 +3,7 @@
   if(!document.querySelector('link[data-d7-saas-ui]')){
     const ui=document.createElement('link');
     ui.rel='stylesheet';
-    ui.href='./saas-light.css?v=1.0';
+    ui.href='./saas-light.css?v=1.1-final';
     ui.dataset.d7SaasUi='1';
     document.head.appendChild(ui);
   }
