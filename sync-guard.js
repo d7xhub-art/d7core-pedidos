@@ -1,4 +1,7 @@
 (()=>{
+  const config=window.D7_SUPABASE_CONFIG||{};
+  const supaUrl=config.url||'https://uewcjlfctumjvqsagnxg.supabase.co';
+  const supaKey=config.key||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVld2NqbGZjdHVtanZxc2FnbnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NTU5OTMsImV4cCI6MjA5ODMzMTk5M30.pobUbUe4QijHzYei3dPlZbXuZyw4M8EkqB4ohivphaY';
   // Camada visual SaaS carregada desde a primeira abertura, sem alterar a lógica de negócio.
   if(!document.querySelector('link[data-d7-saas-ui]')){
     const ui=document.createElement('link');
@@ -24,7 +27,7 @@
   function idOf(x){return String((x&&(x.id??x.num))??'');}
   function headers(){
     const token=window.D7Auth?.getAccessToken?.()||'';
-    return {'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'};
+    return {'apikey':supaKey,'Authorization':'Bearer '+token,'Content-Type':'application/json'};
   }
   function setMessage(text){const el=document.getElementById('statusMsg');if(el)el.textContent=text;}
 
@@ -41,7 +44,7 @@
     if(!(await readyForCloud()))return false;
     const payload=rows.map(r=>({id:idOf(r)||String(Date.now()),data:r,updated_at:new Date().toISOString()}));
     try{
-      const r=await fetch(SUPA_URL+'/rest/v1/'+tbl,{
+      const r=await fetch(supaUrl+'/rest/v1/'+tbl,{
         method:'POST',
         headers:{...headers(),'Prefer':'resolution=merge-duplicates,return=minimal'},
         body:JSON.stringify(payload)
@@ -72,7 +75,7 @@
     let imported=0,ok=true;
     for(const tbl of TABLES){
       try{
-        const r=await fetch(SUPA_URL+'/rest/v1/'+tbl+'?select=data&order=updated_at.asc',{headers:headers()});
+        const r=await fetch(supaUrl+'/rest/v1/'+tbl+'?select=data&order=updated_at.asc',{headers:headers()});
         if(!r.ok){
           if(OPTIONAL.has(tbl)&&(r.status===404||r.status===400))continue;
           ok=false;continue;
