@@ -4,11 +4,23 @@
   const timers=new Map();
 
   function idOf(x){return String((x&&(x.id??x.num))??'');}
-  function headers(){return {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};}
+  function headers(){
+    const token=window.D7Auth?.getAccessToken?.()||'';
+    return {'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'};
+  }
   function setMessage(text){const el=document.getElementById('statusMsg');if(el)el.textContent=text;}
+
+  async function readyForCloud(){
+    if(!window.D7Auth)return false;
+    if(await window.D7Auth.hasValidSession())return true;
+    setSyncDot('wait');
+    setMessage('Entre para sincronizar com a nuvem');
+    return false;
+  }
 
   async function syncTableSafe(tbl,rows){
     if(!Array.isArray(rows)||rows.length===0)return true;
+    if(!(await readyForCloud()))return false;
     const payload=rows.map(r=>({id:idOf(r)||String(Date.now()),data:r,updated_at:new Date().toISOString()}));
     try{
       const r=await fetch(SUPA_URL+'/rest/v1/'+tbl,{
@@ -25,6 +37,7 @@
   }
 
   async function pushLocalFirst(){
+    if(!(await readyForCloud()))return false;
     setSyncDot('wait');
     setMessage('Salvando dados locais na nuvem...');
     let ok=true;
@@ -37,6 +50,7 @@
   }
 
   async function mergeRemote(){
+    if(!(await readyForCloud()))return {ok:false,imported:0};
     let imported=0,ok=true;
     for(const tbl of TABLES){
       try{
@@ -62,6 +76,7 @@
   }
 
   async function fullSafeSync(){
+    if(!(await readyForCloud()))return false;
     const pushed=await pushLocalFirst();
     const pulled=await mergeRemote();
     if(pushed&&pulled.ok){
@@ -83,11 +98,11 @@
     timers.set(tbl,setTimeout(async()=>{
       const ok=await syncTableSafe(tbl,rows);
       setSyncDot(ok?'ok':'err');
-      setMessage(ok?'Dados locais e nuvem sincronizados':'Dados locais preservados • falha na nuvem');
+      setMessage(ok?'Dados locais e nuvem sincronizados':'Dados locais preservados • entre para sincronizar');
     },700));
   };
 
-  // A primeira sincronização é sempre local -> nuvem -> merge remoto.
-  // Isso impede uma nuvem vazia/antiga de substituir cadastros existentes no navegador.
-  setTimeout(()=>fullSafeSync(),1200);
+  // Só sincroniza depois de uma sessão autenticada válida.
+  window.addEventListener('d7-auth-ready',()=>fullSafeSync());
+  setTimeout(async()=>{if(window.D7Auth&&await window.D7Auth.hasValidSession())fullSafeSync();},1200);
 })();
