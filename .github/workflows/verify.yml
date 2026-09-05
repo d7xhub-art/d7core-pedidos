@@ -22,6 +22,8 @@ jobs:
           node-version: '22'
       - name: Smoke test
         run: node tests/smoke.mjs
+      - name: Teste do Novo Pedido
+        run: node tests/pedido-ui.mjs
       - name: Teste de produtividade
         run: node tests/productivity.mjs
       - name: Validar JavaScript de arquivos auxiliares
