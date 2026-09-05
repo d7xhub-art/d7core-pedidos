@@ -1,0 +1,48 @@
+name: Validar interface publicada
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar navegador de teste
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 --no-save
+          npx playwright install --with-deps chromium
+      - name: Validar D7COMERCIAL publicado
+        run: |
+          node <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto('https://d7xhub-art.github.io/d7core-pedidos/',{waitUntil:'networkidle',timeout:90000});
+            await page.waitForTimeout(2500);
+            const title=await page.title();
+            const body=await page.locator('body').innerText();
+            if(!title.includes('D7COMERCIAL')) throw new Error('Título inesperado: '+title);
+            for(const t of ['Início','Clientes','Produtos','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']){
+              if(!body.includes(t)) throw new Error('Item ausente: '+t);
+            }
+            for(const bad of ['w.document.close();','setTimeout(()=>w.print()','${prods.length}','function imprimirCatalogo()']){
+              if(body.includes(bad)) throw new Error('Código exposto na interface: '+bad);
+            }
+            if(errors.length) throw new Error('Erros JavaScript na página: '+errors.join(' | '));
+            console.log('RENDER_OK');
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
