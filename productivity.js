@@ -58,21 +58,10 @@
 
   function organizePedido(search){
     const catalog=search.closest('.pedido-catalogo');
-    const workspace=search.closest('.pedido-workspace');
-    const summary=workspace?.querySelector('.pedido-resumo');
-    if(!catalog||!summary)return;
-
-    catalog.classList.add('pedido-busca-dropdown');
-    catalog.classList.toggle('busca-ativa',!!search.value.trim());
-    summary.classList.add('pedido-itens-principal');
+    if(!catalog)return;
 
     const meta=[...catalog.children].find(el=>el.tagName==='DIV'&&/produto\(s\) encontrado\(s\)/.test(el.textContent||''));
     if(meta)meta.classList.add('pedido-busca-meta');
-
-    const title=summary.querySelector('.pedido-resumo-head > div > div:first-child');
-    if(title)title.textContent='🛒 Itens do Pedido';
-    const empty=summary.querySelector('.pedido-resumo-vazio');
-    if(empty&&summary.contains(empty))empty.innerHTML='<div style="font-size:24px;margin-bottom:8px">🛒</div>Nenhum item adicionado ainda.<br>Busque um produto acima para começar.';
   }
 
   function ensureStyle(){
