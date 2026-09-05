@@ -20,14 +20,14 @@ assert.ok(!/<button[^>]*>[^<]*📌\s*Follow-up<\/button>/i.test(html), 'ação v
 assert.ok(!/>D7 HUB</.test(html), 'marca antiga D7 HUB reapareceu');
 assert.ok(!html.includes("method:'DELETE'"), 'sincronização não pode apagar dados remotos');
 
-// Sincronização: primeiro envia o local, depois mescla a nuvem; nunca sobrescreve lista local.
+// Sincronização segura: local -> nuvem -> merge remoto.
 assert.match(guard, /pushLocalFirst/, 'sincronização deve enviar dados locais antes de ler a nuvem');
 assert.match(guard, /mergeRemote/, 'sincronização deve mesclar dados remotos sem substituir o local');
 assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Supabase');
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
-assert.ok(sw.includes('sync-guard.js?v=2.4-safe-cloud'), 'service worker deve injetar a sincronização segura atual');
-assert.ok(sw.includes('d7comercial-v2.4-safe-cloud'), 'cache PWA deve ser renovado');
+assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
+assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');
 
 assert.equal(manifest.name, 'D7COMERCIAL');
 assert.equal(manifest.short_name, 'D7COMERCIAL');
