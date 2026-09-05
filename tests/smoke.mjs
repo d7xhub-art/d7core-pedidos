@@ -32,7 +32,7 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.3-auth'), 'service worker deve usar cache da versão autenticada');
+assert.ok(sw.includes('d7comercial-v2.4-final'), 'service worker deve renovar o cache para publicar o visual final');
 
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.3-safe"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
@@ -55,7 +55,7 @@ assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinali
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
 
-assert.match(guard, /saas-light\.css\?v=1\.0/, 'sync guard deve carregar a camada visual SaaS');
+assert.match(guard, /saas-light\.css\?v=1\.1-final/, 'sync guard deve carregar a versão final da camada visual SaaS');
 assert.match(ui, /D7 SaaS Light UI/, 'CSS deve identificar a camada SaaS');
 assert.match(ui, /:focus-visible/, 'interface deve ter foco visível para teclado');
 assert.match(ui, /text-transform:\s*none/, 'interface deve reduzir caixa alta');
@@ -63,7 +63,6 @@ assert.match(ui, /font-weight:\s*600/, 'interface deve usar pesos tipográficos 
 assert.match(ui, /@media\s*\(max-width:\s*700px\)/, 'interface deve preservar responsividade no celular');
 assert.match(ui, /prefers-reduced-motion/, 'interface deve respeitar redução de movimento');
 
-// Finalização visual: aparência clara, discreta e SaaS, sem o fundo preto dominante.
 assert.match(ui, /--bg:\s*#f6f7f9/i, 'fundo principal deve ser claro');
 assert.match(ui, /--sidebar:\s*#ffffff/i, 'sidebar deve ser clara');
 assert.match(ui, /--card:\s*#ffffff/i, 'cards devem usar superfície clara');
