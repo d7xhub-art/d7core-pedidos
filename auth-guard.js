@@ -25,6 +25,14 @@
     }
     return false;
   }
+  function authErrorMessage(raw,context='login'){
+    const text=String(raw||'').trim();
+    if(/Signups not allowed for otp/i.test(text)||/signup.*not allowed/i.test(text))return 'E-mail não autorizado para acessar o D7COMERCIAL.';
+    if(/invalid login credentials/i.test(text))return 'E-mail ou senha inválidos.';
+    if(/email not confirmed/i.test(text))return 'Este e-mail ainda não está confirmado.';
+    if(context==='magic')return 'Não foi possível enviar o link de acesso. Confira o e-mail autorizado e tente novamente.';
+    return text||'Não foi possível entrar.';
+  }
   async function refreshSession(){
     const s=readSession();
     if(!s?.refresh_token)return false;
@@ -51,7 +59,7 @@
       body:JSON.stringify({email,password})
     });
     const body=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(body.error_description||body.msg||body.message||'Não foi possível entrar');
+    if(!r.ok)throw new Error(authErrorMessage(body.error_description||body.msg||body.message,'login'));
     if(!body.access_token)throw new Error('Sessão não recebida');
     saveSession(body);
     return body;
@@ -64,7 +72,7 @@
       body:JSON.stringify({email,create_user:false,options:{email_redirect_to:redirect}})
     });
     const body=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(body.msg||body.message||'Não foi possível enviar o acesso por e-mail');
+    if(!r.ok)throw new Error(authErrorMessage(body.error_description||body.msg||body.message,'magic'));
     return true;
   }
   async function signOut(){
@@ -87,7 +95,7 @@
       <label style="display:block;font-size:11px;font-weight:800;color:#aaa;margin:12px 0 5px">SENHA</label>
       <input id="d7AuthPass" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px;border-radius:9px;border:1px solid #333;background:#101010;color:#fff;outline:none" placeholder="••••••••">
       <button id="d7AuthLogin" style="width:100%;margin-top:14px;padding:12px;border:0;border-radius:9px;background:#dc2626;color:#fff;font-weight:900;cursor:pointer">Entrar</button>
-      <button id="d7AuthMagic" style="width:100%;margin-top:9px;padding:11px;border:1px solid #383838;border-radius:9px;background:#222;color:#eee;font-weight:800;cursor:pointer">Enviar link de acesso por e-mail</button>
+      <button id="d7AuthMagic" style="width:100%;margin-top:9px;padding:11px;border:1px solid #383838;border-radius:9px;background:#222;color:#eee;font-weight:800;cursor:pointer">Enviar link para e-mail autorizado</button>
       <div id="d7AuthMsg" style="min-height:20px;margin-top:12px;font-size:12px;color:#fbbf24"></div>
     </div>`;
     document.body.appendChild(gate);
