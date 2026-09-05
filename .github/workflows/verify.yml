@@ -26,6 +26,8 @@ jobs:
         run: node tests/pedido-ui.mjs
       - name: Teste de produtividade
         run: node tests/productivity.mjs
+      - name: Teste de configuração da autenticação
+        run: node tests/auth-config.mjs
       - name: Validar JavaScript de arquivos auxiliares
         run: |
           node --check auth-guard.js
