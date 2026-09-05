@@ -10,4 +10,6 @@ assert.match(js,/Enter/,'deve existir ação rápida com Enter');
 assert.match(js,/bProd/,'deve focar a busca de produto');
 assert.match(js,/addItem/,'Enter deve usar a inclusão existente de produto');
 assert.match(js,/MutationObserver/,'deve reaplicar produtividade após re-render sem alterar o núcleo');
+assert.match(js,/closest\('\.pedido-busca-acao'\)/,'atalhos devem ficar fora da grade formada por busca e botão');
+assert.doesNotMatch(js,/search\.insertAdjacentElement\('afterend',hint\)/,'atalhos não podem deslocar o botão Buscar para outra linha');
 console.log('PRODUCTIVITY_OK');

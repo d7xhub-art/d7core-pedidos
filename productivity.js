@@ -43,11 +43,13 @@
   function ensureHint(search){
     const catalog=search.closest('.pedido-catalogo');
     if(!catalog||catalog.querySelector('.d7-shortcuts'))return;
+    const searchRow=search.closest('.pedido-busca-acao');
+    if(!searchRow)return;
     const hint=document.createElement('div');
     hint.className='d7-shortcuts';
     hint.setAttribute('aria-label','Atalhos de produtividade');
     hint.innerHTML='<span><kbd>Enter</kbd> adiciona</span><span><kbd>Ctrl</kbd> + <kbd>K</kbd> busca</span><span><kbd>Esc</kbd> limpa</span>';
-    search.insertAdjacentElement('afterend',hint);
+    searchRow.insertAdjacentElement('afterend',hint);
   }
 
   function highlightFirst(){

@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 
 const source=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+assert.match(source,/c\.scrollTop=0/,'a navegação deve abrir cada tela no topo');
 
 function extractFunction(name){
   const start=source.indexOf(`function ${name}(`);

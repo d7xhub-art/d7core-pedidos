@@ -525,7 +525,9 @@ function goto(t){
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('si-'+t);if(el)el.classList.add('on');
   document.getElementById('tb-title').textContent=titles[t]||t;
-  closeModal();closeMPed();closeSidebar();render();updateBadges();
+  closeModal();closeMPed();closeSidebar();render();
+  const c=document.getElementById('content');if(c)c.scrollTop=0;
+  updateBadges();
 }
 
 // ══ RENDER ══
@@ -2715,10 +2717,10 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.8-cache-recovery',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.9-layout',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
-<script src="./sync-guard.js?v=2.4-config"></script>
+<script src="./sync-guard.js?v=2.5-layout"></script>
 </body>
 </html>
 

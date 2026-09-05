@@ -14,7 +14,7 @@
   // Produtividade isolada: atalhos e foco do Novo Pedido, sem tocar nas regras comerciais.
   if(!document.querySelector('script[data-d7-productivity]')){
     const productivity=document.createElement('script');
-    productivity.src='./productivity.js?v=1.1-novo-pedido';
+    productivity.src='./productivity.js?v=1.2-search-layout';
     productivity.defer=true;
     productivity.dataset.d7Productivity='1';
     document.head.appendChild(productivity);
