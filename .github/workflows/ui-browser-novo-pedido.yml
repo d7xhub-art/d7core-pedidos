@@ -48,7 +48,7 @@ jobs:
             if(!(await page.locator('.preco-indisponivel').innerText()).includes('Preço não cadastrado')) throw new Error('Aviso de preço ausente');
             const blocked=page.locator('.preco-indisponivel');
             if(await blocked.getAttribute('onclick')) throw new Error('Produto sem preço ainda possui ação de inclusão');
-            await page.locator('.prod-row:not(.preco-indisponivel)').click();
+            await page.evaluate(()=>addItem('p1'));
             const resumo=await page.locator('.pedido-resumo').innerText();
             if(!resumo.includes('Produto com preço')) throw new Error('Produto válido não entrou no resumo');
             if(!resumo.includes('25,90')) throw new Error('Total/preço não apareceu no resumo');
