@@ -1,0 +1,62 @@
+name: Testar Novo Pedido no Navegador
+
+on:
+  push:
+    branches: [feat/novo-pedido-profissional]
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/novo-pedido-profissional
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar Chromium
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 --no-save
+          npx playwright install --with-deps chromium
+      - name: Testar fluxo do Novo Pedido
+        run: |
+          python3 -m http.server 8080 >/tmp/d7-http.log 2>&1 &
+          node <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:1000}});
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto('http://127.0.0.1:8080/index.html',{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(500);
+            await page.evaluate(()=>{
+              DB.set('produtos',[
+                {id:'p0',cod:'TEST-000',desc:'Produto sem preço',un:'pc',preco:0},
+                {id:'p1',cod:'TEST-001',desc:'Produto com preço',un:'fardo',preco:25.90}
+              ]);
+              goto('novo-pedido');
+            });
+            await page.locator('.pedido-profissional').waitFor();
+            if(await page.locator('.pedido-dados-compactos').count()!==1) throw new Error('Cabeçalho compacto ausente');
+            if(!(await page.locator('body').innerText()).includes('Resumo do Pedido')) throw new Error('Resumo ausente');
+            if(await page.locator('.preco-indisponivel').count()!==1) throw new Error('Produto sem preço não foi bloqueado');
+            if(!(await page.locator('.preco-indisponivel').innerText()).includes('Preço não cadastrado')) throw new Error('Aviso de preço ausente');
+            const blocked=page.locator('.preco-indisponivel');
+            if(await blocked.getAttribute('onclick')) throw new Error('Produto sem preço ainda possui ação de inclusão');
+            await page.locator('.prod-row:not(.preco-indisponivel)').click();
+            const resumo=await page.locator('.pedido-resumo').innerText();
+            if(!resumo.includes('Produto com preço')) throw new Error('Produto válido não entrou no resumo');
+            if(!resumo.includes('25,90')) throw new Error('Total/preço não apareceu no resumo');
+            await page.setViewportSize({width:390,height:844});
+            const columns=await page.locator('.pedido-workspace').evaluate(el=>getComputedStyle(el).gridTemplateColumns);
+            if(columns.split(' ').length>1) throw new Error('Layout móvel não colapsou: '+columns);
+            if(errors.length) throw new Error('Erros JS: '+errors.join(' | '));
+            console.log('BROWSER_NOVO_PEDIDO_OK');
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
