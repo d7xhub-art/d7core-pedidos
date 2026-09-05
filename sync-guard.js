@@ -3,7 +3,7 @@
   if(!document.querySelector('link[data-d7-saas-ui]')){
     const ui=document.createElement('link');
     ui.rel='stylesheet';
-    ui.href='./saas-light.css?v=1.1-final';
+    ui.href='./saas-light.css?v=1.2-novo-pedido';
     ui.dataset.d7SaasUi='1';
     document.head.appendChild(ui);
   }
@@ -11,7 +11,7 @@
   // Produtividade isolada: atalhos e foco do Novo Pedido, sem tocar nas regras comerciais.
   if(!document.querySelector('script[data-d7-productivity]')){
     const productivity=document.createElement('script');
-    productivity.src='./productivity.js?v=1.0';
+    productivity.src='./productivity.js?v=1.1-novo-pedido';
     productivity.defer=true;
     productivity.dataset.d7Productivity='1';
     document.head.appendChild(productivity);
