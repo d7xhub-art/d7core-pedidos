@@ -1,4 +1,4 @@
-const CACHE='d7comercial-v2.5-novo-pedido';
+const CACHE='d7comercial-v2.6-auth-config';
 const ASSETS=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./migrar.html','./auth-guard.js','./sync-guard.js','./saas-light.css'];
 
 self.addEventListener('install',event=>event.waitUntil(
@@ -16,8 +16,8 @@ async function injectGuards(response){
   const type=response.headers.get('content-type')||'';
   if(!type.includes('text/html'))return response;
   let text=await response.text();
-  if(!text.includes('auth-guard.js'))text=text.replace('</body>','<script src="./auth-guard.js?v=1.0"></script></body>');
-  if(!text.includes('sync-guard.js'))text=text.replace('</body>','<script src="./sync-guard.js?v=2.3-safe"></script></body>');
+  if(!text.includes('auth-guard.js'))text=text.replace('</body>','<script src="./auth-guard.js?v=1.1-config"></script></body>');
+  if(!text.includes('sync-guard.js'))text=text.replace('</body>','<script src="./sync-guard.js?v=2.4-config"></script></body>');
   const headers=new Headers(response.headers);
   headers.delete('content-length');
   return new Response(text,{status:response.status,statusText:response.statusText,headers});
