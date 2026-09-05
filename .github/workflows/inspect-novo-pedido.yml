@@ -1,0 +1,32 @@
+name: Inspecionar Novo Pedido
+
+on:
+  push:
+    branches: [feat/novo-pedido-profissional]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/novo-pedido-profissional
+      - name: Mostrar estrutura relevante
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          needles=['function pgNovoPedido','Novo Pedido','ADICIONAR PRODUTO','Adicionar Produto','function addNP','function addProd','function np','np.itens','pedido-itens']
+          lines=s.splitlines()
+          for needle in needles:
+              print('\n###', needle)
+              hits=[i for i,l in enumerate(lines) if needle.lower() in l.lower()]
+              for i in hits[:8]:
+                  a=max(0,i-8); b=min(len(lines),i+35)
+                  print(f'--- lines {a+1}-{b} ---')
+                  for n in range(a,b): print(f'{n+1}: {lines[n]}')
+          PY
