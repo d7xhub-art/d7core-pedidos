@@ -1,9 +1,3 @@
-Warning: truncated output (original token count: 50043)
-Total output lines: 2645
-
-Warning: truncated output (original token count: 51788)
-Total output lines: 2715
-
 <!DOCTYPE html>
 <!-- D7COMERCIAL v2.1 -->
 <html lang="pt-BR">
@@ -1261,7 +1255,83 @@ function pgPedidos(){
   ${list.length===0
     ?`<div class="empty"><div class="empty-ico">📋</div><div class="empty-t">Nenhum pedido encontrado</div></div>`
     :`<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Cliente</th><th>Representada</th><th>Data</th><th>Itens</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>
-    ${list.map(p=>`…43 tokens truncated…ng:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
+    ${list.map(p=>`<tr>
+      <td><span style="font-weight:900;color:var(--p);font-size:13px">#${p.num}</span></td>
+      <td><div style="font-weight:600;white-space:nowrap">${p.cliNome||'—'}</div><div style="font-size:11.5px;color:var(--sub);white-space:nowrap">${p.cliCid||''}${p.cliUF?'/'+p.cliUF:''}</div></td>
+      <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${p.repNome||'—'}</td>
+      <td style="color:var(--sub);font-size:12.5px;white-space:nowrap">${fmtDate(p.data)}</td>
+      <td style="color:var(--sub);text-align:center">${p.itens.length}</td>
+      <td style="font-weight:800;color:var(--a);white-space:nowrap">${fmt(p.total)}</td>
+      <td><span class="badge ${p.status==='aberto'?'bd-open':p.status==='enviado'?'bd-sent':'bd-cancel'}">${p.status==='aberto'?'Aberto':p.status==='enviado'?'Enviado':'Cancelado'}</span></td>
+      <td><div style="display:flex;gap:5px">
+        <button class="icon-btn btn-sm" onclick="verPedido('${p.id}')">👁️ Ver</button>
+        <button class="icon-btn btn-sm" style="background:rgba(249,115,22,.15);color:var(--a);border-color:rgba(249,115,22,.3)" onclick="editarPedido('${p.id}')">✏️</button>
+        <button class="icon-btn icon-btn-g btn-sm" onclick="exportWpp('${p.id}')">📲</button>
+        <button class="icon-btn icon-btn-red btn-sm" onclick="delPed('${p.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}`;
+}
+
+function verPedido(id){
+  const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;
+  const rep=DB.get('representadas').find(r=>r.id==p.repId)||{};
+  const st=p.status||'aberto';
+  const sc={aberto:{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'},enviado:{bg:'rgba(34,197,94,.15)',cl:'#4ade80',bd:'rgba(34,197,94,.3)',lb:'✓ Enviado'},cancelado:{bg:'rgba(100,116,139,.15)',cl:'#94a3b8',bd:'rgba(100,116,139,.3)',lb:'✗ Cancelado'}}[st]||{bg:'rgba(220,38,38,.15)',cl:'#ff8080',bd:'rgba(220,38,38,.3)',lb:'● Aberto'};
+  document.getElementById('mpbody').innerHTML=`
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="padding:2px 0 12px;border-bottom:1px solid var(--bdr)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:10px;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase">Pedido</div>
+          <div style="font-size:28px;font-weight:800;color:var(--txt);line-height:1;letter-spacing:-1px">#${p.num}</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:4px">📅 ${fmtDate(p.data)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span style="background:${sc.bg};color:${sc.cl};border:1px solid ${sc.bd};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">${sc.lb}</span>
+          <div style="font-size:18px;font-weight:800;color:var(--txt)">${fmt(p.total)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-sm" style="background:#25d366;border:none;color:#fff;font-weight:600" onclick="exportWpp('${p.id}')">💬 WhatsApp</button>
+        <button class="btn btn-sm btn-r" onclick="editarPedido('${p.id}')">✏️ Editar</button>
+        <button class="btn btn-sm" style="background:rgba(0,0,0,.08);color:var(--txt);border:1px solid var(--bdr)" onclick="imprimirPedido('${p.id}')">🖨️ Imprimir</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">👤 Cliente</div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt);line-height:1.3">${p.cliNome}</div>
+        ${p.cliFan?'<div style="font-size:11px;color:var(--acc);margin-top:2px">'+p.cliFan+'</div>':''}
+        ${p.cliCnpj?'<div style="font-size:11px;color:var(--sub);margin-top:6px">'+p.cliCnpj+'</div>':''}
+        ${p.cliCid?'<div style="font-size:11px;color:var(--sub)">'+p.cliCid+(p.cliUF?'/'+p.cliUF:'')+'</div>':''}
+        <div style="margin-top:8px"><span class="tag-a">${p.cliCond||'—'}</span></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🏢 Representada</div>
+        <div style="font-size:13px;color:var(--txt);font-weight:600;margin-bottom:2px">🏢 ${p.repNome}</div>
+        <div style="font-size:11px;color:var(--sub);margin-bottom:8px">${rep.cnpj||'CNPJ não informado'}</div>
+      </div>
+    </div>
+    <div style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);border-radius:12px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap">🚛 Frete</span>
+      <span style="font-size:13px;color:var(--txt);text-align:right">${p.frete?p.frete:'Não informado'} <span style="color:var(--sub);font-weight:400">· ${p.itens.length} item(s) · </span><span style="font-weight:700;color:#dc2626">${fmt(p.total)}</span></span>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:700;color:var(--txt)">Itens do Pedido</span>
+        <span style="font-size:11px;color:var(--sub)">${p.itens.length} produto(s)</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:rgba(220,38,38,.05)">
+          <th style="padding:8px 14px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">#</th>
+          <th style="padding:8px 8px;text-align:left;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Produto</th>
+          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Obs.</th>
+          <th style="padding:8px 8px;text-align:center;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Qtd</th>
+          <th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Vl. Fardo</th>
+          <th style="padding:8px 14px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Total</th>
+        </tr></thead>
+        <tbody>${p.itens.map((it,i)=>'<tr style="border-top:1px solid var(--bdr)'+(i%2?';background:rgba(0,0,0,.04)':'')+'"><td style="padding:10px 14px;font-size:12px;color:var(--sub)">'+(i+1)+'</td><td style="padding:10px 8px"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">'+it.desc+'</div><span class="tag">'+it.cod+'</span></td><td style="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
         </tbody>
       </table>
     </div>
