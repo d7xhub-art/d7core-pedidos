@@ -391,12 +391,7 @@ alter table representadas enable row level security;
 alter table produtos enable row level security;
 alter table pedidos enable row level security;
 alter table followups enable row level security;
-create policy "anon_all" on clientes for all to anon using(true) with check(true);
-create policy "anon_all" on prospectos for all to anon using(true) with check(true);
-create policy "anon_all" on representadas for all to anon using(true) with check(true);
-create policy "anon_all" on produtos for all to anon using(true) with check(true);
-create policy "anon_all" on pedidos for all to anon using(true) with check(true);
-create policy "anon_all" on followups for all to anon using(true) with check(true);</textarea>
+</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-p" onclick="navigator.clipboard.writeText(document.getElementById('sbSql').value).then(()=>alert('SQL copiado!'))">📋 Copiar SQL</button>
       <a href="https://supabase.com/dashboard/project/uewcjlfctumjvqsagnxg/sql/new" target="_blank" class="btn btn-p" style="text-decoration:none">🔗 Abrir SQL Editor</a>
