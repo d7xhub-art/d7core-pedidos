@@ -18,6 +18,7 @@ jobs:
       - name: Aplicar patch de autenticação
         run: |
           python - <<'PY'
+          import re
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
@@ -33,11 +34,10 @@ jobs:
           if '<script src="./auth-guard.js?v=1.0"></script>' not in s:
               if marker not in s: raise SystemExit('sync guard marker not found')
               s=s.replace(marker,auth,1)
-          for table in ['clientes','prospectos','representadas','produtos','pedidos','followups']:
-              s=s.replace(f'create policy "anon_all" on {table} for all to anon using(true) with check(true);\n','')
+          s=re.sub(r'create policy\s+"anon_all"\s+on\s+(clientes|prospectos|representadas|produtos|pedidos|followups)\s+for\s+all\s+to\s+anon\s+using\(true\)\s+with\s+check\(true\);\s*','',s,flags=re.I)
           if "'Authorization':'Bearer '+SUPA_KEY" in s:
               raise SystemExit('unsafe anon bearer remains in index')
-          if 'create policy "anon_all"' in s:
+          if 'create policy "anon_all"' in s.lower():
               raise SystemExit('unsafe anon_all instructions remain in index')
           p.write_text(s,encoding='utf-8')
           PY
