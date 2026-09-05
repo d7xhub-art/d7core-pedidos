@@ -30,7 +30,7 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.2-stable'), 'service worker está na base estável restaurada');
+assert.ok(sw.includes('d7comercial-v2.3-auth'), 'service worker deve usar cache da versão autenticada');
 
 // O guard deve estar presente já na primeira abertura, antes de qualquer sincronização automática.
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.3-safe"><\/script>/, 'index deve carregar o guard diretamente na primeira visita');
@@ -40,7 +40,7 @@ assert.ok(!html.includes('// On startup: pull cloud first, then push any local d
 assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.0"><\/script>/, 'index deve carregar o auth guard');
 assert.match(auth, /signInWithPassword|\/auth\/v1\/token\?grant_type=password/, 'auth guard deve oferecer login autenticado');
 assert.match(auth, /access_token/, 'auth guard deve persistir token autenticado');
-assert.match(guard, /D7Auth\.getAccessToken/, 'sync guard deve usar token autenticado');
+assert.match(guard, /D7Auth\??\.getAccessToken/, 'sync guard deve usar token autenticado');
 assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard não pode usar chave anon como bearer');
 assert.ok(!html.includes("'Authorization':'Bearer '+SUPA_KEY"), 'index não pode usar chave anon como bearer de dados');
 
