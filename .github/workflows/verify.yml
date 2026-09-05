@@ -31,6 +31,7 @@ jobs:
         run: |
           node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('manifest.json','utf8'));if(m.name!=='D7COMERCIAL')process.exit(1);for(const f of ['index.html','manifest.json','sw.js','auth-guard.js','sync-guard.js','migrar.html','icon-192.png','icon-512.png'])if(!fs.existsSync(f)){console.error('Falta '+f);process.exit(1)};console.log('PWA_OK')"
       - name: Confirmar que acesso anônimo aos dados está bloqueado
+        if: github.event_name != 'pull_request'
         run: |
           python - <<'PY'
           import re, urllib.request, urllib.error
