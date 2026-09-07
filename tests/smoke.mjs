@@ -65,6 +65,16 @@ assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinali
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
 
+const catalogoInicio=html.indexOf('/* ══════════════════════ CATÁLOGO ══════════════════════ */');
+const catalogoFim=html.indexOf('/* ══════════════════════ NOVO PEDIDO ══════════════════════ */');
+assert.ok(catalogoInicio>=0&&catalogoFim>catalogoInicio,'bloco do catálogo deve existir');
+const catalogo=html.slice(catalogoInicio,catalogoFim);
+assert.ok(!catalogo.includes('fmt(p.preco)'), 'catálogo não deve exibir preço de lista');
+assert.ok(!catalogo.includes('p.precoMin'), 'catálogo não deve exibir preço mínimo');
+assert.ok(!catalogo.includes('DB.set(\'produtos\''), 'catálogo não deve alterar nem restaurar a lista de produtos');
+assert.ok(!catalogo.includes('Preço Lista'), 'catálogo impresso não deve ter coluna de preço de lista');
+assert.ok(!catalogo.includes('Preço Mín.'), 'catálogo impresso não deve ter coluna de preço mínimo');
+
 assert.match(guard, /saas-light\.css\?v=1\.3-order-builder/, 'sync guard deve carregar a camada visual do construtor de itens');
 assert.match(guard, /productivity\.js\?v=1\.2-search-layout/, 'sync guard deve renovar os atalhos sem quebrar a grade de busca');
 assert.match(ui, /D7 SaaS Light UI/, 'CSS deve identificar a camada SaaS');
