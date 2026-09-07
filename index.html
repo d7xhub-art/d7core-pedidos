@@ -896,7 +896,7 @@ function saveRep(){
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('representadas',list);closeModal();render();updateBadges();
 }
-function delRep(id){if(!confirm('Excluir empresa?'))return;DB.set('representadas',DB.get('representadas').filter(x=>x.id!=id));render();updateBadges()}
+function delRep(id){if(!confirm('Excluir empresa?'))return;window.markDeleted('representadas',id);DB.set('representadas',DB.get('representadas').filter(x=>x.id!=id));render();updateBadges()}
 
 /* ══════════════════════ CATÁLOGO ══════════════════════ */
 function pgCatalogo(){
@@ -1070,6 +1070,10 @@ function enviarCatalogoWpp(repId){
   const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
   const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
   openModal(`📲 ${rep.fantasia||rep.razao||'Representada'}`,`
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:7px">Prévia do catálogo · sem preços</div>
+    ${produtosRep.map(p=>`<div style="font-size:13px;font-weight:650;color:#1f2937;padding:4px 0">• ${p.desc}</div>`).join('')}
+  </div>
   <div class="fld" style="margin-bottom:14px">
     <label>Selecionar Comprador Cadastrado</label>
     <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
@@ -1102,7 +1106,6 @@ function confirmarEnvioWpp(repId){
   if(!prods.length)return alert('Selecione pelo menos um produto.');
   const r=allReps.find(x=>x.id==repId)||{};
   const titulo=r.fantasia||r.razao||'Catálogo';
-  if(!prods.length)return alert('Nenhum produto selecionado nesta representada.');
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
   let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
   if(intro)msg+=intro+'\n\n';
@@ -1110,6 +1113,7 @@ function confirmarEnvioWpp(repId){
   prods.forEach(p=>{msg+='• '+p.desc+'\n';});
   msg+='\n_Pedidos pelo WhatsApp_';
   window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
+  prods.forEach(p=>_selCatalogProds.delete(String(p.id)));
   closeModal();
 }
 
@@ -2688,7 +2692,7 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.1-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.4-catalog-whatsapp',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
 <script src="./sync-guard.js?v=2.7-deletions"></script>

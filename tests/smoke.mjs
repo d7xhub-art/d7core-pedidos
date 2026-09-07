@@ -44,7 +44,7 @@ assert.match(html, /markDeleted\('produtos',id\)/, 'exclusão de produto deve se
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v3.1-deletions'), 'service worker deve renovar o cache após corrigir exclusões');
+assert.ok(sw.includes('d7comercial-v3.4-catalog-whatsapp'), 'service worker deve renovar o cache após corrigir o catálogo');
 
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.7-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
@@ -63,8 +63,8 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=3\.1-deletions/, 'deve forçar a atualização do service worker após corrigir exclusões');
-assert.match(sw, /d7comercial-v3\.1-deletions/, 'deve usar um cache novo após corrigir exclusões');
+assert.match(html, /sw\.js\?v=3\.4-catalog-whatsapp/, 'deve forçar a atualização do service worker após corrigir o catálogo');
+assert.match(sw, /d7comercial-v3\.4-catalog-whatsapp/, 'deve usar um cache novo após corrigir o catálogo');
 assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
@@ -86,6 +86,7 @@ assert.match(catalogo, /toggleCatalogProd\('\$\{p\.id\}'\)/, 'a marcação deve 
 assert.match(catalogo, /_selCatalogProds\.has\(String\(p\.id\)\)/, 'mensagem deve conter somente os produtos marcados');
 assert.match(catalogo, /Selecione pelo menos um produto/, 'envio sem produto selecionado deve ser bloqueado');
 assert.match(html, /function delProd\(id\)\{if\(!confirm\('Excluir produto\?'\)\)return;/, 'exclusão pelo catálogo deve exigir confirmação');
+assert.match(html, /function delRep\(id\)\{if\(!confirm\('Excluir empresa\?'\)\)return;window\.markDeleted\('representadas',id\)/, 'exclusão de representada deve ser persistida antes da sincronização');
 
 assert.match(guard, /saas-light\.css\?v=1\.3-order-builder/, 'sync guard deve carregar a camada visual do construtor de itens');
 assert.match(guard, /productivity\.js\?v=1\.2-search-layout/, 'sync guard deve renovar os atalhos sem quebrar a grade de busca');

@@ -48,6 +48,8 @@ jobs:
           JS
       - name: Validar visual real do Novo Pedido
         run: node tests/visual-novo-pedido.cjs
+      - name: Validar envio real do catálogo ao WhatsApp
+        run: node tests/catalogo-whatsapp.cjs
       - name: Salvar captura validada
         uses: actions/upload-artifact@v4
         with:
