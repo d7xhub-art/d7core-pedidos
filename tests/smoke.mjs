@@ -74,6 +74,8 @@ assert.ok(!catalogo.includes('p.precoMin'), 'catálogo não deve exibir preço m
 assert.ok(!catalogo.includes('DB.set(\'produtos\''), 'catálogo não deve alterar nem restaurar a lista de produtos');
 assert.ok(!catalogo.includes('Preço Lista'), 'catálogo impresso não deve ter coluna de preço de lista');
 assert.ok(!catalogo.includes('Preço Mín.'), 'catálogo impresso não deve ter coluna de preço mínimo');
+assert.match(catalogo, /onclick="delProd\('\$\{p\.id\}'\)"/, 'catálogo deve permitir excluir o produto');
+assert.match(html, /function delProd\(id\)\{if\(!confirm\('Excluir produto\?'\)\)return;/, 'exclusão pelo catálogo deve exigir confirmação');
 
 assert.match(guard, /saas-light\.css\?v=1\.3-order-builder/, 'sync guard deve carregar a camada visual do construtor de itens');
 assert.match(guard, /productivity\.js\?v=1\.2-search-layout/, 'sync guard deve renovar os atalhos sem quebrar a grade de busca');
