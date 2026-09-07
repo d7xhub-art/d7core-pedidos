@@ -27,6 +27,14 @@ const server=http.createServer((req,res)=>{
     localStorage.setItem('d7_produtos',JSON.stringify([{id:'p1',repId:'r1',cod:'0001',desc:'SAL MOÍDO 30X1 FARDO',un:'frd',preco:25.9,estoque:20}]));
   });
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+  const menuIds=await page.locator('.sb-item[id]').evaluateAll(items=>items.map(item=>item.id));
+  const expectedMenu=['si-dashboard','si-clientes','si-orcamento','si-novo-pedido','si-produtos','si-ficha-tecnica','si-representadas','si-pedidos','si-catalogo'];
+  if(JSON.stringify(menuIds)!==JSON.stringify(expectedMenu))throw new Error('Ordem visual do menu incorreta: '+menuIds.join(', '));
+  await page.evaluate(()=>goto('produtos'));
+  if(!(await page.locator('#content').innerText()).includes('SAL MOÍDO 30X1 FARDO'))throw new Error('Produto cadastrado não apareceu na página Produtos');
+  await page.evaluate(()=>goto('ficha-tecnica'));
+  if(!(await page.locator('#content').innerText()).includes('SAL MOÍDO 30X1 FARDO'))throw new Error('Ficha Técnica não compartilha os produtos cadastrados');
+  if(!(await page.locator('#content').innerText()).includes('Pendente'))throw new Error('Situação da ficha técnica não foi apresentada');
   await page.evaluate(()=>goto('novo-pedido'));
   await page.waitForSelector('.pedido-dados-compactos');
   await page.waitForFunction(()=>document.querySelector('link[data-d7-saas-ui]')?.sheet);
