@@ -1069,7 +1069,7 @@ function enviarCatalogoWpp(repId){
   if(!produtosRep.length)return alert('Marque pelo menos um produto desta representada.');
   const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
   const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
-  openModal('📲 ${rep.fantasia||rep.razao||'Representada'}',`
+  openModal(`📲 ${rep.fantasia||rep.razao||'Representada'}`,`
   <div class="fld" style="margin-bottom:14px">
     <label>Selecionar Comprador Cadastrado</label>
     <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
