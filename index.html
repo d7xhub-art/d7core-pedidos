@@ -917,8 +917,7 @@ function pgCatalogo(){
   return `
   <div class="pg-head">
     <div><div class="pg-title">📒 Catálogo</div><div class="pg-sub">${totalProds} produto(s) · ${reps.length} representada(s)</div></div>
-    <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toggleSelMode()" style="background:${_selReps.size>0?'rgba(37,211,102,.2)':'rgba(99,102,241,.1)'};border-color:${_selReps.size>0?'rgba(37,211,102,.5)':'rgba(99,102,241,.3)'};color:${_selReps.size>0?'#25d366':'#818cf8'}">☑️ ${_selReps.size>0?_selReps.size+' selecionada(s)':'Selecionar'}</button><button class="btn btn-ghost" onclick="enviarCatalogoWpp('')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 Tudo</button><button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️</button></div>
-  ${_selReps.size>0?`<div style="position:sticky;top:0;z-index:50;margin:0 0 14px;background:linear-gradient(135deg,#25d366,#128c7e);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between"><span style="color:#fff;font-weight:700;font-size:14px">✅ ${_selReps.size} empresa(s) selecionada(s)</span><div style="display:flex;gap:8px"><button onclick="_selReps.clear();render()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px">✕ Limpar</button><button onclick="enviarRepsSelecionadasWpp()" style="background:#fff;border:none;color:#128c7e;padding:7px 16px;border-radius:8px;cursor:pointer;font-weight:900;font-size:13px">📲 Enviar Seleção</button></div></div>`:''}
+    <button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️ Imprimir completo</button>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -942,7 +941,7 @@ function pgCatalogo(){
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;color:var(--sub);font-weight:700">${g.items.length} produto(s)</span>
-            ${r?`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:${_selReps.has(r.id)?'rgba(37,211,102,.18)':'rgba(255,255,255,.05)'};border:1px solid ${_selReps.has(r.id)?'rgba(37,211,102,.5)':'var(--border)'};border-radius:8px"><input type="checkbox" ${_selReps.has(r.id)?'checked':''} onchange="toggleRepSel('${r.id}')" style="width:15px;height:15px;accent-color:#25d366;cursor:pointer"><span style="font-size:12px;font-weight:700;color:${_selReps.has(r.id)?'#25d366':'var(--sub)'}">Incluir</span></label><button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲</button>`:''}
+            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#128c7e;font-weight:800">📲 Escolher produtos</button>`:''}
           </div>
         </div>
         ${g.items.some(p=>p.foto)
@@ -1056,58 +1055,18 @@ function imprimirCatalogo(){
   setTimeout(()=>w.print(),300);
 }
 
-function toggleRepSel(id){if(_selReps.has(id))_selReps.delete(id);else _selReps.add(id);render();}
-function toggleSelMode(){if(_selReps.size>0){_selReps.clear();render();}else{const reps=DB.get('representadas');reps.forEach(r=>_selReps.add(r.id));render();}}
-function enviarRepsSelecionadasWpp(){
-  if(_selReps.size===0)return alert('Nenhuma empresa selecionada.');
-  const allReps=DB.get('representadas');
-  const allProds=DB.get('produtos');
-  const repsSelList=allReps.filter(r=>_selReps.has(r.id));
-  const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
-  const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp?' — '+c.wppComp:c.fone?' — '+c.fone:''}</option>`).join('');
-  const repNames=repsSelList.map(r=>r.fantasia||r.razao).join(', ');
-  openModal('📲 Enviar Catálogo Selecionado',`
-  <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#25d366;font-weight:700">✅ ${repsSelList.length} empresa(s): ${repNames}</div>
-  <div class="fld" style="margin-bottom:14px"><label>Selecionar Comprador Cadastrado</label>
-    <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
-      <option value="">— Digite o número abaixo —</option>${opts}
-    </select>
-  </div>
-  <div class="fld" style="margin-bottom:14px"><label>WhatsApp do Comprador</label>
-    <input id="wppNum" type="tel" placeholder="(62) 99999-9999" oninput="this.value=maskFone(this.value)" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:15px">
-  </div>
-  <div class="fld" style="margin-bottom:16px"><label>Mensagem inicial (opcional)</label>
-    <textarea id="wppMsg" placeholder="Olá! Segue nossa seleção de produtos." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:55px;resize:vertical"></textarea>
-  </div>
-  <button class="btn btn-full" onclick="confirmarEnvioRepsSel()" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📲 Abrir WhatsApp</button>`);
-}
-function confirmarEnvioRepsSel(){
-  const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
-  const intro=document.getElementById('wppMsg').value.trim();
-  const selEl=document.getElementById('wppSelect');
-  const _sp2=selEl&&selEl.value?DB.get('prospectos').find(p=>p.id===selEl.value):null;const selCli=selEl&&selEl.value?(DB.get('clientes').find(c=>c.id===selEl.value)||(_sp2?{id:_sp2.id,contato:_sp2.nome,fantasia:_sp2.empresa,fone:_sp2.fone,wppComp:_sp2.fone}:null)):null;
-  if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
-  const allReps=DB.get('representadas'),allProds=DB.get('produtos');
-  const repsSelList=allReps.filter(r=>_selReps.has(r.id));
-  const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
-  let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
-  if(intro)msg+=intro+'\n\n';
-  msg+='*Catálogo Selecionado*\n'+'━━━━━━━━━━━━━━━━━\n\n';
-  repsSelList.forEach(r=>{
-    const prods=allProds.filter(p=>p.repId===r.id);
-    if(!prods.length)return;
-    msg+='*'+(r.fantasia||r.razao)+'*\n';
-    prods.forEach(p=>{msg+='• '+p.desc+'\n';});
-    msg+='\n';
-  });
-  msg+='_Pedidos pelo WhatsApp_';
-  window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
-  closeModal();
-}
 function enviarCatalogoWpp(repId){
+  if(!repId)return alert('Escolha uma representada para enviar o catálogo.');
+  const rep=DB.get('representadas').find(r=>r.id==repId)||{};
+  const produtos=DB.get('produtos').filter(p=>p.repId==repId);
+  if(!produtos.length)return alert('Nenhum produto nesta representada.');
   const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
   const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
-  openModal('📲 Enviar Catálogo via WhatsApp',`
+  openModal('📲 ${rep.fantasia||rep.razao||'Enviar Catálogo'}',`
+  <div class="sec" style="margin-top:0">Escolha os produtos</div>
+  <div style="display:grid;gap:8px;max-height:260px;overflow-y:auto;margin-bottom:16px;padding:2px">
+    ${produtos.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border2);border-radius:8px;cursor:pointer"><input type="checkbox" name="catalogoProduto" value="${p.id}" checked style="width:18px;height:18px;accent-color:#25d366"><span style="font-weight:700">${p.desc}</span></label>`).join('')}
+  </div>
   <div class="fld" style="margin-bottom:14px">
     <label>Selecionar Comprador Cadastrado</label>
     <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
@@ -1128,6 +1087,8 @@ function enviarCatalogoWpp(repId){
 }
 
 function confirmarEnvioWpp(repId){
+  const produtoIds=[...document.querySelectorAll('input[name="catalogoProduto"]:checked')].map(el=>el.value);
+  if(!produtoIds.length)return alert('Selecione ao menos um produto.');
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
   const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
@@ -1135,23 +1096,15 @@ function confirmarEnvioWpp(repId){
   const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
   if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
-  let prods,titulo;
-  if(repId){prods=allProds.filter(p=>p.repId==repId);const r=allReps.find(x=>x.id==repId)||{};titulo=r.fantasia||r.razao||'Catálogo';}
-  else{prods=allProds;titulo='Catálogo Completo';}
+  const prods=allProds.filter(p=>p.repId==repId&&produtoIds.includes(String(p.id)));
+  const r=allReps.find(x=>x.id==repId)||{};
+  const titulo=r.fantasia||r.razao||'Catálogo';
   if(!prods.length)return alert('Nenhum produto neste catálogo.');
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
   let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
   if(intro)msg+=intro+'\n\n';
   msg+='*'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
-  if(!repId){
-    const groups={};
-    allReps.forEach(r=>{const items=prods.filter(p=>p.repId===r.id);if(items.length)groups[r.id]={nome:r.fantasia||r.razao,items};});
-    const semRep=prods.filter(p=>!p.repId);
-    if(semRep.length)groups['__']={nome:'Outros',items:semRep};
-    Object.values(groups).forEach(g=>{msg+='*'+g.nome+'*\n';g.items.forEach(p=>{msg+='• '+p.desc+'\n';});msg+='\n';});
-  }else{
-    prods.forEach(p=>{msg+='• '+p.desc+'\n';});
-  }
+  prods.forEach(p=>{msg+='• '+p.desc+'\n';});
   msg+='\n_Pedidos pelo WhatsApp_';
   window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
   closeModal();
@@ -2732,7 +2685,7 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.1-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.2-catalog-selection',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
 <script src="./sync-guard.js?v=2.7-deletions"></script>
