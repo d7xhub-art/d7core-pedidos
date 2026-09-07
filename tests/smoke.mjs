@@ -32,9 +32,9 @@ assert.match(guard, /resolution=merge-duplicates/, 'envio deve usar upsert no Su
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v2.9-layout'), 'service worker deve renovar o cache após a correção do layout');
+assert.ok(sw.includes('d7comercial-v3.0-order-builder'), 'service worker deve renovar o cache após adicionar o construtor de itens');
 
-assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.5-layout"><\/script>/, 'index deve renovar o guard com a correção visual');
+assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.6-order-builder"><\/script>/, 'index deve renovar o guard com o construtor de itens');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
 
 assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.2-enter"><\/script>/, 'index deve carregar o auth guard');
@@ -51,13 +51,13 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=2\.9-layout/, 'deve forçar a atualização do service worker após corrigir o layout');
-assert.match(sw, /d7comercial-v2\.9-layout/, 'deve usar um cache novo após corrigir o layout');
+assert.match(html, /sw\.js\?v=3\.0-order-builder/, 'deve forçar a atualização do service worker após adicionar o construtor de itens');
+assert.match(sw, /d7comercial-v3\.0-order-builder/, 'deve usar um cache novo após adicionar o construtor de itens');
 assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
 
-assert.match(guard, /saas-light\.css\?v=1\.2-novo-pedido/, 'sync guard deve carregar a camada visual atualizada do Novo Pedido');
+assert.match(guard, /saas-light\.css\?v=1\.3-order-builder/, 'sync guard deve carregar a camada visual do construtor de itens');
 assert.match(guard, /productivity\.js\?v=1\.2-search-layout/, 'sync guard deve renovar os atalhos sem quebrar a grade de busca');
 assert.match(ui, /D7 SaaS Light UI/, 'CSS deve identificar a camada SaaS');
 assert.match(ui, /:focus-visible/, 'interface deve ter foco visível para teclado');

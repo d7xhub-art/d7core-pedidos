@@ -37,6 +37,13 @@ assert.match(html,/Início\s*&gt;\s*Novo Pedido|Início\s*>\s*Novo Pedido/,'deve
 assert.match(html,/Importar de Orçamento/,'deve disponibilizar a ação do mockup aprovado');
 assert.match(html,/1\s*<\/span>\s*Dados do Pedido/,'deve numerar a primeira etapa');
 assert.match(html,/2\s*<\/span>\s*Adicionar Produtos/,'deve numerar a segunda etapa');
+assert.match(html,/id="npProdSel"/,'deve permitir escolher o produto antes de adicionar');
+assert.match(html,/id="npProdQty"/,'deve permitir informar a quantidade');
+assert.match(html,/id="npProdUn"/,'deve exibir a unidade do produto');
+assert.match(html,/id="npProdPeso"/,'deve permitir informar o peso');
+assert.match(html,/id="npProdPreco"/,'deve permitir revisar o valor unitário');
+assert.match(html,/id="npProdTotal"/,'deve calcular o total da linha');
+assert.match(html,/Adicionar Produto/,'deve oferecer inclusão explícita do produto');
 assert.match(html,/Condição de Pagamento/,'deve mostrar a condição comercial do cliente');
 assert.match(html,/Observações opcionais/,'deve manter observações dentro dos dados do pedido');
 assert.match(html,/Buscar Produto/,'deve oferecer a aba principal do catálogo');

@@ -47,6 +47,15 @@ const server=http.createServer((req,res)=>{
   if(input.width<350||button.width<75||button.width>180)throw new Error('Proporção da busca está incorreta');
   if(scrollTop!==0)throw new Error('Novo Pedido não abriu no topo');
   if(shortcutsParent.includes('pedido-busca-acao'))throw new Error('Atalhos deslocaram o botão Buscar');
+  await page.selectOption('#npProdSel','p1');
+  await page.fill('#npProdQty','3');
+  await page.dispatchEvent('#npProdQty','input');
+  const draftTotal=await page.locator('#npProdTotal').innerText();
+  if(!draftTotal.includes('77,70'))throw new Error('Total da linha não foi calculado: '+draftTotal);
+  await page.click('#npAddProd');
+  const itemCount=await page.locator('.pedido-resumo-head .tag').innerText();
+  if(itemCount!=='1')throw new Error('Produto não foi incluído no resumo');
+  if(!(await page.locator('.pedido-resumo-lista').innerText()).includes('SAL MOÍDO 30X1 FARDO'))throw new Error('Produto incluído não aparece no resumo');
   if(errors.length)throw new Error('Erros JavaScript: '+errors.join(' | '));
 
   fs.mkdirSync(path.join(root,'artifacts'),{recursive:true});
