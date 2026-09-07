@@ -18,6 +18,14 @@ assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
 for (const item of ['Clientes','Produtos','Ficha Técnica','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
   assert.ok(html.includes(item), `menu obrigatório ausente: ${item}`);
 }
+const menuOrder=['si-dashboard','si-clientes','si-orcamento','si-novo-pedido','si-produtos','si-ficha-tecnica','si-representadas','si-pedidos','si-catalogo'];
+let lastMenuPosition=-1;
+for(const id of menuOrder){
+  const position=html.indexOf(`id="${id}"`);
+  assert.ok(position>lastMenuPosition,`${id} deve respeitar a nova ordem do menu`);
+  lastMenuPosition=position;
+}
+assert.match(html, /function pgFichaTecnica\(\)/, 'Ficha Técnica deve ter página própria');
 for (const route of ['prospectos','followups','relatorios','agenda','backup','config']) {
   assert.ok(!html.includes(`id="si-${route}"`), `atalho removido reapareceu: ${route}`);
   assert.ok(!html.includes(`goto('${route}')`), `rota removida reapareceu: ${route}`);
