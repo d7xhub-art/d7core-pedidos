@@ -44,7 +44,7 @@ assert.match(html, /markDeleted\('produtos',id\)/, 'exclusão de produto deve se
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v3.1-deletions'), 'service worker deve renovar o cache após corrigir exclusões');
+assert.ok(sw.includes('d7comercial-v3.2-catalog-selection'), 'service worker deve renovar o cache após corrigir envio do catálogo');
 
 assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.7-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
@@ -63,8 +63,8 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=3\.1-deletions/, 'deve forçar a atualização do service worker após corrigir exclusões');
-assert.match(sw, /d7comercial-v3\.1-deletions/, 'deve usar um cache novo após corrigir exclusões');
+assert.match(html, /sw\.js\?v=3\.2-catalog-selection/, 'deve forçar a atualização do service worker após corrigir envio do catálogo');
+assert.match(sw, /d7comercial-v3\.2-catalog-selection/, 'deve usar um cache novo após corrigir envio do catálogo');
 assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');
@@ -80,6 +80,12 @@ assert.ok(!catalogo.includes('Preço Lista'), 'catálogo impresso não deve ter 
 assert.ok(!catalogo.includes('Preço Mín.'), 'catálogo impresso não deve ter coluna de preço mínimo');
 assert.match(catalogo, /onclick="delProd\('\$\{p\.id\}'\)"/, 'catálogo deve permitir excluir o produto');
 assert.match(html, /function delProd\(id\)\{if\(!confirm\('Excluir produto\?'\)\)return;/, 'exclusão pelo catálogo deve exigir confirmação');
+assert.ok(!catalogo.includes('toggleSelMode()'), 'catálogo não deve selecionar várias representadas ao mesmo tempo');
+assert.ok(!catalogo.includes('Enviar Seleção'), 'catálogo não deve exibir envio conjunto de representadas');
+assert.ok(!catalogo.includes('>Incluir</span>'), 'representada não deve usar o seletor antigo Incluir');
+assert.match(html, /name="catalogoProduto"/, 'envio por representada deve permitir escolher produtos');
+assert.match(html, /catalogoProduto[^']*:checked/, 'envio deve considerar somente os produtos marcados');
+assert.match(html, /Selecione ao menos um produto/, 'envio deve bloquear seleção vazia');
 
 assert.match(guard, /saas-light\.css\?v=1\.3-order-builder/, 'sync guard deve carregar a camada visual do construtor de itens');
 assert.match(guard, /productivity\.js\?v=1\.2-search-layout/, 'sync guard deve renovar os atalhos sem quebrar a grade de busca');
