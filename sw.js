@@ -1,4 +1,4 @@
-const CACHE='d7comercial-v3.2-catalog-selection';
+const CACHE='d7comercial-v3.3-syntax-fix';
 const ASSETS=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./migrar.html','./auth-guard.js','./sync-guard.js','./saas-light.css'];
 
 self.addEventListener('install',event=>event.waitUntil(
