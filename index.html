@@ -297,10 +297,11 @@ select option{color:#111!important;background:#fff!important}
     <div class="sb-section">Menu</div>
     <div class="sb-item" id="si-dashboard" onclick="goto('dashboard')"><span class="ico">🏠</span>Início</div>
     <div class="sb-item" id="si-clientes" onclick="goto('clientes')"><span class="ico">👥</span>Clientes<span class="sb-badge zero" id="badge-cli">0</span></div>
-    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">🧾</span>Produtos com Ficha Técnica<span class="sb-badge zero" id="badge-prod">0</span></div>
-    <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
     <div class="sb-item" id="si-orcamento" onclick="openFormOrc()"><span class="ico">🧮</span>Novo Orçamento</div>
     <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
+    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">📦</span>Produtos<span class="sb-badge zero" id="badge-prod">0</span></div>
+    <div class="sb-item" id="si-ficha-tecnica" onclick="goto('ficha-tecnica')"><span class="ico">🧾</span>Ficha Técnica</div>
+    <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
     <div class="sb-item" id="si-pedidos" onclick="goto('pedidos')"><span class="ico">📋</span>Pedidos<span class="sb-badge zero" id="badge-ped">0</span></div>
     <div class="sb-item" id="si-catalogo" onclick="goto('catalogo')"><span class="ico">📒</span>Catálogo</div>
   </div>
@@ -521,7 +522,7 @@ function updateBadges(){
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Início',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos com Ficha Técnica',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',orcamento:'Novo Orçamento'};
+const titles={dashboard:'Início',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos','ficha-tecnica':'Ficha Técnica',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',orcamento:'Novo Orçamento'};
 function goto(t){
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -535,7 +536,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,orcamento:pgOrcamento};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,'ficha-tecnica':pgFichaTecnica,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,orcamento:pgOrcamento};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -719,7 +720,7 @@ function pgProdutos(){
     </tr>`).join('')}`).join('');
   return `
   <div class="pg-head">
-    <div><div class="pg-title">Produtos com Ficha Técnica</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
+    <div><div class="pg-title">Produtos</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
     <button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button>
   </div>
   <div class="filter-row">
@@ -731,6 +732,25 @@ function pgProdutos(){
     :`<div class="tbl-wrap"><table><thead><tr><th style="width:52px">Foto</th><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
   ${tableRows}
   </tbody></table></div>`}`;
+}
+function pgFichaTecnica(){
+  const all=DB.get('produtos');
+  const q=(document.getElementById('sficha')||{}).value||'';
+  const list=all.filter(p=>(p.desc+p.cod+(p.repNome||'')+(p.fichaTecnica||'')).toLowerCase().includes(q.toLowerCase()));
+  return `
+  <div class="pg-head">
+    <div><div class="pg-title">Ficha Técnica</div><div class="pg-sub">${list.length} de ${all.length} produto(s)</div></div>
+    <button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button>
+  </div>
+  <div class="filter-row">
+    <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-bar" id="sficha" type="search" placeholder="Buscar ficha por produto, código ou representada..." oninput="render()" value="${q}"></div>
+  </div>
+  ${list.length===0
+    ?`<div class="empty"><div class="empty-ico">🧾</div><div class="empty-t">Nenhuma ficha técnica encontrada</div><div class="empty-s">Cadastre um produto ou preencha sua ficha técnica.</div></div>`
+    :`<div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Produto</th><th>Representada</th><th>Situação</th><th>Ações</th></tr></thead><tbody>
+      ${list.map(p=>`<tr><td><span class="tag">${p.cod}</span></td><td style="font-weight:600">${p.desc}</td><td>${p.repNome||'—'}</td><td>${p.fichaTecnica?'<span class="tag tag-g">Preenchida</span>':'<span class="tag">Pendente</span>'}</td><td><div style="display:flex;gap:6px"><button class="icon-btn btn-sm" onclick="verFichaProd('${p.id}')">🧾 Visualizar</button><button class="icon-btn btn-sm" onclick="openFormProd('${p.id}')">✏️ Editar</button></div></td></tr>`).join('')}
+    </tbody></table></div>`}`;
 }
 function openFormProd(id){
   editId=id||null;const p=id?DB.get('produtos').find(x=>x.id==id):{};const c=p||{};
