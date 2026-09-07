@@ -15,7 +15,7 @@ const auth = fs.readFileSync(authPath, 'utf8');
 const ui = fs.readFileSync(uiPath, 'utf8');
 
 assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
-for (const item of ['Clientes','Produtos com Ficha','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
+for (const item of ['Clientes','Produtos','Ficha Técnica','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
   assert.ok(html.includes(item), `menu obrigatório ausente: ${item}`);
 }
 for (const route of ['prospectos','followups','relatorios','agenda','backup','config']) {
