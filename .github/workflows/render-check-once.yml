@@ -3,7 +3,7 @@ name: Validar interface publicada
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, codex/reorganiza-menu]
 
 permissions:
   contents: read
