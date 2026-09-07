@@ -490,7 +490,7 @@ function maskCNPJ(v){return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1.$2').
 function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'):d.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3')}
 function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
 
-let tab='dashboard',editId=null,pSearch='',npEditId=null,_selReps=new Set();
+let tab='dashboard',editId=null,pSearch='',npEditId=null,_selCatalogProds=new Set();
 let np={cliId:'',repId:'',itens:[],obs:'',data:''};
 
 // ══ MODAL ══
@@ -917,7 +917,7 @@ function pgCatalogo(){
   return `
   <div class="pg-head">
     <div><div class="pg-title">📒 Catálogo</div><div class="pg-sub">${totalProds} produto(s) · ${reps.length} representada(s)</div></div>
-    <button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️ Imprimir completo</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="imprimirCatalogo()">🖨️</button></div>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -941,7 +941,7 @@ function pgCatalogo(){
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;color:var(--sub);font-weight:700">${g.items.length} produto(s)</span>
-            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#128c7e;font-weight:800">📲 Escolher produtos</button>`:''}
+            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 Enviar marcados</button>`:''}
           </div>
         </div>
         ${g.items.some(p=>p.foto)
@@ -952,6 +952,7 @@ function pgCatalogo(){
                 ?`<img src="${p.foto}" style="width:100%;aspect-ratio:1/1;object-fit:cover">`
                 :`<div style="width:100%;aspect-ratio:1/1;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer" onclick="openFormProd('${p.id}')" title="Adicionar foto">📦</div>`}
               <div style="padding:8px 10px;flex:1">
+                <label style="display:flex;align-items:center;gap:7px;margin-bottom:7px;color:#25d366;font-size:11px;font-weight:800;cursor:pointer"><input type="checkbox" name="catalogProd" ${_selCatalogProds.has(String(p.id))?'checked':''} onchange="toggleCatalogProd('${p.id}')" style="width:18px;height:18px;accent-color:#25d366"> MARCAR</label>
                 <div style="font-size:12px;font-weight:700;margin:2px 0;line-height:1.3">${p.desc}</div>
               </div>
               <div style="padding:0 10px 10px">
@@ -959,8 +960,9 @@ function pgCatalogo(){
               </div>
             </div>`).join('')}
           </div>`
-          :`<div class="tbl-wrap"><table><thead><tr><th>Descrição do produto</th><th></th></tr></thead><tbody>
+          :`<div class="tbl-wrap"><table><thead><tr><th>Selecionar</th><th>Descrição do produto</th><th></th></tr></thead><tbody>
           ${g.items.map(p=>`<tr>
+            <td style="width:90px"><label style="display:flex;align-items:center;gap:6px;color:#25d366;font-size:11px;font-weight:800;cursor:pointer"><input type="checkbox" name="catalogProd" ${_selCatalogProds.has(String(p.id))?'checked':''} onchange="toggleCatalogProd('${p.id}')" style="width:18px;height:18px;accent-color:#25d366"> MARCAR</label></td>
             <td style="font-weight:600">${p.desc}</td>
             <td style="text-align:right"><button class="icon-btn icon-btn-red btn-sm" onclick="delProd('${p.id}')">🗑️ Excluir</button></td>
           </tr>`).join('')}
@@ -1055,18 +1057,19 @@ function imprimirCatalogo(){
   setTimeout(()=>w.print(),300);
 }
 
+function toggleCatalogProd(id){
+  id=String(id);
+  if(_selCatalogProds.has(id))_selCatalogProds.delete(id);else _selCatalogProds.add(id);
+  render();
+}
 function enviarCatalogoWpp(repId){
   if(!repId)return alert('Escolha uma representada para enviar o catálogo.');
   const rep=DB.get('representadas').find(r=>r.id==repId)||{};
-  const produtos=DB.get('produtos').filter(p=>p.repId==repId);
-  if(!produtos.length)return alert('Nenhum produto nesta representada.');
+  const produtosRep=DB.get('produtos').filter(p=>p.repId==repId&&_selCatalogProds.has(String(p.id)));
+  if(!produtosRep.length)return alert('Marque pelo menos um produto desta representada.');
   const clis=[...DB.get('clientes').filter(c=>c.wppComp||c.fone).map(c=>({...c,_t:'C'})),...DB.get('prospectos').filter(p=>p.fone).map(p=>({id:p.id,contato:p.nome,fantasia:p.empresa,fone:p.fone,wppComp:p.fone,_t:'P'}))];
   const opts=clis.map(c=>`<option value="${c.id}" data-wpp="${c.wppComp||c.fone}">[${c._t}] ${c.contato||c.fantasia||c.razao}${c.wppComp||c.fone?' — '+(c.wppComp||c.fone):''}</option>`).join('');
-  openModal('📲 ${rep.fantasia||rep.razao||'Enviar Catálogo'}',`
-  <div class="sec" style="margin-top:0">Escolha os produtos</div>
-  <div style="display:grid;gap:8px;max-height:260px;overflow-y:auto;margin-bottom:16px;padding:2px">
-    ${produtos.map(p=>`<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border2);border-radius:8px;cursor:pointer"><input type="checkbox" name="catalogoProduto" value="${p.id}" checked style="width:18px;height:18px;accent-color:#25d366"><span style="font-weight:700">${p.desc}</span></label>`).join('')}
-  </div>
+  openModal('📲 ${rep.fantasia||rep.razao||'Representada'}',`
   <div class="fld" style="margin-bottom:14px">
     <label>Selecionar Comprador Cadastrado</label>
     <select id="wppSelect" onchange="var c=this.options[this.selectedIndex];document.getElementById('wppNum').value=c.dataset.wpp||'';" style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px">
@@ -1087,19 +1090,19 @@ function enviarCatalogoWpp(repId){
 }
 
 function confirmarEnvioWpp(repId){
-  const produtoIds=[...document.querySelectorAll('input[name="catalogoProduto"]:checked')].map(el=>el.value);
-  if(!produtoIds.length)return alert('Selecione ao menos um produto.');
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
   const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
   const selId=selEl?selEl.value:'';
   const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
   if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
+  if(!repId)return alert('Escolha uma representada para enviar o catálogo.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
-  const prods=allProds.filter(p=>p.repId==repId&&produtoIds.includes(String(p.id)));
+  const prods=allProds.filter(p=>_selCatalogProds.has(String(p.id))).filter(p=>p.repId==repId);
+  if(!prods.length)return alert('Selecione pelo menos um produto.');
   const r=allReps.find(x=>x.id==repId)||{};
   const titulo=r.fantasia||r.razao||'Catálogo';
-  if(!prods.length)return alert('Nenhum produto neste catálogo.');
+  if(!prods.length)return alert('Nenhum produto selecionado nesta representada.');
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
   let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
   if(intro)msg+=intro+'\n\n';
@@ -2685,7 +2688,7 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.2-catalog-selection',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.1-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
 <script src="./sync-guard.js?v=2.7-deletions"></script>
