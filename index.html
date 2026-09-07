@@ -808,7 +808,7 @@ function saveProd(){
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
-function delProd(id){if(!confirm('Excluir produto?'))return;DB.set('produtos',DB.get('produtos').filter(x=>x.id!=id));render();updateBadges()}
+function delProd(id){if(!confirm('Excluir produto?'))return;window.markDeleted('produtos',id);DB.set('produtos',DB.get('produtos').filter(x=>x.id!=id));render();updateBadges()}
 function verFichaProd(id){
   const p=DB.get('produtos').find(x=>x.id==id);if(!p)return;
   openModal('🧾 Ficha Técnica',`<div class="pd-block"><div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${p.foto?`<img src="${p.foto}" alt="${p.desc}" style="width:90px;height:90px;object-fit:cover;border-radius:10px">`:''}<div><span class="tag">${p.cod}</span><h3 style="margin-top:8px">${p.desc}</h3><div style="color:var(--sub);margin-top:4px">${p.repNome||'Sem representada'}</div></div></div><div class="sec">Especificações</div><div style="white-space:pre-wrap;line-height:1.6">${p.fichaTecnica||p.obs||'Ficha técnica ainda não informada.'}</div><div class="sec">Dados comerciais</div><div><b>Unidade:</b> ${p.un||'—'} &nbsp; <b>Peso / fardo:</b> ${p.pesoPorFardo||'—'} &nbsp; <b>Referência:</b> ${p.refFab||'—'}</div></div>`);
@@ -2732,10 +2732,10 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.0-order-builder',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.1-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
-<script src="./sync-guard.js?v=2.6-order-builder"></script>
+<script src="./sync-guard.js?v=2.7-deletions"></script>
 </body>
 </html>
 
