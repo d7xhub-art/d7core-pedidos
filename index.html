@@ -955,11 +955,15 @@ function pgCatalogo(){
               <div style="padding:8px 10px;flex:1">
                 <div style="font-size:12px;font-weight:700;margin:2px 0;line-height:1.3">${p.desc}</div>
               </div>
+              <div style="padding:0 10px 10px">
+                <button class="btn btn-danger btn-sm btn-full" onclick="delProd('${p.id}')" style="font-size:11px">🗑️ Excluir</button>
+              </div>
             </div>`).join('')}
           </div>`
-          :`<div class="tbl-wrap"><table><thead><tr><th>Descrição do produto</th></tr></thead><tbody>
+          :`<div class="tbl-wrap"><table><thead><tr><th>Descrição do produto</th><th></th></tr></thead><tbody>
           ${g.items.map(p=>`<tr>
             <td style="font-weight:600">${p.desc}</td>
+            <td style="text-align:right"><button class="icon-btn icon-btn-red btn-sm" onclick="delProd('${p.id}')">🗑️ Excluir</button></td>
           </tr>`).join('')}
           </tbody></table></div>`}
       </div>`;
