@@ -25,6 +25,13 @@
   const timers=new Map();
 
   function idOf(x){return String((x&&(x.id??x.num))??'');}
+  function deletedKey(tbl){return 'd7_deleted_'+tbl;}
+  function getDeletedIds(tbl){
+    try{return new Set(JSON.parse(localStorage.getItem(deletedKey(tbl))||'[]').map(String));}
+    catch{return new Set();}
+  }
+  function saveDeletedIds(tbl,ids){localStorage.setItem(deletedKey(tbl),JSON.stringify([...ids]));}
+  function deletedRows(tbl){return [...getDeletedIds(tbl)].map(id=>({id,_deleted:true}));}
   function headers(){
     const token=window.D7Auth?.getAccessToken?.()||'';
     return {'apikey':supaKey,'Authorization':'Bearer '+token,'Content-Type':'application/json'};
@@ -63,7 +70,8 @@
     setMessage('Salvando dados locais na nuvem...');
     let ok=true;
     for(const tbl of TABLES){
-      const rows=DB.get(tbl);
+      const deletedIds=getDeletedIds(tbl);
+      const rows=DB.get(tbl).filter(row=>!deletedIds.has(idOf(row))).concat(deletedRows(tbl));
       const one=await syncTableSafe(tbl,rows);
       if(!one)ok=false;
     }
@@ -82,11 +90,13 @@
         }
         const rows=await r.json();
         const remote=rows.map(x=>x.data).filter(Boolean);
-        if(!remote.length)continue;
-        const local=DB.get(tbl);
+        const deletedIds=getDeletedIds(tbl);
+        remote.filter(x=>x._deleted).map(idOf).filter(Boolean).forEach(id=>deletedIds.add(id));
+        saveDeletedIds(tbl,deletedIds);
+        const local=DB.get(tbl).filter(x=>!deletedIds.has(idOf(x)));
         const localIds=new Set(local.map(idOf).filter(Boolean));
-        const additions=remote.filter(x=>{const id=idOf(x);return id&&!localIds.has(id);});
-        if(additions.length){
+        const additions=remote.filter(x=>{const id=idOf(x);return !x._deleted&&id&&!deletedIds.has(id)&&!localIds.has(id);});
+        if(additions.length||local.length!==DB.get(tbl).length){
           localStorage.setItem('d7_'+tbl,JSON.stringify([...local,...additions]));
           imported+=additions.length;
         }
@@ -113,6 +123,13 @@
   window.supaSyncTable=syncTableSafe;
   window.supaFullSync=fullSafeSync;
   window.supaPull=async()=>{const r=await mergeRemote();return r.imported;};
+  window.markDeleted=(tbl,id)=>{
+    const deletedIds=getDeletedIds(tbl);
+    deletedIds.add(String(id));
+    saveDeletedIds(tbl,deletedIds);
+    clearTimeout(timers.get('deleted:'+tbl));
+    timers.set('deleted:'+tbl,setTimeout(()=>syncTableSafe(tbl,[{id:String(id),_deleted:true}]),100));
+  };
   window.queueSync=(tbl,rows)=>{
     setSyncDot('wait');
     clearTimeout(timers.get(tbl));
