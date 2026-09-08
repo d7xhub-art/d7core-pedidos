@@ -30,8 +30,24 @@ const server=http.createServer((req,res)=>{
       {id:'p3',repId:'r2',desc:'Produto de Outra Representada',preco:99.00}
     ]));
     window.__opened=[];
+    window.__catalogCapture='';
+    window.__clipboardTypes=[];
     window.open=(url)=>{window.__opened.push(url);return {document:{write(){},close(){}},print(){}}};
+    window.ClipboardItem=class ClipboardItem{
+      constructor(items){this.items=items;window.__clipboardTypes=Object.keys(items);}
+    };
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+      write:async(items)=>{window.__clipboardWritten=items.length;}
+    }});
   });
+  await page.route('**/html2canvas.min.js',route=>route.fulfill({
+    contentType:'text/javascript',
+    body:`window.html2canvas=async function(el){
+      window.__catalogCapture=el.innerText;
+      const canvas=document.createElement('canvas');canvas.width=800;canvas.height=1000;
+      return canvas;
+    };`
+  }));
   await page.goto('http://127.0.0.1:4174/',{waitUntil:'networkidle'});
   await page.evaluate(()=>goto('catalogo'));
   const catalogText=await page.locator('#content').innerText();
@@ -43,12 +59,17 @@ const server=http.createServer((req,res)=>{
   if(preview.includes('Farofa Picanha 250g')||preview.includes('Produto de Outra Representada'))throw new Error('A prévia incluiu produto não marcado ou de outra representada');
   if(preview.includes('25,90')||preview.includes('R$'))throw new Error('A prévia expôs preço');
   await page.fill('#wppNum','62999999999');
-  await page.locator('#modal button').filter({hasText:'Abrir WhatsApp'}).click();
+  await page.locator('#modal button').filter({hasText:'Enviar foto'}).click();
+  await page.waitForFunction(()=>window.__clipboardWritten===1);
   const opened=await page.evaluate(()=>window.__opened.at(-1));
   const sent=decodeURIComponent(opened||'');
-  if(!sent.includes('Farinha Biju 500g'))throw new Error('A mensagem não contém o produto marcado');
-  if(sent.includes('Farofa Picanha 250g')||sent.includes('Produto de Outra Representada'))throw new Error('A mensagem incluiu produto não marcado ou de outra representada');
-  if(sent.includes('25,90')||sent.includes('42,00')||sent.includes('99,00')||sent.includes('R$'))throw new Error('A mensagem expôs preços');
+  const capture=await page.evaluate(()=>window.__catalogCapture);
+  const clipboardTypes=await page.evaluate(()=>window.__clipboardTypes);
+  if(!capture.includes('Farinha Biju 500g'))throw new Error('A foto não contém o produto marcado');
+  if(capture.includes('Farofa Picanha 250g')||capture.includes('Produto de Outra Representada'))throw new Error('A foto incluiu produto não marcado ou de outra representada');
+  if(capture.includes('25,90')||capture.includes('42,00')||capture.includes('99,00')||capture.includes('R$'))throw new Error('A foto expôs preços');
+  if(!clipboardTypes.includes('image/png'))throw new Error('Nenhuma imagem PNG foi copiada para envio');
+  if(!sent.includes('web.whatsapp.com/send?phone=5562999999999'))throw new Error('O WhatsApp do comprador não foi aberto');
   if(errors.length)throw new Error('Erros JavaScript: '+errors.join(' | '));
   console.log('CATALOGO_WHATSAPP_OK');
   await browser.close();
