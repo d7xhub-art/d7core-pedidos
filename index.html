@@ -1089,13 +1089,32 @@ function enviarCatalogoWpp(repId){
     <label>Mensagem inicial (opcional)</label>
     <textarea id="wppMsg" placeholder="Olá! Segue nosso catálogo de produtos." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:60px;resize:vertical"></textarea>
   </div>
-  <button class="btn btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📲 Abrir WhatsApp</button>
+  <button id="btnEnviarCatalogo" class="btn btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📷 Enviar foto pelo WhatsApp</button>
   `);
 }
 
-function confirmarEnvioWpp(repId){
+function escCatalogo(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function gerarFotoCatalogo(titulo,prods){
+  if(typeof html2canvas==='undefined')throw new Error('Gerador de imagem indisponível. Atualize o aplicativo e tente novamente.');
+  const folha=document.createElement('div');
+  folha.setAttribute('aria-hidden','true');
+  folha.style.cssText='position:fixed;left:-10000px;top:0;width:900px;padding:42px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1';
+  const cards=prods.map(p=>`<div style="border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#fff;break-inside:avoid">
+    ${p.foto?`<img src="${p.foto}" alt="" style="display:block;width:100%;aspect-ratio:1/1;object-fit:cover">`:`<div style="width:100%;aspect-ratio:1/1;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:70px">📦</div>`}
+    <div style="padding:16px;font-size:20px;font-weight:700;line-height:1.3">${escCatalogo(p.desc||'Produto')}</div>
+  </div>`).join('');
+  folha.innerHTML=`<div style="border-bottom:4px solid #dc2626;padding-bottom:18px;margin-bottom:24px"><div style="font-size:34px;font-weight:900;letter-spacing:-1px">D7COMERCIAL</div><div style="font-size:26px;font-weight:800;color:#dc2626;margin-top:8px">${escCatalogo(titulo)}</div></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">${cards}</div><div style="margin-top:28px;text-align:center;font-size:18px;font-weight:700;color:#475569">Pedidos pelo WhatsApp</div>`;
+  document.body.appendChild(folha);
+  try{
+    await Promise.all([...folha.querySelectorAll('img')].map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=img.onerror=resolve;})));
+    const canvas=await html2canvas(folha,{backgroundColor:'#ffffff',scale:1.5,useCORS:true,logging:false});
+    return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Não foi possível gerar a foto.')),'image/png'));
+  }finally{folha.remove();}
+}
+
+async function confirmarEnvioWpp(repId){
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
-  const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
   const selId=selEl?selEl.value:'';
   const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
@@ -1107,14 +1126,28 @@ function confirmarEnvioWpp(repId){
   const r=allReps.find(x=>x.id==repId)||{};
   const titulo=r.fantasia||r.razao||'Catálogo';
   const compradorNome=selCli?(selCli.contato||selCli.fantasia||selCli.razao):'';
-  let msg=compradorNome?'Olá, *'+compradorNome+'*!\n\n':'';
-  if(intro)msg+=intro+'\n\n';
-  msg+='*'+titulo+'*\n'+'━━━━━━━━━━━━━━━━━\n\n';
-  prods.forEach(p=>{msg+='• '+p.desc+'\n';});
-  msg+='\n_Pedidos pelo WhatsApp_';
-  window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'_blank');
-  prods.forEach(p=>_selCatalogProds.delete(String(p.id)));
-  closeModal();
+  const btn=document.getElementById('btnEnviarCatalogo');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Gerando foto...';}
+  try{
+    const blob=await gerarFotoCatalogo(titulo,prods);
+    const file=new File([blob],'catalogo-'+titulo.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.png',{type:'image/png'});
+    const msg=(compradorNome?'Olá, '+compradorNome+'!\n\n':'')+'Segue o catálogo '+titulo+'.';
+    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if(isMobile&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Catálogo '+titulo,text:msg});
+    }else{
+      if(!navigator.clipboard||!window.ClipboardItem)throw new Error('Este navegador não permite copiar a foto. Use o Chrome atualizado.');
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      window.open('https://web.whatsapp.com/send?phone=55'+tel,'d7CatalogoWpp');
+      alert('📷 Foto copiada!\n\nNo WhatsApp que abriu, pressione Ctrl+V e depois Enviar.');
+    }
+    prods.forEach(p=>_selCatalogProds.delete(String(p.id)));
+    closeModal();
+  }catch(e){
+    if(e&&e.name!=='AbortError')alert('Não foi possível enviar a foto: '+(e.message||e));
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='📷 Enviar foto pelo WhatsApp';}
+  }
 }
 
 /* ══════════════════════ NOVO PEDIDO ══════════════════════ */
