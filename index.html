@@ -970,7 +970,7 @@ function pgCatalogo(){
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <span style="font-size:12px;color:var(--sub);font-weight:700">${g.items.length} produto(s)</span>
-            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📲 Enviar marcados</button>`:''}
+            ${r?`<button class="btn btn-ghost btn-sm" onclick="imprimirCatalogoRep('${r.id}')">🖨️</button><button class="btn btn-ghost btn-sm" onclick="enviarCatalogoWpp('${r.id}')" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.35);color:#25d366">📷 Foto dos marcados</button>`:''}
           </div>
         </div>
         ${g.items.some(p=>p.foto)
@@ -1118,7 +1118,7 @@ function enviarCatalogoWpp(repId){
     <label>Mensagem inicial (opcional)</label>
     <textarea id="wppMsg" placeholder="Olá! Segue nosso catálogo de produtos." style="width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;height:60px;resize:vertical"></textarea>
   </div>
-  <button id="btnEnviarCatalogo" class="btn btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📷 Enviar foto pelo WhatsApp</button>
+  <button id="btnEnviarCatalogo" class="btn btn-full" onclick="confirmarEnvioWpp('${repId||''}')" style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;font-weight:700;padding:13px;border-radius:10px;font-size:15px;cursor:pointer">📷 Copiar foto e abrir WhatsApp</button>
   `);
 }
 
@@ -1168,15 +1168,15 @@ async function confirmarEnvioWpp(repId){
     }else{
       if(!navigator.clipboard||!window.ClipboardItem)throw new Error('Este navegador não permite copiar a foto. Use o Chrome atualizado.');
       await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      alert('📷 Foto copiada!\n\nClique em OK. No WhatsApp que abrir, pressione Ctrl+V e depois Enviar.');
       window.open('https://web.whatsapp.com/send?phone=55'+tel,'d7CatalogoWpp');
-      alert('📷 Foto copiada!\n\nNo WhatsApp que abriu, pressione Ctrl+V e depois Enviar.');
     }
     prods.forEach(p=>_selCatalogProds.delete(String(p.id)));
     closeModal();
   }catch(e){
     if(e&&e.name!=='AbortError')alert('Não foi possível enviar a foto: '+(e.message||e));
   }finally{
-    if(btn){btn.disabled=false;btn.textContent='📷 Enviar foto pelo WhatsApp';}
+    if(btn){btn.disabled=false;btn.textContent='📷 Copiar foto e abrir WhatsApp';}
   }
 }
 
