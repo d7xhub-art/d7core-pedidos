@@ -20,4 +20,7 @@ assert.ok(compacto.includes('Produto 8'),'deve manter os oito principais produto
 assert.ok(!compacto.includes('Produto 9'),'deve limitar catálogos grandes');
 assert.ok(compacto.includes('catálogo completo pode ser solicitado'),'deve avisar sobre o catálogo completo');
 
+const fluxo=html.slice(html.indexOf('async function confirmarEnvioWpp'),html.indexOf('/* ══════════════════════ NOVO PEDIDO'));
+assert.ok(fluxo.indexOf("alert('📷 Foto copiada!")<fluxo.indexOf("window.open('https://web.whatsapp.com"),'deve mostrar a instrução antes de abrir o WhatsApp');
+
 console.log('CRM_WHATSAPP_FORMAT_OK');
