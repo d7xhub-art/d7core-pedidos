@@ -490,6 +490,35 @@ function maskCNPJ(v){return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'$1.$2').
 function maskFone(v){const d=v.replace(/\D/g,'');return d.length<=10?d.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3'):d.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3')}
 function maskCEP(v){return v.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').slice(0,9)}
 
+// CRM WHATSAPP FORMAT START
+function formatarCRMWhatsapp(texto,{catalogo=false,limite=8}={}){
+  const linhas=String(texto||'').replace(/\r/g,'').split('\n');
+  const limpas=[];
+  let emBloco=false;
+  for(let linha of linhas){
+    if(/^\s*```/.test(linha)){emBloco=!emBloco;continue;}
+    linha=linha.trimEnd();
+    if(/^\s*\|?(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(linha))continue;
+    if(linha.includes('|')){
+      const celulas=linha.split('|').map(v=>v.trim()).filter(Boolean);
+      linha=celulas.length>1?'• '+celulas.join(' — '):linha.replace(/\|/g,' · ');
+    }
+    limpas.push(linha);
+  }
+  const saida=[];
+  let itens=0,ocultos=0,branco=false;
+  for(const linha of limpas){
+    const item=/^\s*(?:•|-|\d+[.)])\s+/.test(linha);
+    if(catalogo&&item){itens++;if(itens>limite){ocultos++;continue;}}
+    if(!linha.trim()){if(branco||!saida.length)continue;branco=true;saida.push('');continue;}
+    branco=false;saida.push(linha.trim());
+  }
+  while(saida.at(-1)==='')saida.pop();
+  if(catalogo&&ocultos)saida.push('','_O catálogo completo pode ser solicitado._');
+  return saida.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+// CRM WHATSAPP FORMAT END
+
 let tab='dashboard',editId=null,pSearch='',npEditId=null,_selCatalogProds=new Set();
 let np={cliId:'',repId:'',itens:[],obs:'',data:''};
 
@@ -1115,6 +1144,7 @@ async function gerarFotoCatalogo(titulo,prods){
 
 async function confirmarEnvioWpp(repId){
   const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
+  const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
   const selId=selEl?selEl.value:'';
   const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
@@ -1131,7 +1161,7 @@ async function confirmarEnvioWpp(repId){
   try{
     const blob=await gerarFotoCatalogo(titulo,prods);
     const file=new File([blob],'catalogo-'+titulo.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.png',{type:'image/png'});
-    const msg=(compradorNome?'Olá, '+compradorNome+'!\n\n':'')+'Segue o catálogo '+titulo+'.';
+    const msg=formatarCRMWhatsapp((compradorNome?'Olá, *'+compradorNome+'*!\n\n':'')+(intro?intro+'\n\n':'')+'Segue o catálogo *'+titulo+'*.',{catalogo:true});
     const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     if(isMobile&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({files:[file],title:'Catálogo '+titulo,text:msg});
@@ -1393,6 +1423,7 @@ function exportWpp(id){
   p.itens.forEach((it,i)=>{t+=`${i+1}. ${it.desc} [${it.cod}]\n   ${it.qty} ${it.un} × ${fmt(it.preco)} = *${fmt(it.qty*it.preco)}*\n`});
   t+=`\n━━━━━━━━━━━━━━━━━━\n*TOTAL: ${fmt(p.total)}*`;
   if(p.obs)t+=`\n\n📝 _${p.obs}_`;
+  t=formatarCRMWhatsapp(t);
   if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado para a área de transferência!')));
   else navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado! Cole no WhatsApp.'));
 }
@@ -1600,6 +1631,7 @@ function fuWpp(id){
   if(f.assunto)t+=`💬 *Assunto:* ${f.assunto}\n`;
   if(f.obs)t+=`📝 _${f.obs}_\n`;
   if(f.pedNum)t+=`🧾 Pedido #${f.pedNum}\n`;
+  t=formatarCRMWhatsapp(t);
   if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t));
   else navigator.clipboard.writeText(t).then(()=>alert('✅ Copiado para a área de transferência!'));
 }
@@ -1616,6 +1648,7 @@ function fuWppLista(){
     t+=`${i+1}. ${venc?'🔴':''}${hj?'📅':'🕐'} ${fmtDate(f.data)} — *${f.cliNome||'Sem cliente'}*\n`;
     t+=`   ${f.tipo}: ${f.assunto||'(sem assunto)'}\n`;
   });
+  t=formatarCRMWhatsapp(t);
   if(navigator.share)navigator.share({text:t}).catch(()=>navigator.clipboard.writeText(t));
   else navigator.clipboard.writeText(t).then(()=>alert('✅ Lista copiada!'));
 }
@@ -2628,11 +2661,12 @@ function shareOrcWpp(id){
   lines.push('','*TOTAL DO ORÇAMENTO: '+fmt(o.total+(o.freteTotal||0)+(o.freteTotal||0)*((o.freteIcmsPct||0)/100)+(o.freteTotal||0)*((o.freteFinanceiroPct||0)/100))+'*');
   if(o.obs)lines.push('Obs: '+o.obs);
   const tel=(o.tel||'').replace(/\D/g,'');
-  const msg=encodeURIComponent(lines.join('\n'));
+  const texto=formatarCRMWhatsapp(lines.join('\n'));
+  const msg=encodeURIComponent(texto);
   if(tel){
     window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+msg,'d7wpp');
   }else{
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lines.join('\n')).catch(()=>{});
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(texto).catch(()=>{});
     alert('⚠️ Este orçamento não tem telefone do cliente cadastrado.\n\nO texto foi copiado. Abra a conversa do cliente no WhatsApp e cole (Ctrl+V).\n\nPara enviar direto na próxima vez, edite o pedido e preencha o campo Telefone/WPP do comprador.');
   }
 }
