@@ -41,12 +41,15 @@ assert.match(guard, /d7_deleted_/, 'sincronização deve persistir exclusões lo
 assert.match(guard, /_deleted/, 'sincronização deve enviar e respeitar marcadores de exclusão');
 assert.match(guard, /deletedIds\.has\(id\)/, 'itens excluídos não podem voltar durante a mesclagem');
 assert.match(html, /markDeleted\('produtos',id\)/, 'exclusão de produto deve ser registrada antes da sincronização');
+for(const table of ['clientes','produtos','representadas','pedidos']){
+  assert.match(html, new RegExp(`markDeleted\\('${table}',id\\)`), `exclusão de ${table} deve ser permanente`);
+}
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v3.4-catalog-whatsapp'), 'service worker deve renovar o cache após corrigir o catálogo');
+assert.ok(sw.includes('d7comercial-v3.5-permanent-deletions'), 'service worker deve renovar o cache após exclusões permanentes');
 
-assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.7-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
+assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.8-permanent-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
 
 assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.2-enter"><\/script>/, 'index deve carregar o auth guard');
@@ -63,8 +66,11 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=3\.4-catalog-whatsapp/, 'deve forçar a atualização do service worker após corrigir o catálogo');
-assert.match(sw, /d7comercial-v3\.4-catalog-whatsapp/, 'deve usar um cache novo após corrigir o catálogo');
+assert.match(html, /sw\.js\?v=3\.5-permanent-deletions/, 'deve forçar a atualização do service worker após exclusões permanentes');
+assert.match(sw, /d7comercial-v3\.5-permanent-deletions/, 'deve usar um cache novo após exclusões permanentes');
+for(const field of ['Código do produto','Linha 1','Linha 2','DUN-14','NCM']){
+  assert.ok(html.includes(field), `ficha técnica deve exibir ${field}`);
+}
 assert.match(html, /Preço não cadastrado/, 'produto sem preço deve ser sinalizado');
 assert.match(html, /preco-indisponivel/, 'produto sem preço deve ter inclusão bloqueada');
 assert.match(html, /pedido-dados-compactos/, 'cliente, representada e data devem usar cabeçalho compacto');

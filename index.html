@@ -689,7 +689,7 @@ function saveCli(){
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('clientes',list);closeModal();render();updateBadges();
 }
-function delCli(id){if(!confirm('Excluir este cliente?'))return;DB.set('clientes',DB.get('clientes').filter(x=>x.id!=id));render();updateBadges()}
+function delCli(id){if(!confirm('Excluir este cliente?'))return;window.markDeleted('clientes',id);DB.set('clientes',DB.get('clientes').filter(x=>x.id!=id));render();updateBadges()}
 
 /* ══════════════════════ PRODUTOS ══════════════════════ */
 /* ── FOTO PRODUTO ── */
@@ -820,6 +820,14 @@ const reps=DB.get('representadas');
     </div>
     <div class="fld"><label>Observações</label><textarea id="pObs">${c.obs||''}</textarea></div>
     <div class="sec">🧾 Ficha Técnica</div>
+    <div class="row2">
+      <div class="fld"><label>Linha 1</label><input id="pLinha1" value="${c.linha1||''}" placeholder="Ex: Alimentos"></div>
+      <div class="fld"><label>Linha 2</label><input id="pLinha2" value="${c.linha2||''}" placeholder="Ex: Farinhas"></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>DUN-14</label><input id="pDun14" value="${c.dun14||''}" inputmode="numeric" maxlength="14" placeholder="Código de 14 dígitos"></div>
+      <div class="fld"><label>NCM</label><input id="pNcm" value="${c.ncm||''}" inputmode="numeric" maxlength="10" placeholder="Ex: 11010010"></div>
+    </div>
     <div class="fld"><label>Especificações, composição e aplicação</label><textarea id="pFicha" rows="6" placeholder="Características técnicas, dimensões, materiais, aplicação e cuidados">${c.fichaTecnica||''}</textarea></div>
     <div class="fld"><label>⚖️ Peso / Qtd por Fardo</label><input id="pPeso" type="text" value="${c.pesoPorFardo||''}" placeholder="Ex: 12kg, 24un, 10x1kg"></div>
     <button class="btn btn-p btn-full" onclick="saveProd()">💾 Salvar Produto</button>
@@ -833,14 +841,14 @@ function saveProd(){
   const rep=DB.get('representadas').find(r=>r.id==repId)||{};
   const fotoAtual=editId?(DB.get('produtos').find(x=>x.id==editId)||{}).foto||'':'';
   const foto=_prodFoto==='__remover__'?'':(_prodFoto||fotoAtual);
-  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),fichaTecnica:document.getElementById('pFicha').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
+  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),linha1:document.getElementById('pLinha1').value.trim(),linha2:document.getElementById('pLinha2').value.trim(),dun14:document.getElementById('pDun14').value.trim(),ncm:document.getElementById('pNcm').value.trim(),fichaTecnica:document.getElementById('pFicha').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
 function delProd(id){if(!confirm('Excluir produto?'))return;window.markDeleted('produtos',id);DB.set('produtos',DB.get('produtos').filter(x=>x.id!=id));render();updateBadges()}
 function verFichaProd(id){
   const p=DB.get('produtos').find(x=>x.id==id);if(!p)return;
-  openModal('🧾 Ficha Técnica',`<div class="pd-block"><div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${p.foto?`<img src="${p.foto}" alt="${p.desc}" style="width:90px;height:90px;object-fit:cover;border-radius:10px">`:''}<div><span class="tag">${p.cod}</span><h3 style="margin-top:8px">${p.desc}</h3><div style="color:var(--sub);margin-top:4px">${p.repNome||'Sem representada'}</div></div></div><div class="sec">Especificações</div><div style="white-space:pre-wrap;line-height:1.6">${p.fichaTecnica||p.obs||'Ficha técnica ainda não informada.'}</div><div class="sec">Dados comerciais</div><div><b>Unidade:</b> ${p.un||'—'} &nbsp; <b>Peso / fardo:</b> ${p.pesoPorFardo||'—'} &nbsp; <b>Referência:</b> ${p.refFab||'—'}</div></div>`);
+  openModal('🧾 Ficha Técnica',`<div class="pd-block"><div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">${p.foto?`<img src="${p.foto}" alt="${p.desc}" style="width:90px;height:90px;object-fit:cover;border-radius:10px">`:''}<div><span class="tag">Código do produto: ${p.cod}</span><h3 style="margin-top:8px">${p.desc}</h3><div style="color:var(--sub);margin-top:4px">${p.repNome||'Sem representada'}</div></div></div><div class="sec">Classificação</div><div class="row2"><div><b>Linha 1:</b> ${p.linha1||'—'}</div><div><b>Linha 2:</b> ${p.linha2||'—'}</div><div><b>DUN-14:</b> ${p.dun14||'—'}</div><div><b>NCM:</b> ${p.ncm||'—'}</div></div><div class="sec">Especificações</div><div style="white-space:pre-wrap;line-height:1.6">${p.fichaTecnica||p.obs||'Ficha técnica ainda não informada.'}</div><div class="sec">Dados comerciais</div><div><b>Unidade:</b> ${p.un||'—'} &nbsp; <b>Peso / fardo:</b> ${p.pesoPorFardo||'—'} &nbsp; <b>Referência:</b> ${p.refFab||'—'}</div></div>`);
 }
 
 /* ══════════════════════ REPRESENTADAS ══════════════════════ */
@@ -1403,7 +1411,7 @@ function verPedido(id){
   document.getElementById('mpedido').classList.add('open');
 }
 function setStatus(id,s){const peds=DB.get('pedidos');const p=peds.find(x=>x.id==id);if(p){p.status=s;DB.set('pedidos',peds);render();verPedido(id)}}
-function delPed(id){if(!confirm('Excluir pedido?'))return;DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
+function delPed(id){if(!confirm('Excluir pedido?'))return;window.markDeleted('pedidos',id);DB.set('pedidos',DB.get('pedidos').filter(x=>x.id!=id));closeMPed();render();updateBadges()}
 function editarPedido(id){const p=DB.get('pedidos').find(x=>x.id==id);if(!p)return;npEditId=id;np={cliId:p.cliId,repId:p.repId,itens:p.itens.map(i=>({...i})),obs:p.obs||'',fretePeso:p.fretePeso||0,freteKm:p.freteKm||0,freteValor:p.freteValor||0,freteResp:p.freteResp||'',data:p.data?p.data.slice(0,10):''};pSearch='';closeMPed();goto('novo-pedido')}
 
 function exportWpp(id){
@@ -2759,10 +2767,10 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.4-catalog-whatsapp',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.5-permanent-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
-<script src="./sync-guard.js?v=2.7-deletions"></script>
+<script src="./sync-guard.js?v=2.8-permanent-deletions"></script>
 </body>
 </html>
 
