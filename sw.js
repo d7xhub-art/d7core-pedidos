@@ -1,4 +1,4 @@
-const CACHE='d7comercial-v3.5-permanent-deletions';
+const CACHE='d7pedidos-v3.6-permanent-deletions';
 const ASSETS=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./migrar.html','./auth-guard.js','./sync-guard.js','./saas-light.css'];
 
 self.addEventListener('install',event=>event.waitUntil(
