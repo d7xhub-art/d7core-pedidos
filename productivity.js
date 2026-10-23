@@ -95,7 +95,12 @@
     const oldSearchGone=lastSearch&&lastSearch!==search&&!lastSearch.isConnected;
     const shouldFocus=!lastSearch||oldSearchGone||active===document.body||active===document.documentElement;
     lastSearch=search;
-    if(shouldFocus)setTimeout(focusSearch,0);
+    if(shouldFocus)setTimeout(()=>{
+      // A queued enhancement must not steal focus after the user starts editing.
+      const focused=document.activeElement;
+      if(focused&&focused!==document.body&&focused!==document.documentElement&&focused!==search)return;
+      focusSearch();
+    },0);
   }
 
   function scheduleEnhance(){

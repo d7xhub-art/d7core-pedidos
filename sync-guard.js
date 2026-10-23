@@ -46,11 +46,33 @@
     return false;
   }
 
+  async function readRemoteRows(tbl,filter=''){
+    const all=[];
+    for(let offset=0;;){
+      const r=await fetch(supaUrl+'/rest/v1/'+tbl+'?select=data&order=id.asc&limit=1000&offset='+offset+filter,{headers:headers(),cache:'no-store'});
+      if(!r.ok){
+        if(OPTIONAL.has(tbl)&&(r.status===404||r.status===400))return [];
+        throw new Error('HTTP '+r.status+' em '+tbl);
+      }
+      const rows=await r.json();
+      if(!Array.isArray(rows))throw new Error('Resposta inválida em '+tbl);
+      if(!rows.length)return all;
+      all.push(...rows);offset+=rows.length;
+    }
+  }
+
   async function syncTableSafe(tbl,rows){
     if(!Array.isArray(rows)||rows.length===0)return true;
     if(!(await readyForCloud()))return false;
-    const payload=rows.map(r=>({id:idOf(r)||String(Date.now()),data:r,updated_at:new Date().toISOString()}));
     try{
+      // Read permanent deletions before every upsert, including queued/backup writes.
+      const remote=await readRemoteRows(tbl,'&data->>_deleted=eq.true');
+      const ids=getDeletedIds(tbl);
+      remote.filter(x=>x.data?._deleted).forEach(x=>ids.add(idOf(x.data)));
+      rows.filter(x=>x._deleted).forEach(x=>ids.add(idOf(x)));
+      saveDeletedIds(tbl,ids);
+      const safe=rows.filter(x=>!ids.has(idOf(x))).concat([...ids].map(id=>({id,_deleted:true})));
+      const payload=safe.map(r=>({id:idOf(r)||String(Date.now()),data:r,updated_at:new Date().toISOString()}));
       const r=await fetch(supaUrl+'/rest/v1/'+tbl,{
         method:'POST',
         headers:{...headers(),'Prefer':'resolution=merge-duplicates,return=minimal'},
@@ -83,12 +105,7 @@
     let imported=0,ok=true;
     for(const tbl of TABLES){
       try{
-        const r=await fetch(supaUrl+'/rest/v1/'+tbl+'?select=data&order=updated_at.asc',{headers:headers()});
-        if(!r.ok){
-          if(OPTIONAL.has(tbl)&&(r.status===404||r.status===400))continue;
-          ok=false;continue;
-        }
-        const rows=await r.json();
+        const rows=await readRemoteRows(tbl);
         const remote=rows.map(x=>x.data).filter(Boolean);
         const deletedIds=getDeletedIds(tbl);
         remote.filter(x=>x._deleted).map(idOf).filter(Boolean).forEach(id=>deletedIds.add(id));
@@ -108,6 +125,8 @@
 
   async function fullSafeSync(){
     if(!(await readyForCloud()))return false;
+    const before=await mergeRemote();
+    if(!before.ok){setSyncDot('err');setMessage('Nuvem indisponível • dados locais preservados');return false;}
     const pushed=await pushLocalFirst();
     const pulled=await mergeRemote();
     if(pushed&&pulled.ok){

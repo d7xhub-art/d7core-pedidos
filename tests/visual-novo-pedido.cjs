@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{
 
 (async()=>{
   await new Promise(resolve=>server.listen(4173,'127.0.0.1',resolve));
-  const browser=await chromium.launch({headless:true});
+  const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||undefined});
   const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
   const errors=[];
   page.on('pageerror',error=>errors.push(String(error)));
@@ -28,13 +28,10 @@ const server=http.createServer((req,res)=>{
   });
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
   const menuIds=await page.locator('.sb-item[id]').evaluateAll(items=>items.map(item=>item.id));
-  const expectedMenu=['si-dashboard','si-clientes','si-orcamento','si-novo-pedido','si-produtos','si-ficha-tecnica','si-representadas','si-pedidos','si-catalogo'];
+  const expectedMenu=['si-representadas','si-produtos','si-clientes','si-novo-pedido','si-historico'];
   if(JSON.stringify(menuIds)!==JSON.stringify(expectedMenu))throw new Error('Ordem visual do menu incorreta: '+menuIds.join(', '));
   await page.evaluate(()=>goto('produtos'));
   if(!(await page.locator('#content').innerText()).includes('SAL MOÍDO 30X1 FARDO'))throw new Error('Produto cadastrado não apareceu na página Produtos');
-  await page.evaluate(()=>goto('ficha-tecnica'));
-  if(!(await page.locator('#content').innerText()).includes('SAL MOÍDO 30X1 FARDO'))throw new Error('Ficha Técnica não compartilha os produtos cadastrados');
-  if(!(await page.locator('#content').innerText()).includes('Pendente'))throw new Error('Situação da ficha técnica não foi apresentada');
   await page.evaluate(()=>goto('novo-pedido'));
   await page.waitForSelector('.pedido-dados-compactos');
   await page.waitForFunction(()=>document.querySelector('link[data-d7-saas-ui]')?.sheet);
@@ -55,6 +52,7 @@ const server=http.createServer((req,res)=>{
   if(input.width<350||button.width<75||button.width>180)throw new Error('Proporção da busca está incorreta');
   if(scrollTop!==0)throw new Error('Novo Pedido não abriu no topo');
   if(shortcutsParent.includes('pedido-busca-acao'))throw new Error('Atalhos deslocaram o botão Buscar');
+  await page.selectOption('#npRep','r1');
   await page.selectOption('#npProdSel','p1');
   await page.fill('#npProdQty','3');
   await page.dispatchEvent('#npProdQty','input');

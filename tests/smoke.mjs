@@ -14,11 +14,11 @@ const guard = fs.readFileSync(guardPath, 'utf8');
 const auth = fs.readFileSync(authPath, 'utf8');
 const ui = fs.readFileSync(uiPath, 'utf8');
 
-assert.match(html, /D7COMERCIAL/, 'branding D7COMERCIAL deve existir');
-for (const item of ['Clientes','Produtos','Ficha Técnica','Representadas','Novo Orçamento','Novo Pedido','Pedidos','Catálogo']) {
+assert.match(html, /D7 PEDIDOS/, 'branding D7 PEDIDOS deve existir');
+for (const item of ['Clientes','Produtos','Representadas','Pedidos','Histórico']) {
   assert.ok(html.includes(item), `menu obrigatório ausente: ${item}`);
 }
-const menuOrder=['si-dashboard','si-clientes','si-orcamento','si-novo-pedido','si-produtos','si-ficha-tecnica','si-representadas','si-pedidos','si-catalogo'];
+const menuOrder=['si-representadas','si-produtos','si-clientes','si-novo-pedido','si-historico'];
 let lastMenuPosition=-1;
 for(const id of menuOrder){
   const position=html.indexOf(`id="${id}"`);
@@ -47,9 +47,9 @@ for(const table of ['clientes','produtos','representadas','pedidos']){
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7comercial-v3.5-permanent-deletions'), 'service worker deve renovar o cache após exclusões permanentes');
+assert.ok(sw.includes('d7pedidos-v3.7-permanent-deletions'), 'service worker deve renovar o cache após exclusões permanentes');
 
-assert.match(html, /<script src="\.\/sync-guard\.js\?v=2\.8-permanent-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
+assert.match(html, /<script src="\.\/sync-guard\.js\?v=3\.7-permanent-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
 
 assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.2-enter"><\/script>/, 'index deve carregar o auth guard');
@@ -66,8 +66,8 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=3\.5-permanent-deletions/, 'deve forçar a atualização do service worker após exclusões permanentes');
-assert.match(sw, /d7comercial-v3\.5-permanent-deletions/, 'deve usar um cache novo após exclusões permanentes');
+assert.match(html, /sw\.js\?v=3\.7-permanent-deletions/, 'deve forçar a atualização do service worker após exclusões permanentes');
+assert.match(sw, /d7pedidos-v3\.7-permanent-deletions/, 'deve usar um cache novo após exclusões permanentes');
 for(const field of ['Código do produto','Linha 1','Linha 2','DUN-14','NCM']){
   assert.ok(html.includes(field), `ficha técnica deve exibir ${field}`);
 }
@@ -112,8 +112,8 @@ assert.match(ui, /box-shadow:\s*0 1px 2px rgba\(16,24,40,.05\)/i, 'cards devem u
 assert.match(ui, /font-weight:\s*500!important/, 'navegação deve ter peso visual leve');
 assert.match(ui, /background:\s*#fff!important/, 'superfícies principais devem ser brancas');
 
-assert.equal(manifest.name, 'D7COMERCIAL');
-assert.equal(manifest.short_name, 'D7COMERCIAL');
+assert.equal(manifest.name, 'D7 PEDIDOS');
+assert.equal(manifest.short_name, 'D7 PEDIDOS');
 assert.ok(manifest.start_url.startsWith('/d7core-pedidos/'));
 assert.ok(sw.includes('index.html'));
 console.log('SMOKE_OK');

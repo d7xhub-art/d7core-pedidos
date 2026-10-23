@@ -295,15 +295,11 @@ select option{color:#111!important;background:#fff!important}
 
   <div style="flex:1;padding-bottom:12px">
     <div class="sb-section">Menu</div>
-    <div class="sb-item" id="si-dashboard" onclick="goto('dashboard')"><span class="ico">🏠</span>Início</div>
-    <div class="sb-item" id="si-clientes" onclick="goto('clientes')"><span class="ico">👥</span>Clientes<span class="sb-badge zero" id="badge-cli">0</span></div>
-    <div class="sb-item" id="si-orcamento" onclick="openFormOrc()"><span class="ico">🧮</span>Novo Orçamento</div>
-    <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Novo Pedido</div>
-    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">📦</span>Produtos<span class="sb-badge zero" id="badge-prod">0</span></div>
-    <div class="sb-item" id="si-ficha-tecnica" onclick="goto('ficha-tecnica')"><span class="ico">🧾</span>Ficha Técnica</div>
     <div class="sb-item" id="si-representadas" onclick="goto('representadas')"><span class="ico">🏢</span>Representadas<span class="sb-badge zero" id="badge-rep">0</span></div>
-    <div class="sb-item" id="si-pedidos" onclick="goto('pedidos')"><span class="ico">📋</span>Pedidos<span class="sb-badge zero" id="badge-ped">0</span></div>
-    <div class="sb-item" id="si-catalogo" onclick="goto('catalogo')"><span class="ico">📒</span>Catálogo</div>
+    <div class="sb-item" id="si-produtos" onclick="goto('produtos')"><span class="ico">📦</span>Produtos<span class="sb-badge zero" id="badge-prod">0</span></div>
+    <div class="sb-item" id="si-clientes" onclick="goto('clientes')"><span class="ico">👥</span>Clientes<span class="sb-badge zero" id="badge-cli">0</span></div>
+    <div class="sb-item" id="si-novo-pedido" onclick="goto('novo-pedido')"><span class="ico">✏️</span>Pedidos</div>
+    <div class="sb-item" id="si-historico" onclick="goto('historico')"><span class="ico">📋</span>Histórico<span class="sb-badge zero" id="badge-ped">0</span></div>
   </div>
 
   <div style="padding:12px 16px;border-top:1px solid var(--border)">
@@ -365,6 +361,7 @@ select option{color:#111!important;background:#fff!important}
   </div>
 </div>
 
+<script src="./data-guard.js?v=3.7"></script>
 <script>
 // ══ SUPABASE ══
 const SUPA_URL='https://uewcjlfctumjvqsagnxg.supabase.co';
@@ -470,8 +467,8 @@ async function supaPull(){
 
 // ══ DB ══
 const DB={
-  get:k=>JSON.parse(localStorage.getItem('d7_'+k)||'[]'),
-  set:(k,v)=>{localStorage.setItem('d7_'+k,JSON.stringify(v));updateStatus();queueSync(k,v);}
+  get:k=>D7Data.get(k),
+  set:(k,v)=>{const rows=D7Data.set(k,v);updateStatus();queueSync(k,rows);}
 };
 function updateStatus(){
   const clis=DB.get('clientes'),peds=DB.get('pedidos'),prods=DB.get('produtos');
@@ -519,7 +516,7 @@ function formatarCRMWhatsapp(texto,{catalogo=false,limite=8}={}){
 }
 // CRM WHATSAPP FORMAT END
 
-let tab='dashboard',editId=null,pSearch='',npEditId=null,_selCatalogProds=new Set();
+let tab='novo-pedido',editId=null,pSearch='',npEditId=null,_selCatalogProds=new Set();
 let np={cliId:'',repId:'',itens:[],obs:'',data:''};
 
 // ══ MODAL ══
@@ -551,8 +548,10 @@ function updateBadges(){
 }
 
 // ══ NAVIGATE ══
-const titles={dashboard:'Início',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos','ficha-tecnica':'Ficha Técnica',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Novo Pedido',orcamento:'Novo Orçamento'};
+const titles={dashboard:'Início',clientes:'Clientes',pedidos:'Pedidos',produtos:'Produtos','ficha-tecnica':'Ficha Técnica',catalogo:'Catálogo',representadas:'Representadas','novo-pedido':'Pedidos',historico:'Histórico',orcamento:'Novo Orçamento'};
 function goto(t){
+  if(t==='pedidos')t='historico';
+  if(!['representadas','produtos','clientes','novo-pedido','historico','catalogo'].includes(t))t='novo-pedido';
   tab=t;
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
   const el=document.getElementById('si-'+t);if(el)el.classList.add('on');
@@ -565,7 +564,7 @@ function goto(t){
 // ══ RENDER ══
 function render(){
   const c=document.getElementById('content');
-  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,'ficha-tecnica':pgFichaTecnica,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,pedidos:pgPedidos,orcamento:pgOrcamento};
+  const pages={dashboard:pgDash,clientes:pgClientes,produtos:pgProdutos,'ficha-tecnica':pgFichaTecnica,catalogo:pgCatalogo,representadas:pgRepresentadas,'novo-pedido':pgNovoPedido,historico:pgPedidos};
   c.innerHTML=(pages[tab]||pgDash)();
 }
 
@@ -685,7 +684,7 @@ function saveCli(){
   const razao=document.getElementById('cRazao').value.trim();
   if(!razao)return alert('Razão Social é obrigatória.');
   const list=DB.get('clientes');
-  const o={id:editId||uuid(),cnpj:document.getElementById('cCnpj').value.trim(),razao,fantasia:document.getElementById('cFantasia').value.trim(),fone:document.getElementById('cFone').value.trim(),email:document.getElementById('cEmail').value.trim(),contato:document.getElementById('cContato').value.trim(),cep:document.getElementById('cCEP').value.trim(),rua:document.getElementById('cRua').value.trim(),num:document.getElementById('cNum').value.trim(),bairro:document.getElementById('cBairro').value.trim(),cidade:document.getElementById('cCidade').value.trim(),uf:document.getElementById('cUF').value.trim().toUpperCase(),condPag:document.getElementById('cCond').value,limite:parseFloat(document.getElementById('cLimite').value)||0,obs:document.getElementById('cObs').value.trim(),wppComp:(document.getElementById('cWppComp')||{}).value||''};
+  const o={...(list.find(x=>x.id==editId)||{}),id:editId||uuid(),cnpj:document.getElementById('cCnpj').value.trim(),razao,fantasia:document.getElementById('cFantasia').value.trim(),fone:document.getElementById('cFone').value.trim(),email:document.getElementById('cEmail').value.trim(),contato:document.getElementById('cContato').value.trim(),cep:document.getElementById('cCEP').value.trim(),rua:document.getElementById('cRua').value.trim(),num:document.getElementById('cNum').value.trim(),bairro:document.getElementById('cBairro').value.trim(),cidade:document.getElementById('cCidade').value.trim(),uf:document.getElementById('cUF').value.trim().toUpperCase(),condPag:document.getElementById('cCond').value,limite:parseFloat(document.getElementById('cLimite').value)||0,obs:document.getElementById('cObs').value.trim(),wppComp:(document.getElementById('cWppComp')||{}).value||''};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('clientes',list);closeModal();render();updateBadges();
 }
@@ -750,7 +749,7 @@ function pgProdutos(){
   return `
   <div class="pg-head">
     <div><div class="pg-title">Produtos</div><div class="pg-sub">${list.length} de ${all.length} no catálogo</div></div>
-    <button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" onclick="goto('catalogo')">WhatsApp / Imprimir produtos</button><button class="btn btn-g" onclick="openFormProd()">+ Novo Produto</button></div>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -758,7 +757,7 @@ function pgProdutos(){
   </div>
   ${list.length===0
     ?`<div class="empty"><div class="empty-ico">📦</div><div class="empty-t">Nenhum produto encontrado</div></div>`
-    :`<div class="tbl-wrap"><table><thead><tr><th style="width:52px">Foto</th><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço Lista</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
+    :`<div class="tbl-wrap"><table><thead><tr><th style="width:52px">Foto</th><th>Código</th><th>Descrição</th><th>Ref. Fab.</th><th>Unid.</th><th>Preço</th><th>Preço Mín.</th><th>Ações</th></tr></thead><tbody>
   ${tableRows}
   </tbody></table></div>`}`;
 }
@@ -783,7 +782,7 @@ function pgFichaTecnica(){
 }
 function openFormProd(id){
   editId=id||null;const p=id?DB.get('produtos').find(x=>x.id==id):{};const c=p||{};
-  if(!DB.get('representadas').length){supaPull().then(()=>openFormProd(id));return;}
+  if(!DB.get('representadas').length){alert('Cadastre uma representada antes de cadastrar produtos.');goto('representadas');return;}
 const reps=DB.get('representadas');
   _prodFoto='';
   openModal(id?'Editar Produto':'Novo Produto',`
@@ -794,9 +793,9 @@ const reps=DB.get('representadas');
       <div class="fld"><label>Ref. Fabricante</label><input id="pRef" value="${c.refFab||''}" placeholder="Ref. original"></div>
     </div>
     <div class="fld"><label>Descrição Completa *</label><input id="pDesc" value="${c.desc||''}" placeholder="Nome detalhado do produto"></div>
-    <div class="fld"><label>Representada</label>
+    <div class="fld"><label>Representada *</label>
       <select id="pRepId" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%">
-        <option value="">— Sem representada —</option>
+        <option value="">— Selecione a representada —</option>
         ${reps.map(r=>`<option value="${r.id}" ${(c.repId||'')==r.id?'selected':''}>${r.fantasia||r.razao}</option>`).join('')}
       </select></div>
     <div class="sec">📷 Foto do Produto</div>
@@ -814,7 +813,7 @@ const reps=DB.get('representadas');
     <div style="font-size:11px;color:var(--sub);margin-bottom:8px">📱 No celular: usa a câmera diretamente. No PC: selecione um arquivo.</div>
     <div class="sec">💰 Preços</div>
     <div class="row3">
-      <div class="fld"><label>Preço Lista R$</label><input id="pPreco" type="number" step="0.01" min="0" value="${c.preco||''}" placeholder="0,00"></div>
+      <div class="fld"><label>Preço de venda R$</label><input id="pPreco" type="number" step="0.01" min="0" value="${c.preco||''}" placeholder="0,00"></div>
       <div class="fld"><label>Preço Mínimo R$</label><input id="pPrecoMin" type="number" step="0.01" min="0" value="${c.precoMin||''}" placeholder="0,00"></div>
       <div class="fld"><label>Unidade</label><select id="pUn">${['un','cx','kg','lt','frd','pc','bd','sc','pct','par','rolo','m','m²'].map(u=>`<option ${(c.un||'un')===u?'selected':''}>${u}</option>`).join('')}</select></div>
     </div>
@@ -838,10 +837,13 @@ function saveProd(){
   if(!cod||!desc)return alert('Código e descrição são obrigatórios.');
   const list=DB.get('produtos');
   const repId=document.getElementById('pRepId').value||'';
-  const rep=DB.get('representadas').find(r=>r.id==repId)||{};
+  const rep=DB.get('representadas').find(r=>r.id==repId);
+  if(!rep)return alert('Selecione a representada do produto.');
+  const preco=Number(document.getElementById('pPreco').value);
+  if(!Number.isFinite(preco)||preco<=0)return alert('Informe um preço válido maior que zero.');
   const fotoAtual=editId?(DB.get('produtos').find(x=>x.id==editId)||{}).foto||'':'';
   const foto=_prodFoto==='__remover__'?'':(_prodFoto||fotoAtual);
-  const o={id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),linha1:document.getElementById('pLinha1').value.trim(),linha2:document.getElementById('pLinha2').value.trim(),dun14:document.getElementById('pDun14').value.trim(),ncm:document.getElementById('pNcm').value.trim(),fichaTecnica:document.getElementById('pFicha').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
+  const o={...(list.find(x=>x.id==editId)||{}),id:editId||uuid(),cod,desc,refFab:document.getElementById('pRef').value.trim(),un:document.getElementById('pUn').value,preco:parseFloat(document.getElementById('pPreco').value)||0,precoMin:parseFloat(document.getElementById('pPrecoMin').value)||0,obs:document.getElementById('pObs').value.trim(),linha1:document.getElementById('pLinha1').value.trim(),linha2:document.getElementById('pLinha2').value.trim(),dun14:document.getElementById('pDun14').value.trim(),ncm:document.getElementById('pNcm').value.trim(),fichaTecnica:document.getElementById('pFicha').value.trim(),pesoPorFardo:document.getElementById('pPeso').value.trim(),repId,repNome:rep.fantasia||rep.razao||'',foto};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('produtos',list);closeModal();render();updateBadges();
 }
@@ -929,7 +931,7 @@ function saveRep(){
   const razao=document.getElementById('rRazao').value.trim();
   if(!razao)return alert('Razão Social é obrigatória.');
   const list=DB.get('representadas');
-  const o={id:editId||uuid(),cnpj:document.getElementById('rCnpj').value.trim(),razao,fantasia:document.getElementById('rFantasia').value.trim(),fone:document.getElementById('rFone').value.trim(),email:document.getElementById('rEmail').value.trim(),contato:document.getElementById('rContato').value.trim(),wpp:document.getElementById('rWpp').value.trim(),cep:document.getElementById('rCEP').value.trim(),rua:document.getElementById('rRua').value.trim(),num:document.getElementById('rNum').value.trim(),bairro:document.getElementById('rBairro')?document.getElementById('rBairro').value.trim():'',cidade:document.getElementById('rCidade').value.trim(),uf:document.getElementById('rUF').value.trim().toUpperCase(),comissao:parseFloat(document.getElementById('rComissao').value)||0,prazo:parseInt(document.getElementById('rPrazo').value)||0,obs:document.getElementById('rObs').value.trim()};
+  const o={...(list.find(x=>x.id==editId)||{}),id:editId||uuid(),cnpj:document.getElementById('rCnpj').value.trim(),razao,fantasia:document.getElementById('rFantasia').value.trim(),fone:document.getElementById('rFone').value.trim(),email:document.getElementById('rEmail').value.trim(),contato:document.getElementById('rContato').value.trim(),wpp:document.getElementById('rWpp').value.trim(),cep:document.getElementById('rCEP').value.trim(),rua:document.getElementById('rRua').value.trim(),num:document.getElementById('rNum').value.trim(),bairro:document.getElementById('rBairro')?document.getElementById('rBairro').value.trim():'',cidade:document.getElementById('rCidade').value.trim(),uf:document.getElementById('rUF').value.trim().toUpperCase(),comissao:parseFloat(document.getElementById('rComissao').value)||0,prazo:parseInt(document.getElementById('rPrazo').value)||0,obs:document.getElementById('rObs').value.trim()};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('representadas',list);closeModal();render();updateBadges();
 }
@@ -1151,12 +1153,13 @@ async function gerarFotoCatalogo(titulo,prods){
 }
 
 async function confirmarEnvioWpp(repId){
-  const tel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
+  const rawTel=(document.getElementById('wppNum').value||'').replace(/\D/g,'');
+  const tel=rawTel.startsWith('55')&&rawTel.length>=12?rawTel.slice(2):rawTel;
   const intro=document.getElementById('wppMsg').value.trim();
   const selEl=document.getElementById('wppSelect');
   const selId=selEl?selEl.value:'';
   const _sp=selId?DB.get('prospectos').find(p=>p.id===selId):null;const selCli=selId?(DB.get('clientes').find(c=>c.id===selId)||(_sp?{id:_sp.id,contato:_sp.nome,fantasia:_sp.empresa,fone:_sp.fone,wppComp:_sp.fone}:null)):null;
-  if(!tel||tel.length<10)return alert('Informe um WhatsApp válido com DDD.');
+  if(!/^[1-9]\d{9,10}$/.test(tel))return alert('Informe um WhatsApp válido com DDD.');
   if(!repId)return alert('Escolha uma representada para enviar o catálogo.');
   const allReps=DB.get('representadas'),allProds=DB.get('produtos');
   const prods=allProds.filter(p=>_selCatalogProds.has(String(p.id))).filter(p=>p.repId==repId);
@@ -1177,7 +1180,7 @@ async function confirmarEnvioWpp(repId){
       if(!navigator.clipboard||!window.ClipboardItem)throw new Error('Este navegador não permite copiar a foto. Use o Chrome atualizado.');
       await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
       alert('📷 Foto copiada!\n\nClique em OK. No WhatsApp que abrir, pressione Ctrl+V e depois Enviar.');
-      window.open('https://web.whatsapp.com/send?phone=55'+tel,'d7CatalogoWpp');
+      window.open('https://web.whatsapp.com/send?phone=55'+tel+'&text='+encodeURIComponent(msg),'d7CatalogoWpp');
     }
     prods.forEach(p=>_selCatalogProds.delete(String(p.id)));
     closeModal();
@@ -1190,7 +1193,7 @@ async function confirmarEnvioWpp(repId){
 
 /* ══════════════════════ NOVO PEDIDO ══════════════════════ */
 function pgNovoPedido(){
-  const clis=DB.get('clientes'),reps=DB.get('representadas'),prods=DB.get('produtos');
+  const clis=DB.get('clientes'),reps=DB.get('representadas'),prods=DB.get('produtos').filter(p=>!np.repId||p.repId==np.repId);
   const total=np.itens.reduce((s,i)=>s+i.qty*i.preco,0);
   const cliSel=clis.find(c=>c.id==np.cliId)||{};
   const frete=Number(np.freteValor)||0;
@@ -1199,13 +1202,13 @@ function pgNovoPedido(){
   const fp=q?prods.filter(p=>{const hay=norm(p.desc+' '+p.cod+' '+(p.refFab||''));return norm(q).split(' ').filter(Boolean).every(w=>hay.includes(w));}):prods;
   return `
   <div class="pedido-profissional">
-    <div class="pedido-breadcrumb">Início &gt; Novo Pedido</div>
-    <div class="pg-head pedido-page-head"><div><div class="pg-title">${npEditId?'Editar Pedido':'Novo Pedido'}</div><div class="pg-sub">Crie um novo pedido de venda</div></div><div class="pedido-head-actions"><button class="btn btn-ghost btn-sm" onclick="goto('orcamento')">↗ Importar de Orçamento</button><button class="btn btn-ghost btn-sm" onclick="limpar()">Limpar</button><button class="btn btn-a btn-sm" onclick="confirmar()">Salvar Pedido</button></div></div>
+    <div class="pedido-breadcrumb">Pedidos &gt; Novo Pedido</div>
+    <div class="pg-head pedido-page-head"><div><div class="pg-title">${npEditId?'Editar Pedido':'Novo Pedido'}</div><div class="pg-sub">Crie um novo pedido de venda</div></div><div class="pedido-head-actions"><button class="btn btn-ghost btn-sm" onclick="limpar()">Limpar</button><button class="btn btn-a btn-sm" onclick="confirmar()">Salvar Pedido</button></div></div>
     <div class="pd-block pedido-dados-compactos">
       <div class="pedido-section-title"><span>1</span> Dados do Pedido</div>
       <div class="pedido-dados-grid">
         <div class="fld"><label>Cliente *</label><select id="npCli" onchange="np.cliId=this.value;render()"><option value="">— Selecione o cliente —</option>${clis.map(c=>`<option value="${c.id}" ${np.cliId==c.id?'selected':''}>${c.razao||c.fantasia}${c.cidade?' · '+c.cidade+'/'+c.uf:''}</option>`).join('')}</select></div>
-        <div class="fld"><label>Representada *</label><select id="npRep" onchange="np.repId=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"><option value="">— Selecione a empresa —</option>${reps.map(r=>`<option value="${r.id}" ${np.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}</select></div>
+        <div class="fld"><label>Representada *</label><select id="npRep" onchange="changePedidoRep(this.value)" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"><option value="">— Selecione a empresa —</option>${reps.map(r=>`<option value="${r.id}" ${np.repId==r.id?'selected':''}>${r.razao||r.fantasia}</option>`).join('')}</select></div>
         <div class="fld"><label>Data do Pedido</label><input type="date" id="npData" value="${np.data||new Date().toISOString().slice(0,10)}" onchange="np.data=this.value" style="background:rgba(255,255,255,.025);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);outline:none;width:100%"></div>
         <div class="fld"><label>Condição de Pagamento</label><input class="dark-input" value="${cliSel.condPag||'Conforme cadastro do cliente'}" readonly></div>
         <div class="fld"><label>Frete</label><select class="dark-input" id="npFreteResp" oninput="np.freteResp=this.value"><option value="CIF" ${(np.freteResp||'CIF')==='CIF'?'selected':''}>CIF — por nossa conta</option><option value="FOB" ${(np.freteResp||'')==='FOB'?'selected':''}>FOB — por conta do cliente</option></select></div>
@@ -1243,10 +1246,12 @@ function pgNovoPedido(){
   </div>`;
 }
 
-function addItem(pid){const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return;if(!(Number(p.preco)>0))return alert('Preço não cadastrado. Cadastre o preço do produto antes de adicioná-lo ao pedido.');const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+1).toFixed(3))}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty:1,preco:p.preco,disc:''});pSearch='';render()}
+function changePedidoRep(id){if(np.itens.length&&id!==np.repId){alert('Remova os itens antes de trocar a representada.');render();return;}np.repId=id;pSearch='';render()}
+function pedidoProdutoValido(p){if(!np.repId){alert('Selecione a representada antes de adicionar produtos.');return false;}if(p.repId!=np.repId){alert('O produto pertence a outra representada.');return false;}return true;}
+function addItem(pid){const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return;if(!pedidoProdutoValido(p))return;if(!(Number(p.preco)>0))return alert('Preço não cadastrado. Cadastre o preço do produto antes de adicioná-lo ao pedido.');const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+1).toFixed(3))}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty:1,preco:p.preco,disc:''});pSearch='';render()}
 function npProdChange(pid){const p=DB.get('produtos').find(x=>x.id==pid);const un=document.getElementById('npProdUn'),preco=document.getElementById('npProdPreco'),peso=document.getElementById('npProdPeso');if(un)un.textContent=p?.un||'—';if(preco)preco.value=p?.preco||0;if(peso)peso.value=p?.peso||p?.pesoPorFardo||0;calcNpDraft()}
 function calcNpDraft(){const qty=parseFloat(document.getElementById('npProdQty')?.value)||0;const preco=parseFloat(document.getElementById('npProdPreco')?.value)||0;const total=document.getElementById('npProdTotal');if(total)total.textContent=fmt(qty*preco)}
-function addNpDraft(){const pid=document.getElementById('npProdSel')?.value;const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return alert('Selecione um produto.');const qty=parseFloat(document.getElementById('npProdQty')?.value)||0;const preco=parseFloat(document.getElementById('npProdPreco')?.value)||0;const peso=parseFloat(document.getElementById('npProdPeso')?.value)||0;if(qty<=0)return alert('Informe uma quantidade válida.');if(preco<=0)return alert('Informe o valor unitário do produto.');const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+qty).toFixed(3));ex.preco=preco;ex.peso=peso}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty,preco,peso,disc:''});pSearch='';render()}
+function addNpDraft(){const pid=document.getElementById('npProdSel')?.value;const p=DB.get('produtos').find(x=>x.id==pid);if(!p)return alert('Selecione um produto.');if(!pedidoProdutoValido(p))return;const qty=parseFloat(document.getElementById('npProdQty')?.value)||0;const preco=parseFloat(document.getElementById('npProdPreco')?.value)||0;const peso=parseFloat(document.getElementById('npProdPeso')?.value)||0;if(qty<=0)return alert('Informe uma quantidade válida.');if(preco<=0)return alert('Informe o valor unitário do produto.');const ex=np.itens.find(i=>i.pid==pid);if(ex){ex.qty=parseFloat((ex.qty+qty).toFixed(3));ex.preco=preco;ex.peso=peso}else np.itens.push({pid,cod:p.cod,desc:p.desc,un:p.un,qty,preco,peso,disc:''});pSearch='';render()}
 function remItem(i){np.itens.splice(i,1);render()}
 function updItem(i,f,v){np.itens[i][f]=parseFloat(v)||0;render()}
 function updItemDisc(i,v){np.itens[i].disc=v}
@@ -1262,6 +1267,8 @@ function confirmar(){
   if(!np.cliId)return alert('Selecione o cliente.');
   if(!np.repId)return alert('Selecione a representada.');
   if(!np.itens.length)return alert('Adicione ao menos um produto.');
+  if(np.itens.some(i=>!Number.isFinite(Number(i.qty))||Number(i.qty)<=0||!Number.isFinite(Number(i.preco))||Number(i.preco)<=0))return alert('Revise quantidades e preços dos itens.');
+  if(np.itens.some(i=>{const p=DB.get('produtos').find(p=>p.id==i.pid);return p&&p.repId!=np.repId;}))return alert('Há produtos de outra representada no pedido.');
   const peds=DB.get('pedidos');
   const cli=DB.get('clientes').find(c=>c.id==np.cliId)||{};
   const rep=DB.get('representadas').find(r=>r.id==np.repId)||{};
@@ -1297,7 +1304,7 @@ function pgPedidos(){
   if(sf!=='todos')list=list.filter(p=>p.status===sf);
   return `
   <div class="pg-head">
-    <div><div class="pg-title">Pedidos</div><div class="pg-sub">${list.length} pedido(s) · ${fmt(list.reduce((s,p)=>s+p.total,0))}</div></div>
+    <div><div class="pg-title">Histórico</div><div class="pg-sub">${list.length} pedido(s) · ${fmt(list.reduce((s,p)=>s+p.total,0))}</div></div>
   </div>
   <div class="filter-row">
     <div class="search-wrap"><svg class="search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1388,7 +1395,7 @@ function verPedido(id){
           <th style="padding:8px 8px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Vl. Fardo</th>
           <th style="padding:8px 14px;text-align:right;font-size:10px;color:var(--sub);font-weight:700;text-transform:uppercase">Total</th>
         </tr></thead>
-        <tbody>${p.itens.map((it,i)=>'<tr style="border-top:1px solid var(--bdr)'+(i%2?';background:rgba(0,0,0,.04)':'')+'"><td style="padding:10px 14px;font-size:12px;color:var(--sub)">'+(i+1)+'</td><td style="padding:10px 8px"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">'+it.desc+'</div><span class="tag">'+it.cod+'</span></td><td style="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
+        <tbody>${p.itens.map((it,i)=>'<tr style="border-top:1px solid var(--bdr)'+(i%2?';background:rgba(0,0,0,.04)':'')+'"><td style="padding:10px 14px;font-size:12px;color:var(--sub)">'+(i+1)+'</td><td style="padding:10px 8px"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">'+it.desc+'</div><span class="tag">'+it.cod+'</span></td><td style="padding:10px 8px;text-align:center;font-size:12px;color:var(--sub)">'+(it.disc||it.obs||'—')+'</td><td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:600;color:var(--txt)">'+it.qty+' '+it.un+'</td><td style="padding:10px 8px;text-align:right;font-size:13px;color:var(--txt)">'+fmt(it.preco)+'</td><td style="padding:10px 14px;text-align:right;font-size:13px;font-weight:700;color:var(--acc)">'+fmt(it.qty*it.preco)+'</td></tr>').join('')}
         </tbody>
       </table>
     </div>
@@ -1428,7 +1435,7 @@ function exportWpp(id){
   t+=`━━━━━━━━━━━━━━━━━━\n\n`;
 
   t+=`*ITENS:*\n`;
-  p.itens.forEach((it,i)=>{t+=`${i+1}. ${it.desc} [${it.cod}]\n   ${it.qty} ${it.un} × ${fmt(it.preco)} = *${fmt(it.qty*it.preco)}*\n`});
+  p.itens.forEach((it,i)=>{t+=`${i+1}. ${it.desc} [${it.cod}]\n   ${it.qty} ${it.un} × ${fmt(it.preco)} = *${fmt(it.qty*it.preco)}*\n`;if(it.disc||it.obs)t+=`   Obs.: ${it.disc||it.obs}\n`;});
   t+=`\n━━━━━━━━━━━━━━━━━━\n*TOTAL: ${fmt(p.total)}*`;
   if(p.obs)t+=`\n\n📝 _${p.obs}_`;
   t=formatarCRMWhatsapp(t);
@@ -1615,7 +1622,7 @@ function saveFU(){
   const repId=repSel.value;
   const repNome=repId?(repSel.options[repSel.selectedIndex].text):'';
   const list=DB.get('followups');
-  const o={id:editId||uuid(),cliId,cliNome,repId,repNome,tipo,data,assunto:document.getElementById('fuAssunto').value.trim(),obs:document.getElementById('fuObs').value.trim(),pedNum:document.getElementById('fuPedNum').value||'',status:'pendente',criadoEm:editId?(list.find(x=>x.id==editId)||{}).criadoEm||new Date().toISOString():new Date().toISOString()};
+  const o={...(list.find(x=>x.id==editId)||{}),id:editId||uuid(),cliId,cliNome,repId,repNome,tipo,data,assunto:document.getElementById('fuAssunto').value.trim(),obs:document.getElementById('fuObs').value.trim(),pedNum:document.getElementById('fuPedNum').value||'',status:'pendente',criadoEm:editId?(list.find(x=>x.id==editId)||{}).criadoEm||new Date().toISOString():new Date().toISOString()};
   if(editId){const i=list.findIndex(x=>x.id==editId);list[i]=o}else list.push(o);
   DB.set('followups',list);closeModal();render();updateBadges();
 }
@@ -2094,7 +2101,7 @@ function pgBackup(){
 }
 
 function exportarBackup(){
-  const data={versao:'2.2',app:'D7COMERCIAL',exportadoEm:new Date().toISOString(),clientes:DB.get('clientes'),produtos:DB.get('produtos'),representadas:DB.get('representadas'),pedidos:DB.get('pedidos'),followups:DB.get('followups'),prospectos:DB.get('prospectos')};
+  const data=D7Data.backup();
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   const d=new Date();
@@ -2120,13 +2127,9 @@ function importarBackup(e){
   reader.onload=ev=>{
     try{
       const data=JSON.parse(ev.target.result);
-      if(!confirm(`Importar backup de ${new Date(data.exportadoEm).toLocaleString('pt-BR')}?\n\nIsso irá substituir todos os dados atuais.\n\nDados no arquivo:\n• ${(data.clientes||[]).length} clientes\n• ${(data.produtos||[]).length} produtos\n• ${(data.representadas||[]).length} representadas\n• ${(data.pedidos||[]).length} pedidos\n• ${(data.followups||[]).length} follow-ups\n• ${(data.prospectos||[]).length} prospects`))return;
-      if(data.clientes)localStorage.setItem('d7_clientes',JSON.stringify(data.clientes));
-      if(data.produtos)localStorage.setItem('d7_produtos',JSON.stringify(data.produtos));
-      if(data.representadas)localStorage.setItem('d7_representadas',JSON.stringify(data.representadas));
-      if(data.pedidos)localStorage.setItem('d7_pedidos',JSON.stringify(data.pedidos));
-      if(data.followups)localStorage.setItem('d7_followups',JSON.stringify(data.followups));
-      if(data.prospectos)localStorage.setItem('d7_prospectos',JSON.stringify(data.prospectos));
+      if(!confirm(`Importar backup de ${new Date(data.exportadoEm).toLocaleString('pt-BR')}?\n\nOs dados serão mesclados, preservando exclusões permanentes.\n\nDados no arquivo:\n• ${(data.clientes||[]).length} clientes\n• ${(data.produtos||[]).length} produtos\n• ${(data.representadas||[]).length} representadas\n• ${(data.pedidos||[]).length} pedidos\n• ${(data.followups||[]).length} follow-ups\n• ${(data.prospectos||[]).length} prospects`))return;
+      D7Data.importBackup(data);
+      supaFullSync();
       updateStatus();updateBadges();render();
       alert('✅ Backup restaurado com sucesso!\n\n'+`${(data.clientes||[]).length} clientes\n${(data.produtos||[]).length} produtos\n${(data.representadas||[]).length} representadas\n${(data.pedidos||[]).length} pedidos\n${(data.followups||[]).length} follow-ups\n${(data.prospectos||[]).length} prospects`);
     }catch(err){alert('❌ Arquivo inválido ou corrompido.\nVerifique se é um backup gerado pelo D7 PEDIDOS.')}
@@ -2137,11 +2140,11 @@ function importarBackup(e){
 function limparDados(tipo){
   if(tipo==='pedidos'){
     if(!confirm('Apagar TODOS os pedidos? Esta ação não pode ser desfeita.'))return;
-    DB.set('pedidos',[]);alert('Pedidos removidos.');
+    DB.get('pedidos').forEach(p=>window.markDeleted('pedidos',p.id));DB.set('pedidos',[]);alert('Pedidos removidos.');
   }else{
     if(!confirm('⚠️ ATENÇÃO: Apagar TODOS os dados (clientes, produtos, representadas e pedidos)?\n\nEsta ação NÃO pode ser desfeita!'))return;
     if(!confirm('Tem certeza absoluta? Todos os dados serão perdidos.'))return;
-    ['clientes','produtos','representadas','pedidos','followups','prospectos'].forEach(k=>DB.set(k,[]));
+    ['clientes','produtos','representadas','pedidos','followups','prospectos'].forEach(k=>{DB.get(k).forEach(r=>window.markDeleted(k,r.id));DB.set(k,[])});
     alert('Todos os dados foram removidos.');
   }
   render();updateBadges();
@@ -2291,7 +2294,7 @@ function saveCalUrl(){
 
 // ══ INIT ══
 updateStatus();
-goto('dashboard');
+goto('novo-pedido');
 
 function pgConfig(){
   const cfg=DB.get('config')||{};
@@ -2767,10 +2770,10 @@ async function shareOrcImage(id){
     }
   },'image/png');
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.5-permanent-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=3.7-permanent-deletions',{updateViaCache:'none'}).then(r=>r.update()).catch(e=>console.warn('Service worker:',e)));}
 </script>
 <script src="./auth-guard.js?v=1.2-enter"></script>
-<script src="./sync-guard.js?v=2.8-permanent-deletions"></script>
+<script src="./sync-guard.js?v=3.7-permanent-deletions"></script>
 </body>
 </html>
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8').replace(/\r/g,'');
 const match=html.match(/\/\/ CRM WHATSAPP FORMAT START\n([\s\S]*?)\/\/ CRM WHATSAPP FORMAT END/);
 assert.ok(match,'formatador central do CRM deve existir');
 const ctx={};

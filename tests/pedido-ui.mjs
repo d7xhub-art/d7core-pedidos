@@ -21,7 +21,7 @@ const context={
   DB:{get:key=>({
     clientes:[{id:'c1',razao:'Cliente Teste',cidade:'Goiânia',uf:'GO',condPag:'21/28/35'}],
     representadas:[{id:'r1',razao:'Representada Teste'}],
-    produtos:[{id:'p1',cod:'0001',desc:'Farinha Teste',un:'20x500g',preco:42,estoque:18,categoria:'Farinhas'}]
+    produtos:[{id:'p1',repId:'r1',cod:'0001',desc:'Farinha Teste',un:'20x500g',preco:42,estoque:18,categoria:'Farinhas'}]
   }[key]||[])},
   np:{cliId:'c1',repId:'r1',itens:[],obs:'',fretePeso:0,freteKm:0,freteValor:0,freteResp:'CIF',data:'2026-09-05'},
   npEditId:null,
@@ -33,8 +33,8 @@ vm.createContext(context);
 vm.runInContext(`${extractFunction('pgNovoPedido')};this.renderPedido=pgNovoPedido`,context);
 const html=context.renderPedido();
 
-assert.match(html,/Início\s*&gt;\s*Novo Pedido|Início\s*>\s*Novo Pedido/,'deve orientar o usuário com breadcrumb');
-assert.match(html,/Importar de Orçamento/,'deve disponibilizar a ação do mockup aprovado');
+assert.match(html,/Pedidos\s*&gt;\s*Novo Pedido/,'deve orientar o usuário com breadcrumb');
+assert.ok(!html.includes('Importar de Orçamento'),'fluxo simplificado não deve oferecer orçamento');
 assert.match(html,/1\s*<\/span>\s*Dados do Pedido/,'deve numerar a primeira etapa');
 assert.match(html,/2\s*<\/span>\s*Adicionar Produtos/,'deve numerar a segunda etapa');
 assert.match(html,/id="npProdSel"/,'deve permitir escolher o produto antes de adicionar');

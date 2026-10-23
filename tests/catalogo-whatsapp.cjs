@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{
 
 (async()=>{
   await new Promise(resolve=>server.listen(4174,'127.0.0.1',resolve));
-  const browser=await chromium.launch({headless:true});
+  const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||undefined});
   const page=await browser.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(String(error)));
