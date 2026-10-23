@@ -37,18 +37,20 @@ context.window.D7_SUPABASE_CONFIG={url:'https://projeto.supabase.co',key:'chave-
 vm.createContext(context);
 vm.runInContext(source,context);
 
-await context.window.D7Auth.signInWithPassword('usuario@teste.com','senha');
-assert.equal(requestedUrl,'https://projeto.supabase.co/auth/v1/token?grant_type=password');
-assert.equal(JSON.parse(storage.get('d7_supa_session_v1')).access_token,'token');
-
-storage.clear();
-requestedUrl='';
+assert.ok(!source.includes('type="password"'),'a tela não deve pedir senha');
+await context.window.D7Auth.sendMagicLink('usuario@teste.com');
+assert.equal(new URL(requestedUrl).pathname,'/auth/v1/otp');
+assert.equal(new URL(requestedUrl).searchParams.get('redirect_to'),'https://d7xhub-art.github.io/d7core-pedidos/');
+storage.clear();requestedUrl='';
 await domReady();
 await new Promise(resolve=>setTimeout(resolve,0));
 let prevented=false;
-assert.equal(typeof elements['#d7AuthPass'].listeners.keydown,'function','campo de senha deve tratar a tecla Enter');
-elements['#d7AuthPass'].listeners.keydown({key:'Enter',preventDefault(){prevented=true;}});
+assert.equal(typeof elements['#d7AuthEmail'].listeners.keydown,'function');
+elements['#d7AuthEmail'].listeners.keydown({key:'Enter',preventDefault(){prevented=true;}});
 await new Promise(resolve=>setTimeout(resolve,0));
 assert.equal(prevented,true);
-assert.equal(requestedUrl,'https://projeto.supabase.co/auth/v1/token?grant_type=password');
+assert.equal(new URL(requestedUrl).pathname,'/auth/v1/otp');
+assert.equal(new URL(requestedUrl).searchParams.get('redirect_to'),'https://d7xhub-art.github.io/d7core-pedidos/');
+assert.ok(!storage.has('d7_supa_session_v1'),'solicitar link não libera sessão antes da confirmação do e-mail');
+assert.match(elements['#d7AuthMsg'].textContent,/Abra seu e-mail/);
 console.log('AUTH_CONFIG_OK');

@@ -50,6 +50,8 @@ jobs:
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
+      - name: Validar login somente por e-mail
+        run: node tests/email-login.cjs
       - name: Testar emissão, edição, impressão e WhatsApp
         run: node tests/order-lifecycle.cjs
       - name: Validar visual real do Novo Pedido

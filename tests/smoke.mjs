@@ -47,13 +47,13 @@ for(const table of ['clientes','produtos','representadas','pedidos']){
 assert.ok(!/localStorage\.setItem\([^\n]+JSON\.stringify\(d\)\)/.test(guard), 'guard não pode substituir dados locais diretamente pela nuvem');
 assert.match(guard, /orcamentos/, 'orçamentos devem participar da sincronização segura');
 assert.ok(sw.includes('sync-guard.js'), 'service worker deve injetar o guard em toda navegação do app');
-assert.ok(sw.includes('d7pedidos-v3.7-permanent-deletions'), 'service worker deve renovar o cache após exclusões permanentes');
+assert.ok(sw.includes('d7pedidos-v3.8-email-access'), 'service worker deve renovar o cache após exclusões permanentes');
 
-assert.match(html, /<script src="\.\/sync-guard\.js\?v=3\.7-permanent-deletions"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
+assert.match(html, /<script src="\.\/sync-guard\.js\?v=3\.8-email-access"><\/script>/, 'index deve renovar o guard com exclusões permanentes');
 assert.ok(!html.includes('// On startup: pull cloud first, then push any local data that exists'), 'startup legado não pode executar antes do guard');
 
-assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.2-enter"><\/script>/, 'index deve carregar o auth guard');
-assert.match(auth, /signInWithPassword|\/auth\/v1\/token\?grant_type=password/, 'auth guard deve oferecer login autenticado');
+assert.match(html, /<script src="\.\/auth-guard\.js\?v=1\.3-email"><\/script>/, 'index deve carregar o auth guard');
+assert.match(auth, /sendMagicLink|\/auth\/v1\/otp/, 'auth guard deve oferecer login autenticado');
 assert.match(auth, /access_token/, 'auth guard deve persistir token autenticado');
 assert.match(guard, /D7Auth\??\.getAccessToken/, 'sync guard deve usar token autenticado');
 assert.ok(!guard.includes("'Authorization':'Bearer '+SUPA_KEY"), 'sync guard não pode usar chave anon como bearer');
@@ -66,8 +66,8 @@ assert.match(auth, /Signups not allowed for otp/i, 'auth guard deve reconhecer o
 
 assert.match(html, /pedido-profissional/, 'Novo Pedido deve usar layout profissional');
 assert.match(html, /Resumo do Pedido/, 'Novo Pedido deve exibir resumo lateral');
-assert.match(html, /sw\.js\?v=3\.7-permanent-deletions/, 'deve forçar a atualização do service worker após exclusões permanentes');
-assert.match(sw, /d7pedidos-v3\.7-permanent-deletions/, 'deve usar um cache novo após exclusões permanentes');
+assert.match(html, /sw\.js\?v=3\.8-email-access/, 'deve forçar a atualização do service worker após exclusões permanentes');
+assert.match(sw, /d7pedidos-v3\.8-email-access/, 'deve usar um cache novo após exclusões permanentes');
 for(const field of ['Código do produto','Linha 1','Linha 2','DUN-14','NCM']){
   assert.ok(html.includes(field), `ficha técnica deve exibir ${field}`);
 }

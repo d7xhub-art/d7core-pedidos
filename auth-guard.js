@@ -30,7 +30,7 @@
   }
   function authErrorMessage(raw,context='login'){
     const text=String(raw||'').trim();
-    if(/Signups not allowed for otp/i.test(text)||/signup.*not allowed/i.test(text))return 'E-mail não autorizado para acessar o D7COMERCIAL.';
+    if(/Signups not allowed for otp/i.test(text)||/signup.*not allowed/i.test(text))return 'E-mail não autorizado para acessar o D7 PEDIDOS.';
     if(/invalid login credentials/i.test(text))return 'E-mail ou senha inválidos.';
     if(/email not confirmed/i.test(text))return 'Este e-mail ainda não está confirmado.';
     if(context==='magic')return 'Não foi possível enviar o link de acesso. Confira o e-mail autorizado e tente novamente.';
@@ -56,23 +56,12 @@
     if(Number(s.expires_at||0)>now+60)return true;
     return refreshSession();
   }
-  async function signInWithPassword(email,password){
-    const r=await fetch(supaUrl+'/auth/v1/token?grant_type=password',{
-      method:'POST',headers:{'apikey':supaKey,'Content-Type':'application/json'},
-      body:JSON.stringify({email,password})
-    });
-    const body=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(authErrorMessage(body.error_description||body.msg||body.message,'login'));
-    if(!body.access_token)throw new Error('Sessão não recebida');
-    saveSession(body);
-    return body;
-  }
   async function sendMagicLink(email){
     const redirect=location.origin+location.pathname;
     localStorage.setItem(RETURN_KEY,redirect);
-    const r=await fetch(supaUrl+'/auth/v1/otp',{
+    const r=await fetch(supaUrl+'/auth/v1/otp?redirect_to='+encodeURIComponent(redirect),{
       method:'POST',headers:{'apikey':supaKey,'Content-Type':'application/json'},
-      body:JSON.stringify({email,create_user:false,options:{email_redirect_to:redirect}})
+      body:JSON.stringify({email,create_user:false})
     });
     const body=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(authErrorMessage(body.error_description||body.msg||body.message,'magic'));
@@ -90,41 +79,30 @@
     gate.id='d7AuthGate';
     gate.style.cssText='position:fixed;inset:0;z-index:99999;background:#0d0d0d;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif';
     gate.innerHTML=`<div style="width:min(420px,100%);background:#171717;border:1px solid #2b2b2b;border-radius:16px;padding:26px;color:#f3f3f3;box-shadow:0 20px 60px rgba(0,0,0,.45)">
-      <div style="font-size:12px;font-weight:900;letter-spacing:2px;color:#ef4444;margin-bottom:7px">D7COMERCIAL</div>
+      <div style="font-size:12px;font-weight:900;letter-spacing:2px;color:#ef4444;margin-bottom:7px">D7 PEDIDOS</div>
       <div style="font-size:24px;font-weight:900;margin-bottom:6px">Acesso seguro</div>
-      <div style="font-size:13px;color:#999;line-height:1.5;margin-bottom:18px">Entre para liberar os dados comerciais e a sincronização com a nuvem.</div>
+      <div style="font-size:13px;color:#999;line-height:1.5;margin-bottom:18px">Informe seu e-mail autorizado. Enviaremos um link para você entrar sem senha.</div>
       <label style="display:block;font-size:11px;font-weight:800;color:#aaa;margin:10px 0 5px">E-MAIL</label>
       <input id="d7AuthEmail" type="email" autocomplete="username" style="width:100%;box-sizing:border-box;padding:12px;border-radius:9px;border:1px solid #333;background:#101010;color:#fff;outline:none" placeholder="seu@email.com">
-      <label style="display:block;font-size:11px;font-weight:800;color:#aaa;margin:12px 0 5px">SENHA</label>
-      <input id="d7AuthPass" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:12px;border-radius:9px;border:1px solid #333;background:#101010;color:#fff;outline:none" placeholder="••••••••">
       <button id="d7AuthLogin" style="width:100%;margin-top:14px;padding:12px;border:0;border-radius:9px;background:#dc2626;color:#fff;font-weight:900;cursor:pointer">Entrar</button>
-      <button id="d7AuthMagic" style="width:100%;margin-top:9px;padding:11px;border:1px solid #383838;border-radius:9px;background:#222;color:#eee;font-weight:800;cursor:pointer">Enviar link para e-mail autorizado</button>
       <div id="d7AuthMsg" style="min-height:20px;margin-top:12px;font-size:12px;color:#fbbf24"></div>
     </div>`;
     document.body.appendChild(gate);
     const msg=gate.querySelector('#d7AuthMsg');
     const emailInput=gate.querySelector('#d7AuthEmail');
-    const passInput=gate.querySelector('#d7AuthPass');
     const loginButton=gate.querySelector('#d7AuthLogin');
     const submitLogin=async()=>{
       const email=emailInput.value.trim();
-      const pass=passInput.value;
-      if(!email||!pass){msg.textContent='Informe e-mail e senha.';return;}
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.textContent='Informe um e-mail válido.';return;}
+      if(loginButton.disabled)return;
       loginButton.disabled=true;
-      msg.textContent='Entrando...';
-      try{await signInWithPassword(email,pass);msg.style.color='#4ade80';msg.textContent='Acesso liberado.';gate.remove();window.dispatchEvent(new Event('d7-auth-ready'));}
+      msg.textContent='Enviando link...';
+      try{await sendMagicLink(email);msg.style.color='#4ade80';msg.textContent='Link enviado. Abra seu e-mail e toque no link para entrar.';}
       catch(e){msg.style.color='#f87171';msg.textContent=e.message;}
       finally{loginButton.disabled=false;}
     };
     loginButton.onclick=submitLogin;
-    passInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitLogin();}});
-    gate.querySelector('#d7AuthMagic').onclick=async()=>{
-      const email=gate.querySelector('#d7AuthEmail').value.trim();
-      if(!email){msg.textContent='Informe o e-mail primeiro.';return;}
-      msg.textContent='Enviando link...';
-      try{await sendMagicLink(email);msg.style.color='#4ade80';msg.textContent='Link enviado. Abra seu e-mail e toque no link para entrar.';}
-      catch(e){msg.style.color='#f87171';msg.textContent=e.message;}
-    };
+    emailInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitLogin();}});
     return gate;
   }
   async function ensureSession(){
@@ -134,7 +112,7 @@
     return false;
   }
 
-  window.D7Auth={readSession,getAccessToken,authHeaders,ensureSession,hasValidSession,signInWithPassword,sendMagicLink,signOut,refreshSession};
+  window.D7Auth={readSession,getAccessToken,authHeaders,ensureSession,hasValidSession,sendMagicLink,signOut,refreshSession};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>ensureSession());
   else ensureSession();
 })();
