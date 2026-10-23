@@ -1,8 +1,8 @@
 {
   "id": "/d7core-pedidos/",
-  "name": "D7COMERCIAL",
-  "short_name": "D7COMERCIAL",
-  "description": "Gestão comercial de clientes, produtos, representadas, orçamentos e pedidos",
+  "name": "D7 PEDIDOS",
+  "short_name": "D7 PEDIDOS",
+  "description": "Cadastro de representadas, produtos, clientes e emissão de pedidos",
   "lang": "pt-BR",
   "start_url": "/d7core-pedidos/",
   "scope": "/d7core-pedidos/",
@@ -11,7 +11,17 @@
   "background_color": "#0d0d0d",
   "theme_color": "#dc2626",
   "icons": [
-    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
